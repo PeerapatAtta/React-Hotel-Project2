@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { User, Mail, Lock } from 'lucide-react'
+import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Button from '../components/Button'
 import Input from '../components/Input'
@@ -18,6 +18,8 @@ export default function RegisterPage() {
   })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -114,34 +116,50 @@ export default function RegisterPage() {
             </div>
             
             <div className="relative">
-              <div className="absolute left-3 top-9 text-slate-400">
+              <div className="absolute left-3 top-9 text-slate-400 z-10">
                 <Lock size={18} />
               </div>
               <Input
                 label="รหัสผ่าน"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={(e) => handleChange('password', e.target.value)}
                 error={errors.password}
                 placeholder="อย่างน้อย 6 ตัวอักษร"
                 helperText="รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"
-                className="pl-10"
+                className="pl-10 pr-10"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
             
             <div className="relative">
-              <div className="absolute left-3 top-9 text-slate-400">
+              <div className="absolute left-3 top-9 text-slate-400 z-10">
                 <Lock size={18} />
               </div>
               <Input
                 label="ยืนยันรหัสผ่าน"
-                type="password"
+                type={showConfirmPassword ? 'text' : 'password'}
                 value={formData.confirmPassword}
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
                 error={errors.confirmPassword}
                 placeholder="กรอกรหัสผ่านอีกครั้ง"
-                className="pl-10"
+                className="pl-10 pr-10"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
             
             {errors.submit && (

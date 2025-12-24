@@ -33,9 +33,9 @@ function RoomCard({ room }) {
             </div>
           </div>
         ) : (
-          <img 
-            src={imageUrl} 
-            alt={room.name} 
+          <img
+            src={imageUrl}
+            alt={room.name}
             className="h-52 w-full object-cover transition-transform duration-300 hover:scale-105"
             onError={() => setImageError(true)}
             loading="lazy"
@@ -52,15 +52,15 @@ function RoomCard({ room }) {
         </div>
         <div className="space-y-2">
           <IconLabel icon={Users} text={`รองรับ ${room.capacity} คน`} size={16} />
-          <IconLabel 
-            icon={DollarSign} 
-            text={`${formatPrice(room.basePrice)} / คืน`} 
+          <IconLabel
+            icon={DollarSign}
+            text={`${formatPrice(room.basePrice)} / คืน`}
             size={16}
             className="font-semibold text-accent"
           />
         </div>
         <div className="flex flex-wrap gap-2 pt-1">
-          {room.amenities.slice(0, 3).map((amenity) => (
+        {(room.amenities || []).slice(0, 3).map((amenity) => (
             <div
               key={amenity}
               className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1"
@@ -107,7 +107,7 @@ export default function RoomsPage() {
         const { data, error: fetchError } = await roomService.searchRooms({
           minCapacity: guestNumber,
         })
-        
+
         if (fetchError) {
           console.error('Error fetching rooms:', fetchError)
           setError(fetchError.message)
@@ -139,27 +139,27 @@ export default function RoomsPage() {
 
   const validateSearch = () => {
     const newErrors = {}
-    
+
     if (!search.checkIn) {
       newErrors.checkIn = 'กรุณาเลือกวันที่เช็กอิน'
     }
-    
+
     if (!search.checkOut) {
       newErrors.checkOut = 'กรุณาเลือกวันที่เช็กเอาต์'
     }
-    
+
     if (search.checkIn && search.checkOut && search.checkOut <= search.checkIn) {
       newErrors.checkOut = 'วันที่เช็กเอาต์ต้องอยู่หลังวันที่เช็กอิน'
     }
-    
+
     if (!search.guests || Number(search.guests) < 1) {
       newErrors.guests = 'กรุณาระบุจำนวนผู้เข้าพักอย่างน้อย 1 คน'
     }
-    
+
     if (Number(search.guests) > 10) {
       newErrors.guests = 'จำนวนผู้เข้าพักสูงสุด 10 คน'
     }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -195,13 +195,13 @@ export default function RoomsPage() {
           <Card className="p-6 md:p-8">
             <h1 className="text-2xl font-bold text-primary md:text-3xl">ผลลัพธ์การค้นหา</h1>
             <div className="mt-4 flex flex-wrap items-center gap-5 text-sm text-slate-600">
-              <IconLabel 
-                icon={Calendar} 
+              <IconLabel
+                icon={Calendar}
                 text={`${checkIn ? formatDate(checkIn) : '-'} - ${checkOut ? formatDate(checkOut) : '-'}`}
                 size={18}
               />
-              <IconLabel 
-                icon={Users} 
+              <IconLabel
+                icon={Users}
                 text={`${guests} คน`}
                 size={18}
               />
@@ -218,10 +218,10 @@ export default function RoomsPage() {
                 <div className="absolute left-3 top-9 text-slate-400">
                   <Calendar size={18} />
                 </div>
-                <Input 
-                  label="เช็กอิน" 
-                  name="checkIn" 
-                  type="date" 
+                <Input
+                  label="เช็กอิน"
+                  name="checkIn"
+                  type="date"
                   value={search.checkIn}
                   error={errors.checkIn}
                   onChange={(event) => handleChange('checkIn', event.target.value)}
@@ -233,10 +233,10 @@ export default function RoomsPage() {
                 <div className="absolute left-3 top-9 text-slate-400">
                   <Calendar size={18} />
                 </div>
-                <Input 
-                  label="เช็กเอาต์" 
-                  name="checkOut" 
-                  type="date" 
+                <Input
+                  label="เช็กเอาต์"
+                  name="checkOut"
+                  type="date"
                   value={search.checkOut}
                   error={errors.checkOut}
                   onChange={(event) => handleChange('checkOut', event.target.value)}
@@ -248,10 +248,10 @@ export default function RoomsPage() {
                 <div className="absolute left-3 top-9 text-slate-400">
                   <Users size={18} />
                 </div>
-                <Input 
-                  label="จำนวนผู้เข้าพัก" 
-                  name="guests" 
-                  type="number" 
+                <Input
+                  label="จำนวนผู้เข้าพัก"
+                  name="guests"
+                  type="number"
                   min="1"
                   max="10"
                   value={search.guests}

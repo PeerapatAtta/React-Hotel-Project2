@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
 const AuthContext = createContext(null)
 
@@ -7,101 +8,137 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // โหลด user จาก localStorage เมื่อ component mount
-    const savedUser = localStorage.getItem('user')
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser))
-      } catch (error) {
-        console.error('Error parsing user data:', error)
-        localStorage.removeItem('user')
+    // ตรวจสอบ session ที่มีอยู่
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        loadUserProfile(session.user.id)
+      } else {
+        setLoading(false)
       }
-    }
-    setLoading(false)
+    })
+
+    // ฟังการเปลี่ยนแปลง auth state
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        await loadUserProfile(session.user.id)
+      } else {
+        setUser(null)
+        setLoading(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
-  const login = (email, password) => {
-    // Mock authentication - ตรวจสอบกับ mock users
-    let mockUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]')
-    
-    // ถ้ายังไม่มี mockUsers ให้สร้าง default users
-    if (mockUsers.length === 0) {
-      const defaultUsers = [
-        { id: 'admin', name: 'ผู้ดูแลระบบ', email: 'admin@gmail.com', password: 'admin1234', role: 'admin' },
-        { id: 'member', name: 'สมาชิก', email: 'member@gmail.com', password: 'member1234', role: 'member' },
-        { id: '1', name: 'สมชาย ใจดี', email: 'somchai@example.com', password: '123456', role: 'member' },
-        { id: '2', name: 'สมหญิง รักดี', email: 'somying@example.com', password: '123456', role: 'member' },
-        { id: '3', name: 'วิชัย สุขดี', email: 'wichai@example.com', password: '123456', role: 'member' },
-      ]
-      localStorage.setItem('mockUsers', JSON.stringify(defaultUsers))
-      mockUsers = defaultUsers
-    } else {
-      // ตรวจสอบว่ามี member@gmail.com อยู่แล้วหรือยัง ถ้ายังไม่มีให้เพิ่ม
-      const hasMember = mockUsers.some(u => u.email === 'member@gmail.com')
-      if (!hasMember) {
-        const memberUser = { id: 'member', name: 'สมาชิก', email: 'member@gmail.com', password: 'member1234', role: 'member' }
-        mockUsers.push(memberUser)
-        localStorage.setItem('mockUsers', JSON.stringify(mockUsers))
+  const loadUserProfile = async (userId) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (error) {
+        // ถ้ายังไม่มี profile ให้สร้างใหม่
+        const { data: authUser } = await supabase.auth.getUser()
+        if (authUser?.user) {
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              name: authUser.user.user_metadata?.name || authUser.user.email?.split('@')[0] || 'User',
+              email: authUser.user.email,
+              role: authUser.user.user_metadata?.role || 'member',
+            })
+            .select()
+            .single()
+
+          if (createError) {
+            console.error('Error creating profile:', createError)
+            setLoading(false)
+            return
+          }
+
+          setUser({
+            id: newProfile.id,
+            email: newProfile.email || authUser.user.email,
+            name: newProfile.name,
+            role: newProfile.role || 'member',
+            ...newProfile
+          })
+          setLoading(false)
+          return
+        }
+        throw error
       }
+
+      setUser({
+        id: profile.id,
+        email: profile.email || '',
+        name: profile.name,
+        role: profile.role || 'member',
+        ...profile
+      })
+    } catch (error) {
+      console.error('Error loading profile:', error)
+    } finally {
+      setLoading(false)
     }
-    
-    const foundUser = mockUsers.find(u => u.email === email && u.password === password)
-    
-    if (foundUser) {
-      const userData = {
-        id: foundUser.id,
-        name: foundUser.name,
-        email: foundUser.email,
-        role: foundUser.role || 'member',
+  }
+
+  const login = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        return { success: false, error: error.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }
       }
-      setUser(userData)
-      localStorage.setItem('user', JSON.stringify(userData))
+
+      await loadUserProfile(data.user.id)
       return { success: true }
+    } catch (error) {
+      return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' }
     }
-    
-    return { success: false, error: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }
   }
 
-  const register = (name, email, password) => {
-    // Mock registration - ตรวจสอบว่ามี email นี้แล้วหรือยัง
-    const mockUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]')
-    const existingUser = mockUsers.find(u => u.email === email)
-    
-    if (existingUser) {
-      return { success: false, error: 'อีเมลนี้ถูกใช้งานแล้ว' }
-    }
+  const register = async (name, email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name: name,
+            role: 'member'
+          }
+        }
+      })
 
-    // สร้าง user ใหม่ด้วย role 'member'
-    const newUser = {
-      id: Date.now().toString(),
-      name: name,
-      email: email,
-      password: password, // ใน production ไม่ควรเก็บ password แบบนี้
-      role: 'member',
-      status: 'active',
-      totalBookings: 0,
-      createdAt: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
+      if (error) {
+        return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลงทะเบียน' }
+      }
+
+      // รอให้ profile ถูกสร้างโดย trigger
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      if (data.user) {
+        await loadUserProfile(data.user.id)
+      }
+      
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลงทะเบียน' }
     }
-    
-    mockUsers.push(newUser)
-    localStorage.setItem('mockUsers', JSON.stringify(mockUsers))
-    
-    const userData = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-    }
-    setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
-    
-    return { success: true }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut()
     setUser(null)
-    localStorage.removeItem('user')
   }
 
   return (

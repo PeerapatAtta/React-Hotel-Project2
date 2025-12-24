@@ -1,38 +1,65 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import BookingsManagementTable from '../../components/admin/BookingsManagementTable'
 import Button from '../../components/Button'
-import { bookings } from '../../data/bookings'
+import { bookingService } from '../../services/bookingService'
 import { Search, Filter, Download, Calendar } from 'lucide-react'
 import Input from '../../components/Input'
 import { formatPrice } from '../../utils/formatters'
 import Swal from 'sweetalert2'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function AdminBookingsPage() {
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterDate, setFilterDate] = useState('')
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const { data, error: fetchError } = await bookingService.getAllBookings()
+        if (fetchError) {
+          console.error('Error fetching bookings:', fetchError)
+          setError(fetchError.message)
+        } else {
+          setBookings(data || [])
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [])
 
   // Filter bookings
   const filteredBookings = useMemo(() => {
     return bookings.filter((booking) => {
       const matchesSearch = 
-        booking.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.guestName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.roomName.toLowerCase().includes(searchQuery.toLowerCase())
+        booking.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.guest_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.room_name?.toLowerCase().includes(searchQuery.toLowerCase())
       
       const matchesStatus = filterStatus === 'all' || booking.status === filterStatus
       
       const matchesDate = !filterDate || 
-        booking.checkIn === filterDate || 
-        booking.checkOut === filterDate ||
-        (new Date(booking.checkIn) <= new Date(filterDate) && 
-         new Date(booking.checkOut) >= new Date(filterDate))
+        booking.check_in === filterDate || 
+        booking.check_out === filterDate ||
+        (new Date(booking.check_in) <= new Date(filterDate) && 
+         new Date(booking.check_out) >= new Date(filterDate))
       
       return matchesSearch && matchesStatus && matchesDate
     })
-  }, [searchQuery, filterStatus, filterDate])
+  }, [bookings, searchQuery, filterStatus, filterDate])
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -41,7 +68,7 @@ export default function AdminBookingsPage() {
     const cancelled = filteredBookings.filter(b => b.status === 'cancelled').length
     const totalRevenue = filteredBookings
       .filter(b => b.status === 'confirmed')
-      .reduce((sum, b) => sum + b.totalPrice, 0)
+      .reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0)
 
     return { confirmed, pending, cancelled, totalRevenue }
   }, [filteredBookings])
@@ -54,6 +81,24 @@ export default function AdminBookingsPage() {
       confirmButtonText: 'ตกลง',
       confirmButtonColor: '#0d9488',
     })
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <LoadingSpinner text="กำลังโหลดข้อมูลการจอง..." />
+      </AdminLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="text-center py-12">
+          <p className="text-red-600">เกิดข้อผิดพลาด: {error}</p>
+        </div>
+      </AdminLayout>
+    )
   }
 
   return (

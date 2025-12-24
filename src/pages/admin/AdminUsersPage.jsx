@@ -1,16 +1,43 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import UsersManagementTable from '../../components/admin/UsersManagementTable'
 import Button from '../../components/Button'
-import { users } from '../../data/users'
+import { userService } from '../../services/userService'
 import { Search, Filter, UserPlus, Users, Shield, User as UserIcon } from 'lucide-react'
 import Input from '../../components/Input'
 import Swal from 'sweetalert2'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function AdminUsersPage() {
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterRole, setFilterRole] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const { data, error: fetchError } = await userService.getAllUsers()
+        if (fetchError) {
+          console.error('Error fetching users:', fetchError)
+          setError(fetchError.message)
+        } else {
+          setUsers(data || [])
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUsers()
+  }, [])
 
   // Filter users
   const filteredUsers = useMemo(() => {
@@ -47,6 +74,24 @@ export default function AdminUsersPage() {
       confirmButtonText: 'ตกลง',
       confirmButtonColor: '#0d9488',
     })
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <LoadingSpinner text="กำลังโหลดข้อมูลผู้ใช้..." />
+      </AdminLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="text-center py-12">
+          <p className="text-red-600">เกิดข้อผิดพลาด: {error}</p>
+        </div>
+      </AdminLayout>
+    )
   }
 
   return (

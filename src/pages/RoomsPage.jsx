@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Calendar, Users, DollarSign, Bed, Check, Image as ImageIcon, Search, ArrowRight } from 'lucide-react'
-import { rooms } from '../data/rooms'
+import { roomService } from '../services/roomService'
 import { formatPrice, formatDate } from '../utils/formatters'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -84,6 +84,8 @@ export default function RoomsPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const [isLoading, setIsLoading] = useState(true)
+  const [rooms, setRooms] = useState([])
+  const [error, setError] = useState(null)
   const checkIn = params.get('checkIn') || today.toISOString().split('T')[0]
   const checkOut = params.get('checkOut') || tomorrow.toISOString().split('T')[0]
   const guests = params.get('guests') || '2'
@@ -95,18 +97,37 @@ export default function RoomsPage() {
   })
   const [errors, setErrors] = useState({})
 
-  const filteredRooms = useMemo(() => {
-    const guestNumber = Number(guests) || 1
-    return rooms.filter((room) => room.capacity >= guestNumber)
+  // ดึงข้อมูลห้องจาก Supabase
+  useEffect(() => {
+    const fetchRooms = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const guestNumber = Number(guests) || 1
+        const { data, error: fetchError } = await roomService.searchRooms({
+          minCapacity: guestNumber,
+        })
+        
+        if (fetchError) {
+          console.error('Error fetching rooms:', fetchError)
+          setError(fetchError.message)
+        } else {
+          setRooms(data || [])
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchRooms()
   }, [guests])
 
-  useEffect(() => {
-    setIsLoading(true)
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 400)
-    return () => clearTimeout(timer)
-  }, [checkIn, checkOut, guests])
+  const filteredRooms = useMemo(() => {
+    return rooms
+  }, [rooms])
 
   useEffect(() => {
     setSearch({

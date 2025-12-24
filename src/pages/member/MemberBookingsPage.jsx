@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Search, Filter, Calendar, CheckCircle, Clock, X } from 'lucide-react'
 import MemberLayout from '../../components/member/MemberLayout'
@@ -6,129 +6,58 @@ import Card from '../../components/Card'
 import Container from '../../components/layout/Container'
 import Input from '../../components/Input'
 import Button from '../../components/Button'
-import { bookings } from '../../data/bookings'
+import { bookingService } from '../../services/bookingService'
 import { formatDate, formatPrice } from '../../utils/formatters'
 import { useAuth } from '../../context/AuthContext'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function MemberBookingsPage() {
   const { user } = useAuth()
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
 
-  // ข้อมูล mockup user ถ้ายังไม่มี user
-  const mockUser = user || {
-    id: '1',
-    name: 'สมชาย ใจดี',
-    email: 'somchai@example.com',
-    role: 'member',
-  }
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!user?.id) {
+        setLoading(false)
+        return
+      }
 
-  // ดึงการจองของ member นี้ (mockup)
-  let memberBookings = bookings.filter(b => b.email === mockUser?.email)
+      setLoading(true)
+      setError(null)
+      try {
+        const { data, error: fetchError } = await bookingService.getBookingsByUserId(user.id)
+        if (fetchError) {
+          console.error('Error fetching bookings:', fetchError)
+          setError(fetchError.message)
+        } else {
+          setBookings(data || [])
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  // ถ้ายังไม่มีการจอง ให้แสดงข้อมูล mockup
-  if (memberBookings.length === 0) {
-    memberBookings = [
-      {
-        id: 'BK001',
-        roomId: 'deluxe-city',
-        roomName: 'Deluxe City View',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-15',
-        checkOut: '2025-01-17',
-        nights: 2,
-        guests: 2,
-        totalPrice: 6400,
-        status: 'confirmed',
-        createdAt: '2025-01-10T10:30:00',
-      },
-      {
-        id: 'BK002',
-        roomId: 'garden-suite',
-        roomName: 'Garden Suite',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-20',
-        checkOut: '2025-01-22',
-        nights: 2,
-        guests: 4,
-        totalPrice: 9600,
-        status: 'pending',
-        createdAt: '2025-01-12T14:20:00',
-      },
-      {
-        id: 'BK003',
-        roomId: 'studio-loft',
-        roomName: 'Studio Loft',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-18',
-        checkOut: '2025-01-19',
-        nights: 1,
-        guests: 2,
-        totalPrice: 2600,
-        status: 'confirmed',
-        createdAt: '2025-01-11T09:15:00',
-      },
-      {
-        id: 'BK004',
-        roomId: 'penthouse-sky',
-        roomName: 'Penthouse Sky Lounge',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-25',
-        checkOut: '2025-01-28',
-        nights: 3,
-        guests: 5,
-        totalPrice: 18600,
-        status: 'confirmed',
-        createdAt: '2025-01-13T16:45:00',
-      },
-      {
-        id: 'BK005',
-        roomId: 'executive-horizon',
-        roomName: 'Executive Horizon',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-22',
-        checkOut: '2025-01-24',
-        nights: 2,
-        guests: 2,
-        totalPrice: 7600,
-        status: 'cancelled',
-        createdAt: '2025-01-14T11:20:00',
-      },
-      {
-        id: 'BK006',
-        roomId: 'deluxe-city',
-        roomName: 'Deluxe City View',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2024-12-20',
-        checkOut: '2024-12-22',
-        nights: 2,
-        guests: 2,
-        totalPrice: 6400,
-        status: 'confirmed',
-        createdAt: '2024-12-15T10:30:00',
-      },
-    ]
-  }
+    fetchBookings()
+  }, [user])
+
+  // ดึงการจองของ member นี้
+  const memberBookings = bookings
+
 
   // Filter bookings
   const filteredBookings = useMemo(() => {
     return memberBookings.filter((booking) => {
       const matchesSearch =
-        booking.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.roomName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        booking.guestName.toLowerCase().includes(searchQuery.toLowerCase())
+        booking.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.room_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        booking.guest_name?.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesStatus = filterStatus === 'all' || booking.status === filterStatus
 
@@ -142,7 +71,7 @@ export default function MemberBookingsPage() {
     const pending = filteredBookings.filter(b => b.status === 'pending').length
     const cancelled = filteredBookings.filter(b => b.status === 'cancelled').length
     const upcoming = filteredBookings.filter(b => {
-      const checkIn = new Date(b.checkIn)
+      const checkIn = new Date(b.check_in)
       return checkIn >= new Date() && b.status !== 'cancelled'
     }).length
 
@@ -164,6 +93,28 @@ export default function MemberBookingsPage() {
       <span className={`rounded-full px-3 py-1 text-xs font-semibold ${styles[status]}`}>
         {labels[status]}
       </span>
+    )
+  }
+
+  if (loading) {
+    return (
+      <MemberLayout>
+        <Container>
+          <LoadingSpinner text="กำลังโหลดข้อมูลการจอง..." />
+        </Container>
+      </MemberLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <MemberLayout>
+        <Container>
+          <div className="text-center py-12">
+            <p className="text-red-600">เกิดข้อผิดพลาด: {error}</p>
+          </div>
+        </Container>
+      </MemberLayout>
     )
   }
 
@@ -268,8 +219,8 @@ export default function MemberBookingsPage() {
             {filteredBookings.length > 0 ? (
               <div className="space-y-4">
                 {filteredBookings.map((booking) => {
-                  const checkIn = new Date(booking.checkIn)
-                  const checkOut = new Date(booking.checkOut)
+                  const checkIn = new Date(booking.check_in)
+                  const checkOut = new Date(booking.check_out)
                   const isUpcoming = checkIn >= new Date()
                   const isPast = checkOut < new Date()
 
@@ -279,7 +230,7 @@ export default function MemberBookingsPage() {
                         <div className="flex-1 space-y-3">
                           <div className="flex flex-wrap items-center gap-3">
                             <h3 className="text-lg font-semibold text-primary">
-                              {booking.roomName}
+                              {booking.room_name}
                             </h3>
                             {getStatusBadge(booking.status)}
                             {isUpcoming && booking.status !== 'cancelled' && (
@@ -302,13 +253,13 @@ export default function MemberBookingsPage() {
                             <div>
                               <p className="text-xs font-medium text-slate-500">วันที่เช็คอิน</p>
                               <p className="text-sm font-semibold text-slate-700">
-                                {formatDate(booking.checkIn)}
+                                {formatDate(booking.check_in)}
                               </p>
                             </div>
                             <div>
                               <p className="text-xs font-medium text-slate-500">วันที่เช็คเอาท์</p>
                               <p className="text-sm font-semibold text-slate-700">
-                                {formatDate(booking.checkOut)}
+                                {formatDate(booking.check_out)}
                               </p>
                             </div>
                             <div>
@@ -322,16 +273,16 @@ export default function MemberBookingsPage() {
                           <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
                             <span>👥 {booking.guests} คน</span>
                             <span className="font-semibold text-primary text-base">
-                              {formatPrice(booking.totalPrice)}
+                              {formatPrice(booking.total_price)}
                             </span>
                             <span className="text-xs text-slate-400">
-                              จองเมื่อ {formatDate(booking.createdAt)}
+                              จองเมื่อ {formatDate(booking.created_at)}
                             </span>
                           </div>
                         </div>
 
                         <div className="flex flex-col gap-2 lg:items-end">
-                          <Link to={`/rooms/${booking.roomId}`}>
+                          <Link to={`/rooms/${booking.room_id}`}>
                             <Button variant="ghost" className="w-full lg:w-auto">
                               ดูรายละเอียดห้อง
                             </Button>

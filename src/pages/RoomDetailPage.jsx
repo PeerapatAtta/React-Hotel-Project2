@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Users, DollarSign, Bed, Check, ArrowLeft, Image as ImageIcon } from 'lucide-react'
-import { rooms } from '../data/rooms'
+import { roomService } from '../services/roomService'
 import { formatPrice } from '../utils/formatters'
 import Button from '../components/Button'
 import Badge from '../components/Badge'
@@ -44,36 +44,59 @@ function RoomImage({ src, alt, className }) {
 export default function RoomDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
-  const room = useMemo(() => {
-    if (!id) return null
-    
-    // Decode URL parameter
-    const decodedId = decodeURIComponent(id)
-    
-    // ลองหาแบบตรงก่อน
-    let found = rooms.find((item) => item.id === decodedId)
-    
-    // ถ้าไม่เจอ ลองหาแบบ case-insensitive
-    if (!found) {
-      found = rooms.find((item) => item.id.toLowerCase() === decodedId.toLowerCase())
+  const [room, setRoom] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchRoom = async () => {
+      if (!id) {
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      setError(null)
+      
+      try {
+        const decodedId = decodeURIComponent(id)
+        const { data, error: fetchError } = await roomService.getRoomById(decodedId)
+        
+        if (fetchError) {
+          console.error('Error fetching room:', fetchError)
+          setError(fetchError.message)
+        } else if (data) {
+          setRoom(data)
+        } else {
+          setError('ไม่พบข้อมูลห้องนี้')
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+      } finally {
+        setLoading(false)
+      }
     }
-    
-    // ถ้ายังไม่เจอ ลองหาแบบ normalize (แปลง space/hyphen)
-    if (!found) {
-      const normalized = decodedId.replace(/\s+/g, '-').toLowerCase()
-      found = rooms.find((item) => item.id.toLowerCase() === normalized)
-    }
-    
-    return found
+
+    fetchRoom()
   }, [id])
 
-  if (!room) {
+  if (loading) {
+    return (
+      <Container>
+        <div className="py-20 text-center">
+          <p className="text-slate-600">กำลังโหลดข้อมูล...</p>
+        </div>
+      </Container>
+    )
+  }
+
+  if (error || !room) {
     return (
       <Container>
         <div className="py-20">
           <ErrorState
-            title="ไม่พบข้อมูลห้องนี้"
+            title={error || "ไม่พบข้อมูลห้องนี้"}
             description="กรุณากลับไปยังหน้ารายการห้องเพื่อเลือกห้องอื่น"
             actionLabel="กลับไปหน้ารายการห้อง"
             onAction={() => navigate('/rooms')}
@@ -142,7 +165,7 @@ export default function RoomDetailPage() {
 
           {/* Image Gallery */}
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {room.images.map((src, index) => (
+            {(room.images || []).map((src, index) => (
               <div 
                 key={`${src}-${index}`} 
                 className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
@@ -171,7 +194,7 @@ export default function RoomDetailPage() {
                 </Button>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                {room.amenities.map((amenity) => (
+                {(room.amenities || []).map((amenity) => (
                   <div
                     key={amenity}
                     className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-5 transition-colors hover:bg-slate-100"

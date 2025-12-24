@@ -1,119 +1,55 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Calendar, Home, Clock, CheckCircle } from 'lucide-react'
 import Card from '../../components/Card'
 import Container from '../../components/layout/Container'
 import SectionTitle from '../../components/SectionTitle'
 import Button from '../../components/Button'
-import { bookings } from '../../data/bookings'
+import { bookingService } from '../../services/bookingService'
 import { formatDate, formatPrice } from '../../utils/formatters'
 import { useAuth } from '../../context/AuthContext'
 import MemberLayout from '../../components/member/MemberLayout'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function MemberDashboard() {
   const { user } = useAuth()
-  
-  // ข้อมูล mockup user ถ้ายังไม่มี user
-  const mockUser = user || {
-    id: '1',
-    name: 'สมชาย ใจดี',
-    email: 'somchai@example.com',
-    role: 'member',
-  }
-  
-  // ดึงการจองของ member นี้ (mockup)
-  let memberBookings = bookings.filter(b => b.email === mockUser?.email)
-  
-  // ถ้ายังไม่มีการจอง ให้แสดงข้อมูล mockup
-  if (memberBookings.length === 0) {
-    memberBookings = [
-      {
-        id: 'BK001',
-        roomId: 'deluxe-city',
-        roomName: 'Deluxe City View',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-15',
-        checkOut: '2025-01-17',
-        nights: 2,
-        guests: 2,
-        totalPrice: 6400,
-        status: 'confirmed',
-        createdAt: '2025-01-10T10:30:00',
-      },
-      {
-        id: 'BK002',
-        roomId: 'garden-suite',
-        roomName: 'Garden Suite',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-20',
-        checkOut: '2025-01-22',
-        nights: 2,
-        guests: 4,
-        totalPrice: 9600,
-        status: 'pending',
-        createdAt: '2025-01-12T14:20:00',
-      },
-      {
-        id: 'BK003',
-        roomId: 'studio-loft',
-        roomName: 'Studio Loft',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-18',
-        checkOut: '2025-01-19',
-        nights: 1,
-        guests: 2,
-        totalPrice: 2600,
-        status: 'confirmed',
-        createdAt: '2025-01-11T09:15:00',
-      },
-      {
-        id: 'BK004',
-        roomId: 'penthouse-sky',
-        roomName: 'Penthouse Sky Lounge',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-25',
-        checkOut: '2025-01-28',
-        nights: 3,
-        guests: 5,
-        totalPrice: 18600,
-        status: 'confirmed',
-        createdAt: '2025-01-13T16:45:00',
-      },
-      {
-        id: 'BK005',
-        roomId: 'executive-horizon',
-        roomName: 'Executive Horizon',
-        guestName: mockUser.name,
-        email: mockUser.email,
-        phone: '081-234-5678',
-        checkIn: '2025-01-22',
-        checkOut: '2025-01-24',
-        nights: 2,
-        guests: 2,
-        totalPrice: 7600,
-        status: 'cancelled',
-        createdAt: '2025-01-14T11:20:00',
-      },
-    ]
-  }
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!user?.id) {
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      try {
+        const { data, error } = await bookingService.getBookingsByUserId(user.id)
+        if (error) {
+          console.error('Error fetching bookings:', error)
+        } else {
+          setBookings(data || [])
+        }
+      } catch (err) {
+        console.error('Error:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [user])
   
   // แสดงเฉพาะ 5 รายการล่าสุด
-  const displayBookings = memberBookings.slice(0, 5)
+  const displayBookings = bookings.slice(0, 5)
   
   const upcomingBookings = displayBookings.filter(b => {
-    const checkIn = new Date(b.checkIn)
+    const checkIn = new Date(b.check_in)
     return checkIn >= new Date()
   })
   const pastBookings = displayBookings.filter(b => {
-    const checkIn = new Date(b.checkIn)
+    const checkIn = new Date(b.check_in)
     return checkIn < new Date()
   })
 
@@ -125,7 +61,7 @@ export default function MemberDashboard() {
           {/* Welcome Section */}
           <div>
             <h1 className="text-3xl font-bold text-primary">แดชบอร์ดสมาชิก</h1>
-            <p className="text-slate-600 mt-1">ยินดีต้อนรับ, {mockUser?.name || 'สมาชิก'}</p>
+            <p className="text-slate-600 mt-1">ยินดีต้อนรับ, {user?.name || 'สมาชิก'}</p>
           </div>
 
           {/* Stats Cards */}
@@ -194,7 +130,11 @@ export default function MemberDashboard() {
           </Card>
 
           {/* Recent Bookings */}
-          {displayBookings.length > 0 ? (
+          {loading ? (
+            <Card className="p-12">
+              <LoadingSpinner text="กำลังโหลดข้อมูล..." />
+            </Card>
+          ) : displayBookings.length > 0 ? (
             <Card className="p-6 md:p-8">
               <SectionTitle
                 title="การจองล่าสุด"
@@ -208,7 +148,7 @@ export default function MemberDashboard() {
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-primary">{booking.roomName}</h3>
+                        <h3 className="font-semibold text-primary">{booking.room_name}</h3>
                         <span className={`rounded-full px-2 py-1 text-xs font-semibold ${
                           booking.status === 'confirmed' 
                             ? 'bg-green-100 text-green-700'
@@ -221,13 +161,13 @@ export default function MemberDashboard() {
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-4 text-sm text-slate-600">
-                        <span>{formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}</span>
+                        <span>{formatDate(booking.check_in)} - {formatDate(booking.check_out)}</span>
                         <span>{booking.nights} คืน</span>
                         <span>{booking.guests} คน</span>
-                        <span className="font-semibold text-primary">{formatPrice(booking.totalPrice)}</span>
+                        <span className="font-semibold text-primary">{formatPrice(booking.total_price)}</span>
                       </div>
                     </div>
-                    <Link to={`/rooms/${booking.roomId}`}>
+                    <Link to={`/rooms/${booking.room_id}`}>
                       <Button variant="ghost" className="w-full sm:w-auto">
                         ดูรายละเอียด
                       </Button>

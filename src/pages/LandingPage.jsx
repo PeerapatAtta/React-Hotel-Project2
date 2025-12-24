@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Wifi, Coffee, ShieldCheck, Droplet, Calendar, Users, DollarSign, Bed, Search, ArrowRight, Star, CheckCircle } from 'lucide-react'
 import Button from '../components/Button'
@@ -7,7 +7,7 @@ import Card from '../components/Card'
 import Container from '../components/layout/Container'
 import SectionTitle from '../components/SectionTitle'
 import IconLabel from '../components/IconLabel'
-import { rooms } from '../data/rooms'
+import { roomService } from '../services/roomService'
 import { formatPrice } from '../utils/formatters'
 
 const amenities = [
@@ -45,8 +45,21 @@ export default function LandingPage() {
 
   const [search, setSearch] = useState(defaultSearch)
   const [errors, setErrors] = useState({})
+  const [recommendedRooms, setRecommendedRooms] = useState([])
 
-  const recommendedRooms = useMemo(() => rooms.slice(0, 4), [])
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const { data, error } = await roomService.getAllRooms()
+        if (!error && data) {
+          setRecommendedRooms(data.slice(0, 4))
+        }
+      } catch (err) {
+        console.error('Error fetching rooms:', err)
+      }
+    }
+    fetchRooms()
+  }, [])
 
   const validateSearch = () => {
     const newErrors = {}

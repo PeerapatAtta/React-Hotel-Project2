@@ -1,14 +1,65 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import StatCard from '../../components/admin/StatCard'
 import BookingsTable from '../../components/admin/BookingsTable'
 import RevenueChart from '../../components/admin/RevenueChart'
-import { statistics, bookings } from '../../data/bookings'
+import { bookingService } from '../../services/bookingService'
 import { DollarSign, Calendar, Users, Home, TrendingUp } from 'lucide-react'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function AdminDashboard() {
+  const [bookings, setBookings] = useState([])
+  const [statistics, setStatistics] = useState({
+    totalRevenue: 0,
+    totalBookings: 0,
+    activeBookings: 0,
+    availableRooms: 0,
+    occupancyRate: 0,
+    monthlyRevenue: [],
+    todayStats: {
+      checkIns: 0,
+      checkOuts: 0,
+      newBookings: 0,
+      revenue: 0,
+    },
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      try {
+        const [bookingsResult, statsResult] = await Promise.all([
+          bookingService.getAllBookings(),
+          bookingService.getBookingStatistics(),
+        ])
+
+        if (bookingsResult.data) {
+          setBookings(bookingsResult.data)
+        }
+        if (statsResult.data) {
+          setStatistics(statsResult.data)
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length
   const pendingBookings = bookings.filter(b => b.status === 'pending').length
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <LoadingSpinner text="กำลังโหลดข้อมูลแดชบอร์ด..." />
+      </AdminLayout>
+    )
+  }
 
   return (
     <AdminLayout>
@@ -23,7 +74,7 @@ export default function AdminDashboard() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="รายได้รวม"
-            value={`฿${statistics.totalRevenue.toLocaleString()}`}
+            value={`฿${Math.round(statistics.totalRevenue || 0).toLocaleString()}`}
             icon={DollarSign}
             trend="+12.5% จากเดือนที่แล้ว"
             trendUp={true}
@@ -68,7 +119,7 @@ export default function AdminDashboard() {
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
             <p className="text-sm font-medium text-slate-600 mb-1">รายได้วันนี้</p>
             <p className="text-2xl font-bold text-primary">
-              ฿{statistics.todayStats.revenue.toLocaleString()}
+              ฿{Math.round(statistics.todayStats.revenue || 0).toLocaleString()}
             </p>
           </div>
         </div>

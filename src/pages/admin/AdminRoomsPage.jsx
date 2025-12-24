@@ -1,15 +1,42 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import RoomManagementTable from '../../components/admin/RoomManagementTable'
 import Button from '../../components/Button'
-import { rooms } from '../../data/rooms'
+import { roomService } from '../../services/roomService'
 import { Plus, Search, Filter } from 'lucide-react'
 import Input from '../../components/Input'
 import Swal from 'sweetalert2'
+import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function AdminRoomsPage() {
+  const [rooms, setRooms] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all')
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const { data, error: fetchError } = await roomService.getAllRooms()
+        if (fetchError) {
+          console.error('Error fetching rooms:', fetchError)
+          setError(fetchError.message)
+        } else {
+          setRooms(data || [])
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchRooms()
+  }, [])
 
   // Filter rooms based on search and type
   const filteredRooms = rooms.filter((room) => {
@@ -30,6 +57,24 @@ export default function AdminRoomsPage() {
       confirmButtonText: 'ตกลง',
       confirmButtonColor: '#0d9488',
     })
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <LoadingSpinner text="กำลังโหลดข้อมูลห้อง..." />
+      </AdminLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="text-center py-12">
+          <p className="text-red-600">เกิดข้อผิดพลาด: {error}</p>
+        </div>
+      </AdminLayout>
+    )
   }
 
   return (

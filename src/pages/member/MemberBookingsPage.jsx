@@ -8,7 +8,7 @@ import Input from '../../components/Input'
 import Button from '../../components/Button'
 import { bookingService } from '../../services/bookingService'
 import { formatDate, formatPrice } from '../../utils/formatters'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function MemberBookingsPage() {

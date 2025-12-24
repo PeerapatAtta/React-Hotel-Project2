@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Home, Calendar, LogOut, Sparkles } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 
 export default function MemberSidebar({ isOpen, onClose }) {
   const location = useLocation()

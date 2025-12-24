@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { Sparkles, User, LogOut, LayoutDashboard } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import Button from '../Button'
 
 export default function Header() {

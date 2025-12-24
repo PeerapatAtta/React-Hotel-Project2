@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Home } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../hooks/useAuth'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Card from '../components/Card'
@@ -45,16 +45,21 @@ export default function LoginPage() {
     }
 
     setIsLoading(true)
-    // Mock login - ในอนาคตจะเปลี่ยนเป็น API call
-    setTimeout(() => {
-      const result = login(formData.email, formData.password)
+    setErrors({}) // Clear previous errors
+    
+    try {
+      const result = await login(formData.email, formData.password)
       if (result.success) {
         navigate('/')
       } else {
         setErrors({ submit: result.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' })
       }
+    } catch (error) {
+      console.error('Login error:', error)
+      setErrors({ submit: error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' })
+    } finally {
       setIsLoading(false)
-    }, 500)
+    }
   }
 
   return (

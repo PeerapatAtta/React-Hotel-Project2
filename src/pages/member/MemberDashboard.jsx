@@ -7,7 +7,7 @@ import SectionTitle from '../../components/SectionTitle'
 import Button from '../../components/Button'
 import { bookingService } from '../../services/bookingService'
 import { formatDate, formatPrice } from '../../utils/formatters'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 import MemberLayout from '../../components/member/MemberLayout'
 import LoadingSpinner from '../../components/LoadingSpinner'
 

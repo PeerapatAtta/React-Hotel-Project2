@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import MemberSidebar from './MemberSidebar'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '../../hooks/useAuth'
 
 export default function MemberLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)

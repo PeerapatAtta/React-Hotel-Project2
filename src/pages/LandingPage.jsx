@@ -51,35 +51,46 @@ export default function LandingPage() {
     const fetchRooms = async () => {
       try {
         const { data, error } = await roomService.getAllRooms()
-        if (!error && data) {
+
+        if (error) {
+          console.error('Error fetching rooms:', error)
+          setRecommendedRooms([])
+          return
+        }
+
+        if (data && Array.isArray(data) && data.length > 0) {
           setRecommendedRooms(data.slice(0, 4))
+        } else {
+          setRecommendedRooms([])
         }
       } catch (err) {
-        console.error('Error fetching rooms:', err)
+        console.error('Exception while fetching rooms:', err)
+        setRecommendedRooms([])
       }
     }
+
     fetchRooms()
   }, [])
 
   const validateSearch = () => {
     const newErrors = {}
-    
+
     if (!search.checkIn) {
       newErrors.checkIn = 'กรุณาเลือกวันที่เช็กอิน'
     }
-    
+
     if (!search.checkOut) {
       newErrors.checkOut = 'กรุณาเลือกวันที่เช็กเอาต์'
     }
-    
+
     if (search.checkIn && search.checkOut && search.checkOut <= search.checkIn) {
       newErrors.checkOut = 'วันที่เช็กเอาต์ต้องอยู่หลังวันที่เช็กอิน'
     }
-    
+
     if (!search.guests || Number(search.guests) < 1) {
       newErrors.guests = 'กรุณาระบุจำนวนผู้เข้าพักอย่างน้อย 1 คน'
     }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -107,14 +118,14 @@ export default function LandingPage() {
     <div className="relative min-h-screen overflow-x-hidden">
       {/* Background Gradient - Full Page */}
       <div className="fixed inset-0 bg-gradient-to-b from-teal-50 via-blue-50 to-pink-50 -z-10" />
-      
+
       <div className="relative space-y-12 pb-24 pt-4 md:space-y-16 md:pb-28 md:pt-8">
         {/* Hero Section - Dark Teal Background */}
         <div className="relative overflow-hidden bg-gradient-to-br from-teal-700 via-teal-600 to-teal-800 py-12 md:py-20">
           {/* Decorative Elements */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 z-0" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 z-0" />
-          
+
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center opacity-10 z-0" />
           <Container>
             <section className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:gap-12">
@@ -129,10 +140,10 @@ export default function LandingPage() {
                   โรงแรม Prima — ที่พักใจกลางเมืองสำหรับทุกโอกาส
                 </h1>
                 <p className="text-base leading-relaxed text-white md:text-lg opacity-90" style={{ color: '#ffffff' }}>
-                  ออกแบบเพื่อผู้เข้าพักที่ชอบความสะดวกสบาย พร้อมบริการที่เข้าใจความต้องการของคุณ 
+                  ออกแบบเพื่อผู้เข้าพักที่ชอบความสะดวกสบาย พร้อมบริการที่เข้าใจความต้องการของคุณ
                   ทุกห้องมาพร้อมวิวสวยและเชื่อมต่อกับพื้นที่ช้อปปิ้งและคาเฟ่ริมทางเท้า
                 </p>
-                
+
                 {/* Trust Indicators */}
                 <div className="flex flex-wrap items-center gap-4 pt-2 text-sm text-white" style={{ color: '#ffffff' }}>
                   <div className="flex items-center gap-1.5">
@@ -148,13 +159,13 @@ export default function LandingPage() {
                     <span className="text-white" style={{ color: '#ffffff' }}>ราคาดีที่สุด</span>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-3 pt-2 relative z-20">
                   <button
                     onClick={handleSubmit}
                     className="search-room-button group relative z-20 inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold shadow-xl transition-all duration-300 hover:bg-slate-50 hover:shadow-2xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:ring-offset-2 focus:ring-offset-teal-700"
-                    style={{ 
-                      backgroundColor: '#ffffff', 
+                    style={{
+                      backgroundColor: '#ffffff',
                       color: '#0f766e',
                       border: '2px solid #0f766e',
                       zIndex: 20,
@@ -169,8 +180,8 @@ export default function LandingPage() {
                   <button
                     onClick={() => document.getElementById('recommended-rooms')?.scrollIntoView({ behavior: 'smooth' })}
                     className="relative z-20 inline-flex items-center justify-center gap-2 rounded-full border-2 bg-transparent px-6 py-3 text-sm font-semibold transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-teal-700"
-                    style={{ 
-                      color: '#ffffff', 
+                    style={{
+                      color: '#ffffff',
                       borderColor: 'rgba(255, 255, 255, 0.5)',
                       zIndex: 20,
                       position: 'relative'
@@ -273,54 +284,61 @@ export default function LandingPage() {
               />
               <p className="text-sm text-slate-500" style={{ color: '#64748b' }}>ห้องพักยอดนิยมที่ลูกค้าชื่นชอบ</p>
             </div>
-            <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {recommendedRooms.map((room, index) => (
-                <Link key={room.id} to={`/rooms/${room.id}`}>
-                  <Card hover className="p-0 bg-white shadow-lg h-full flex flex-col group cursor-pointer">
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={room.images[0]}
-                        alt={room.name}
-                        className="h-52 w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1">
-                        <Star size={12} className="text-yellow-400 fill-yellow-400" />
-                        <span className="text-xs font-semibold text-slate-700">4.{8 + index}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-4 p-6 flex-1 flex flex-col">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-lg font-semibold leading-tight text-primary group-hover:text-teal-600 transition-colors">{room.name}</h3>
-                        <div className="flex items-center gap-1.5 text-slate-400">
-                          <Bed size={16} className="flex-shrink-0" />
-                          <span className="text-xs font-medium uppercase tracking-wide">{room.type}</span>
+            {recommendedRooms.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-slate-500 mb-4">กำลังโหลดข้อมูลห้องพัก...</p>
+                <p className="text-xs text-slate-400">ตรวจสอบ Console (F12) เพื่อดูสถานะการดึงข้อมูล</p>
+              </div>
+            ) : (
+              <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {recommendedRooms.map((room, index) => (
+                  <Link key={room.id} to={`/rooms/${room.id}`}>
+                    <Card hover className="p-0 bg-white shadow-lg h-full flex flex-col group cursor-pointer">
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={room.images[0]}
+                          alt={room.name}
+                          className="h-52 w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1">
+                          <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                          <span className="text-xs font-semibold text-slate-700">4.{8 + index}</span>
                         </div>
                       </div>
-                      <div className="space-y-2 flex-1">
-                        <IconLabel icon={Users} text={`รองรับ ${room.capacity} คน`} size={16} />
-                        <IconLabel icon={DollarSign} text={`เริ่มต้น ${formatPrice(room.basePrice)}/คืน`} size={16} className="font-semibold text-teal-600" />
-                      </div>
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {room.amenities.slice(0, 3).map((amenity) => (
-                          <span
-                            key={amenity}
-                            className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700 border border-teal-100"
-                          >
-                            {amenity}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="pt-2 mt-auto">
-                        <div className="flex items-center gap-2 text-sm font-semibold text-teal-600 group-hover:gap-3 transition-all">
-                          <span>ดูรายละเอียด</span>
-                          <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                      <div className="space-y-4 p-6 flex-1 flex flex-col">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="text-lg font-semibold leading-tight text-primary group-hover:text-teal-600 transition-colors">{room.name}</h3>
+                          <div className="flex items-center gap-1.5 text-slate-400">
+                            <Bed size={16} className="flex-shrink-0" />
+                            <span className="text-xs font-medium uppercase tracking-wide">{room.type}</span>
+                          </div>
+                        </div>
+                        <div className="space-y-2 flex-1">
+                          <IconLabel icon={Users} text={`รองรับ ${room.capacity} คน`} size={16} />
+                          <IconLabel icon={DollarSign} text={`เริ่มต้น ${formatPrice(room.basePrice)}/คืน`} size={16} className="font-semibold text-teal-600" />
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {room.amenities.slice(0, 3).map((amenity) => (
+                            <span
+                              key={amenity}
+                              className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700 border border-teal-100"
+                            >
+                              {amenity}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="pt-2 mt-auto">
+                          <div className="flex items-center gap-2 text-sm font-semibold text-teal-600 group-hover:gap-3 transition-all">
+                            <span>ดูรายละเอียด</span>
+                            <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
           </section>
         </Container>
 

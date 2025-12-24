@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react'
-import { useAuth } from '../context/AuthContext'
+import { User, Mail, Lock, Eye, EyeOff, ArrowLeft, Home } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Card from '../components/Card'
@@ -63,22 +63,38 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true)
-    // Mock registration
-    setTimeout(() => {
-      const result = register(formData.name, formData.email, formData.password)
+    setErrors({}) // Clear previous errors
+    
+    try {
+      const result = await register(formData.name, formData.email, formData.password)
       if (result.success) {
         navigate('/')
       } else {
         setErrors({ submit: result.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' })
       }
+    } catch (error) {
+      console.error('Registration error:', error)
+      setErrors({ submit: error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' })
+    } finally {
       setIsLoading(false)
-    }, 500)
+    }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-b from-teal-50 via-blue-50 to-pink-50">
       <Container>
         <Card className="max-w-md mx-auto p-8 shadow-xl">
+          {/* Back to Home Link */}
+          <div className="mb-6">
+            <Link 
+              to="/" 
+              className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-teal-600 transition-colors"
+            >
+              <ArrowLeft size={16} />
+              <span>กลับหน้าแรก</span>
+            </Link>
+          </div>
+
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-primary mb-2">สมัครสมาชิก</h1>
             <p className="text-sm text-slate-500">สร้างบัญชีใหม่เพื่อเริ่มต้น</p>
@@ -164,7 +180,12 @@ export default function RegisterPage() {
             
             {errors.submit && (
               <div className="rounded-lg bg-red-50 border border-red-200 p-3">
-                <p className="text-sm text-red-600">{errors.submit}</p>
+                <p className="text-sm text-red-600 font-medium">{errors.submit}</p>
+                {errors.submit.includes('ยืนยันบัญชี') && (
+                  <p className="text-xs text-red-500 mt-1">
+                    ตรวจสอบกล่องจดหมายและคลิกลิงก์ยืนยัน
+                  </p>
+                )}
               </div>
             )}
             
@@ -178,13 +199,22 @@ export default function RegisterPage() {
             </Button>
           </form>
           
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-3">
             <p className="text-sm text-slate-600">
               มีบัญชีอยู่แล้ว?{' '}
               <Link to="/login" className="text-teal-600 hover:text-teal-700 font-semibold transition-colors">
                 เข้าสู่ระบบ
               </Link>
             </p>
+            <div className="pt-3 border-t border-slate-200">
+              <Link 
+                to="/" 
+                className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-teal-600 transition-colors"
+              >
+                <Home size={16} />
+                <span>กลับหน้าแรก</span>
+              </Link>
+            </div>
           </div>
         </Card>
       </Container>

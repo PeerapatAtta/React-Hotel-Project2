@@ -1,7 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
-
-const AuthContext = createContext(null)
+import { AuthContext } from './AuthContextValue'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -96,18 +95,40 @@ export function AuthProvider({ children }) {
       })
 
       if (error) {
-        return { success: false, error: error.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' }
+        console.error('Supabase login error:', error)
+
+        // แปลง error message เป็นภาษาไทย
+        let errorMessage = error.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+
+        if (error.message?.includes('Invalid login credentials')) {
+          errorMessage = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+        } else if (error.message?.includes('Email not confirmed')) {
+          errorMessage = 'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ'
+        } else if (error.message?.includes('User not found')) {
+          errorMessage = 'ไม่พบผู้ใช้ในระบบ'
+        } else if (error.message?.includes('Too many requests')) {
+          errorMessage = 'ลองเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่'
+        }
+
+        return { success: false, error: errorMessage }
+      }
+
+      if (!data.user) {
+        return { success: false, error: 'ไม่พบข้อมูลผู้ใช้' }
       }
 
       await loadUserProfile(data.user.id)
       return { success: true }
     } catch (error) {
+      console.error('Login error:', error)
       return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' }
     }
   }
 
   const register = async (name, email, password) => {
     try {
+      console.log('Attempting to register:', { email, name })
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -115,23 +136,61 @@ export function AuthProvider({ children }) {
           data: {
             name: name,
             role: 'member'
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/`
         }
       })
 
       if (error) {
-        return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลงทะเบียน' }
+        console.error('Supabase signup error:', error)
+        console.error('Error details:', JSON.stringify(error, null, 2))
+
+        // แปลง error message เป็นภาษาไทย
+        let errorMessage = error.message || 'เกิดข้อผิดพลาดในการลงทะเบียน'
+
+        if (error.message?.includes('already registered') || error.message?.includes('User already registered')) {
+          errorMessage = 'อีเมลนี้ถูกใช้งานแล้ว'
+        } else if (error.message?.includes('Password') || error.message?.includes('password')) {
+          errorMessage = 'รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบความยาวและรูปแบบ'
+        } else if (error.message?.includes('Invalid email') || error.message?.includes('invalid')) {
+          errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง'
+        } else if (error.message?.includes('Email rate limit')) {
+          errorMessage = 'ส่งอีเมลบ่อยเกินไป กรุณารอสักครู่'
+        }
+
+        return { success: false, error: errorMessage }
+      }
+
+      console.log('Signup successful:', { user: data.user, session: data.session })
+
+      // ถ้า Supabase ต้องการ email confirmation
+      if (data.user && !data.session) {
+        console.log('Email confirmation required')
+        return {
+          success: true,
+          message: 'กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชีของคุณ',
+          requiresConfirmation: true
+        }
       }
 
       // รอให้ profile ถูกสร้างโดย trigger
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
       if (data.user) {
-        await loadUserProfile(data.user.id)
+        console.log('Waiting for profile creation...')
+        await new Promise(resolve => setTimeout(resolve, 1500))
+
+        try {
+          await loadUserProfile(data.user.id)
+          console.log('Profile loaded successfully')
+        } catch (profileError) {
+          console.error('Error loading profile after registration:', profileError)
+          // ไม่ return error เพราะ user ถูกสร้างแล้ว
+        }
       }
-      
+
       return { success: true }
     } catch (error) {
+      console.error('Registration error:', error)
+      console.error('Error stack:', error.stack)
       return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการลงทะเบียน' }
     }
   }
@@ -148,11 +207,4 @@ export function AuthProvider({ children }) {
   )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider')
-  }
-  return context
-}
 

@@ -27,35 +27,44 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log('[LoginPage] Form submitted with:', { email: formData.email })
+
     const newErrors = {}
-    
+
     if (!formData.email) {
       newErrors.email = 'กรุณากรอกอีเมล'
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'รูปแบบอีเมลไม่ถูกต้อง'
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'กรุณากรอกรหัสผ่าน'
     }
-    
+
     if (Object.keys(newErrors).length > 0) {
+      console.log('[LoginPage] Validation errors:', newErrors)
       setErrors(newErrors)
       return
     }
 
     setIsLoading(true)
     setErrors({}) // Clear previous errors
-    
+    console.log('[LoginPage] Calling login function...')
+
     try {
       const result = await login(formData.email, formData.password)
+      console.log('[LoginPage] Login result:', result)
+
       if (result.success) {
+        console.log('[LoginPage] Login successful, navigating to home...')
         navigate('/')
       } else {
+        console.error('[LoginPage] Login failed:', result.error)
         setErrors({ submit: result.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' })
       }
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('[LoginPage] Login exception:', error)
+      console.error('[LoginPage] Exception stack:', error.stack)
       setErrors({ submit: error.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' })
     } finally {
       setIsLoading(false)
@@ -68,8 +77,8 @@ export default function LoginPage() {
         <Card className="max-w-md mx-auto p-8 shadow-xl">
           {/* Back to Home Link */}
           <div className="mb-6">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-teal-600 transition-colors"
             >
               <ArrowLeft size={16} />
@@ -81,7 +90,7 @@ export default function LoginPage() {
             <h1 className="text-3xl font-bold text-primary mb-2">เข้าสู่ระบบ</h1>
             <p className="text-sm text-slate-500">ยินดีต้อนรับกลับมา</p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="relative">
               <div className="absolute left-3 top-9 text-slate-400">
@@ -97,7 +106,7 @@ export default function LoginPage() {
                 className="pl-10"
               />
             </div>
-            
+
             <div className="relative">
               <div className="absolute left-3 top-9 text-slate-400">
                 <Lock size={18} />
@@ -120,23 +129,23 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            
+
             {errors.submit && (
               <div className="rounded-lg bg-red-50 border border-red-200 p-3">
                 <p className="text-sm text-red-600">{errors.submit}</p>
               </div>
             )}
-            
-            <Button 
-              type="submit" 
-              className="w-full bg-teal-600 hover:bg-teal-700" 
+
+            <Button
+              type="submit"
+              className="w-full bg-teal-600 hover:bg-teal-700"
               disabled={isLoading}
               style={{ backgroundColor: isLoading ? '#94a3b8' : '#0d9488' }}
             >
               {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center space-y-3">
             <p className="text-sm text-slate-600">
               ยังไม่มีบัญชี?{' '}
@@ -145,8 +154,8 @@ export default function LoginPage() {
               </Link>
             </p>
             <div className="pt-3 border-t border-slate-200">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-teal-600 transition-colors"
               >
                 <Home size={16} />

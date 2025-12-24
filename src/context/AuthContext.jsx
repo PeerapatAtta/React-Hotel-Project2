@@ -89,13 +89,27 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
+      console.log('[AuthContext] Starting login for:', email)
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
+      console.log('[AuthContext] Login response:', {
+        hasData: !!data,
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        error: error?.message
+      })
+
       if (error) {
-        console.error('Supabase login error:', error)
+        console.error('[AuthContext] Supabase login error:', error)
+        console.error('[AuthContext] Error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        })
 
         // แปลง error message เป็นภาษาไทย
         let errorMessage = error.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
@@ -114,13 +128,17 @@ export function AuthProvider({ children }) {
       }
 
       if (!data.user) {
+        console.error('[AuthContext] No user data in response')
         return { success: false, error: 'ไม่พบข้อมูลผู้ใช้' }
       }
 
+      console.log('[AuthContext] Loading user profile for:', data.user.id)
       await loadUserProfile(data.user.id)
+      console.log('[AuthContext] Login successful')
       return { success: true }
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('[AuthContext] Login exception:', error)
+      console.error('[AuthContext] Exception stack:', error.stack)
       return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' }
     }
   }

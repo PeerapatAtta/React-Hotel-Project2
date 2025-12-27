@@ -88,6 +88,10 @@ export default function AdminRoomsPage() {
     await refreshRooms()
   }
 
+  const handleDeleteSuccess = async () => {
+    await refreshRooms()
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -181,7 +185,7 @@ export default function AdminRoomsPage() {
         </div>
 
         {/* Rooms Table */}
-        <RoomManagementTable rooms={filteredRooms} onEdit={handleEdit} />
+        <RoomManagementTable rooms={filteredRooms} onEdit={handleEdit} onDelete={handleDeleteSuccess} />
       </div>
 
       {/* Add Room Modal */}

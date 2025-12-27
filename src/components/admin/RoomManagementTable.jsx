@@ -4,8 +4,9 @@ import Button from '../Button'
 import Badge from '../Badge'
 import { Edit, Trash2, Eye, Image as ImageIcon, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import Swal from 'sweetalert2'
+import { roomService } from '../../services/roomService'
 
-export default function RoomManagementTable({ rooms, onEdit }) {
+export default function RoomManagementTable({ rooms, onEdit, onDelete }) {
   const [imageErrors, setImageErrors] = useState({})
   const [selectedImage, setSelectedImage] = useState(null)
   const [selectedRoom, setSelectedRoom] = useState(null)
@@ -16,27 +17,60 @@ export default function RoomManagementTable({ rooms, onEdit }) {
     }
   }
 
-  const handleDelete = (roomId) => {
-    Swal.fire({
+  const handleDelete = async (room) => {
+    const result = await Swal.fire({
       title: 'ลบห้อง?',
-      text: `คุณต้องการลบห้อง "${roomId}" ใช่หรือไม่?`,
+      html: `คุณต้องการลบห้อง <strong>"${room.name}"</strong> (ID: ${room.id}) ใช่หรือไม่?<br/><span class="text-sm text-red-600">การกระทำนี้ไม่สามารถยกเลิกได้</span>`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'ใช่, ลบ',
       cancelButtonText: 'ยกเลิก',
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#64748b',
-    }).then((result) => {
-      if (result.isConfirmed) {
+    })
+
+    if (result.isConfirmed) {
+      try {
+        // Show loading
         Swal.fire({
-          icon: 'info',
-          title: 'แจ้งเตือน',
-          text: `ฟีเจอร์ลบห้อง "${roomId}" จะเปิดใช้งานเร็วๆ นี้`,
+          title: 'กำลังลบ...',
+          text: 'กรุณารอสักครู่',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading()
+          }
+        })
+
+        const { error } = await roomService.deleteRoom(room.id)
+
+        if (error) {
+          throw error
+        }
+
+        // Success
+        await Swal.fire({
+          icon: 'success',
+          title: 'ลบสำเร็จ',
+          text: `ลบห้อง "${room.name}" เรียบร้อยแล้ว`,
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#0d9488',
+        })
+
+        // Call callback to refresh data
+        if (onDelete) {
+          onDelete()
+        }
+      } catch (error) {
+        console.error('Error deleting room:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message || 'ไม่สามารถลบห้องได้ กรุณาลองใหม่อีกครั้ง',
           confirmButtonText: 'ตกลง',
           confirmButtonColor: '#0d9488',
         })
       }
-    })
+    }
   }
 
   const handleView = (roomId) => {
@@ -187,7 +221,7 @@ export default function RoomManagementTable({ rooms, onEdit }) {
                     </Button>
                     <Button
                       variant="ghost"
-                      onClick={() => handleDelete(room.id)}
+                      onClick={() => handleDelete(room)}
                       className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                       title="ลบ"
                     >

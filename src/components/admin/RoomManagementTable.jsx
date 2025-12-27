@@ -119,7 +119,7 @@ export default function RoomManagementTable({ rooms }) {
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm font-semibold text-primary">
-                    {formatPrice(room.basePrice)}
+                    {formatPrice(room.base_price || room.basePrice)}
                   </span>
                 </td>
                 <td className="px-6 py-4">

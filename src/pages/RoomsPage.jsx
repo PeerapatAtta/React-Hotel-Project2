@@ -54,7 +54,7 @@ function RoomCard({ room }) {
           <IconLabel icon={Users} text={`รองรับ ${room.capacity} คน`} size={16} />
           <IconLabel
             iconText="฿"
-            text={`${formatPriceNumber(room.basePrice)} / คืน`}
+            text={`${formatPriceNumber(room.base_price || room.basePrice)} / คืน`}
             size={16}
             className="font-semibold text-accent"
           />

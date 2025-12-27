@@ -315,7 +315,7 @@ export default function LandingPage() {
                         </div>
                         <div className="space-y-2 flex-1">
                           <IconLabel icon={Users} text={`รองรับ ${room.capacity} คน`} size={16} />
-                          <IconLabel iconText="฿" text={`เริ่มต้น ${formatPriceNumber(room.basePrice)}/คืน`} size={16} className="font-semibold text-teal-600" />
+                          <IconLabel iconText="฿" text={`เริ่มต้น ${formatPriceNumber(room.base_price || room.basePrice)}/คืน`} size={16} className="font-semibold text-teal-600" />
                         </div>
                         <div className="flex flex-wrap gap-2 pt-2">
                           {room.amenities.slice(0, 3).map((amenity) => (

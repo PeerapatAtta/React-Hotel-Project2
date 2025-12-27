@@ -152,7 +152,7 @@ export default function RoomDetailPage() {
                     />
                     <IconLabel 
                       iconText="฿"
-                      text={`${formatPriceNumber(room.basePrice)} / คืน`}
+                      text={`${formatPriceNumber(room.base_price || room.basePrice)} / คืน`}
                       size={18}
                       className="font-semibold text-accent"
                     />

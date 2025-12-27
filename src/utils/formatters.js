@@ -11,13 +11,22 @@ export function formatPrice(value) {
 }
 
 export function formatPriceNumber(value) {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    return value
+  // Handle both number and string (from database)
+  if (value === null || value === undefined) {
+    return '0'
   }
+  
+  // Convert string to number if needed
+  const numValue = typeof value === 'string' ? parseFloat(value) : value
+  
+  if (typeof numValue !== 'number' || Number.isNaN(numValue)) {
+    return String(value || '0')
+  }
+  
   // Return formatted number without currency symbol (for use with icon)
   return new Intl.NumberFormat('th-TH', {
     maximumFractionDigits: 0,
-  }).format(value)
+  }).format(numValue)
 }
 
 export function formatDate(value) {

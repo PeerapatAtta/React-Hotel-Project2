@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Users, Bed, Check, ArrowLeft, Image as ImageIcon } from 'lucide-react'
 import { roomService } from '../services/roomService'
 import { formatPriceNumber } from '../utils/formatters'
+import { useAuth } from '../hooks/useAuth'
 import Button from '../components/Button'
 import Badge from '../components/Badge'
 import Card from '../components/Card'
@@ -44,6 +45,7 @@ function RoomImage({ src, alt, className }) {
 export default function RoomDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
   const [room, setRoom] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -81,7 +83,7 @@ export default function RoomDetailPage() {
     fetchRoom()
   }, [id])
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <Container>
         <div className="py-20 text-center">
@@ -107,13 +109,23 @@ export default function RoomDetailPage() {
   }
 
   const handleBooking = () => {
-    Swal.fire({
-      icon: 'info',
-      title: 'แจ้งเตือน',
-      text: 'ระบบจองจะเปิดใช้งานเร็วๆ นี้',
-      confirmButtonText: 'ตกลง',
-      confirmButtonColor: '#0d9488',
+    // ตรวจสอบว่า user login หรือยัง
+    if (!user) {
+      // ถ้ายังไม่ login ให้ redirect ไปหน้า login พร้อม returnUrl เพื่อกลับมาหน้านี้หลัง login
+      const currentUrl = window.location.pathname + window.location.search
+      navigate(`/login?returnUrl=${encodeURIComponent(currentUrl)}`)
+      return
+    }
+
+    // ถ้า login แล้ว ให้ redirect ไปหน้า rooms พร้อม query params เพื่อให้ user เลือกวันที่และจอง
+    const today = new Date()
+    const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
+    const params = new URLSearchParams({
+      checkIn: today.toISOString().split('T')[0],
+      checkOut: tomorrow.toISOString().split('T')[0],
+      guests: '2',
     })
+    navigate(`/rooms?${params.toString()}`)
   }
 
   return (

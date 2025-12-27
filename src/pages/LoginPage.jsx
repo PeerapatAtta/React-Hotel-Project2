@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Home } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import Button from '../components/Button'
@@ -9,11 +9,15 @@ import Container from '../components/layout/Container'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { login } = useAuth()
   const [formData, setFormData] = useState({ email: '', password: '' })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  
+  // ดึง returnUrl จาก query params
+  const returnUrl = searchParams.get('returnUrl') || '/'
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -56,8 +60,9 @@ export default function LoginPage() {
       console.log('[LoginPage] Login result:', result)
 
       if (result.success) {
-        console.log('[LoginPage] Login successful, navigating to home...')
-        navigate('/')
+        console.log('[LoginPage] Login successful, navigating to:', returnUrl)
+        // Redirect กลับไปหน้าที่ user ต้องการ หรือหน้าแรกถ้าไม่มี returnUrl
+        navigate(returnUrl)
       } else {
         console.error('[LoginPage] Login failed:', result.error)
         setErrors({ submit: result.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' })

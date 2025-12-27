@@ -34,14 +34,24 @@ export default function AdminDashboard() {
           bookingService.getBookingStatistics(),
         ])
 
-        if (bookingsResult.data) {
-          setBookings(bookingsResult.data)
+        if (bookingsResult.error) {
+          console.error('Error fetching bookings:', bookingsResult.error)
+          setBookings([])
+        } else if (bookingsResult.data) {
+          setBookings(Array.isArray(bookingsResult.data) ? bookingsResult.data : [])
         }
-        if (statsResult.data) {
-          setStatistics(statsResult.data)
+
+        if (statsResult.error) {
+          console.error('Error fetching statistics:', statsResult.error)
+        } else if (statsResult.data) {
+          setStatistics({
+            ...statsResult.data,
+            monthlyRevenue: statsResult.data.monthlyRevenue || [],
+          })
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
+        setBookings([])
       } finally {
         setLoading(false)
       }
@@ -126,7 +136,7 @@ export default function AdminDashboard() {
 
         {/* Charts and Tables */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <RevenueChart data={statistics.monthlyRevenue} />
+          <RevenueChart data={statistics.monthlyRevenue || []} />
           <div className="rounded-2xl border border-slate-100 bg-white shadow-sm p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -144,7 +154,7 @@ export default function AdminDashboard() {
                   <p className="text-2xl font-bold text-green-600 mt-1">{confirmedBookings}</p>
                 </div>
                 <div className="text-green-600 text-sm font-semibold">
-                  {((confirmedBookings / bookings.length) * 100).toFixed(0)}%
+                  {bookings.length > 0 ? ((confirmedBookings / bookings.length) * 100).toFixed(0) : 0}%
                 </div>
               </div>
               <div className="flex items-center justify-between p-4 rounded-lg bg-yellow-50">
@@ -153,7 +163,7 @@ export default function AdminDashboard() {
                   <p className="text-2xl font-bold text-yellow-600 mt-1">{pendingBookings}</p>
                 </div>
                 <div className="text-yellow-600 text-sm font-semibold">
-                  {((pendingBookings / bookings.length) * 100).toFixed(0)}%
+                  {bookings.length > 0 ? ((pendingBookings / bookings.length) * 100).toFixed(0) : 0}%
                 </div>
               </div>
               <div className="flex items-center justify-between p-4 rounded-lg bg-red-50">
@@ -164,7 +174,7 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div className="text-red-600 text-sm font-semibold">
-                  {((bookings.filter(b => b.status === 'cancelled').length / bookings.length) * 100).toFixed(0)}%
+                  {bookings.length > 0 ? ((bookings.filter(b => b.status === 'cancelled').length / bookings.length) * 100).toFixed(0) : 0}%
                 </div>
               </div>
             </div>

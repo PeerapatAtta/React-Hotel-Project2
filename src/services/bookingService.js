@@ -5,16 +5,52 @@ export const bookingService = {
    * ดึงข้อมูลการจองทั้งหมด (Admin only)
    */
   async getAllBookings() {
-    const { data, error } = await supabase
+    // Query แบบง่ายก่อนเพื่อหลีกเลี่ยงปัญหา foreign key join
+    const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')
-      .select(`
-        *,
-        rooms:room_id (id, name, type, images),
-        profiles:user_id (id, name, email)
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
     
-    return { data, error }
+    if (bookingsError) {
+      console.error('Error fetching bookings:', bookingsError)
+      return { data: null, error: bookingsError }
+    }
+
+    // ถ้าไม่มีข้อมูล bookings ให้ return ทันที
+    if (!bookings || bookings.length === 0) {
+      return { data: [], error: null }
+    }
+
+    // ดึงข้อมูล rooms และ profiles แยก (ถ้าต้องการ)
+    try {
+      const roomIds = [...new Set(bookings.map(b => b.room_id).filter(Boolean))]
+      const userIds = [...new Set(bookings.map(b => b.user_id).filter(Boolean))]
+
+      const [roomsResult, profilesResult] = await Promise.all([
+        roomIds.length > 0 
+          ? supabase.from('rooms').select('id, name, type, images').in('id', roomIds)
+          : Promise.resolve({ data: [], error: null }),
+        userIds.length > 0
+          ? supabase.from('profiles').select('id, name, email').in('id', userIds)
+          : Promise.resolve({ data: [], error: null })
+      ])
+
+      const rooms = roomsResult.data || []
+      const profiles = profilesResult.data || []
+
+      // รวมข้อมูล
+      const bookingsWithRelations = bookings.map(booking => ({
+        ...booking,
+        rooms: rooms.find(r => r.id === booking.room_id) || null,
+        profiles: profiles.find(p => p.id === booking.user_id) || null,
+      }))
+
+      return { data: bookingsWithRelations, error: null }
+    } catch (err) {
+      console.error('Error fetching related data:', err)
+      // ถ้าเกิด error ในการดึง related data ให้ return bookings แบบธรรมดา
+      return { data: bookings, error: null }
+    }
   },
 
   /**
@@ -157,9 +193,33 @@ export const bookingService = {
   async getBookingStatistics() {
     const { data: bookings, error } = await supabase
       .from('bookings')
-      .select('status, total_price, check_in, check_out')
+      .select('status, total_price, check_in, check_out, created_at')
 
-    if (error) return { error }
+    if (error) {
+      console.error('Error fetching booking statistics:', error)
+      return { error }
+    }
+
+    // ตรวจสอบว่า bookings เป็น array หรือไม่
+    if (!bookings || !Array.isArray(bookings)) {
+      return {
+        data: {
+          totalRevenue: 0,
+          totalBookings: 0,
+          activeBookings: 0,
+          availableRooms: 0,
+          occupancyRate: 0,
+          monthlyRevenue: [],
+          todayStats: {
+            checkIns: 0,
+            checkOuts: 0,
+            newBookings: 0,
+            revenue: 0,
+          },
+        },
+        error: null
+      }
+    }
 
     const totalRevenue = bookings
       .filter(b => b.status === 'confirmed')
@@ -180,6 +240,32 @@ export const bookingService = {
         .reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0),
     }
 
+    // คำนวณ monthlyRevenue (ย้อนหลัง 6 เดือน)
+    const monthlyRevenue = []
+    const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
+    
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date()
+      date.setMonth(date.getMonth() - i)
+      const year = date.getFullYear()
+      const month = date.getMonth()
+      
+      const monthRevenue = bookings
+        .filter(b => {
+          if (!b.created_at) return false
+          const bookingDate = new Date(b.created_at)
+          return bookingDate.getFullYear() === year && 
+                 bookingDate.getMonth() === month &&
+                 b.status === 'confirmed'
+        })
+        .reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0)
+      
+      monthlyRevenue.push({
+        month: monthNames[month],
+        revenue: monthRevenue
+      })
+    }
+
     return {
       data: {
         totalRevenue,
@@ -190,6 +276,7 @@ export const bookingService = {
         confirmedBookings,
         pendingBookings,
         cancelledBookings,
+        monthlyRevenue,
         todayStats,
       },
       error: null

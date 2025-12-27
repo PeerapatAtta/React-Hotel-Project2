@@ -5,10 +5,25 @@ export const userService = {
      * ดึงข้อมูลผู้ใช้ทั้งหมด (Admin only)
      */
     async getAllUsers() {
+        console.log('[userService] Fetching all users from profiles table...')
+        
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
             .order('created_at', { ascending: false })
+
+        console.log('[userService] Query result:', {
+            hasData: !!data,
+            dataLength: data?.length,
+            hasError: !!error,
+            errorCode: error?.code,
+            errorMessage: error?.message,
+            errorDetails: error
+        })
+
+        if (error) {
+            console.error('[userService] Supabase error:', error)
+        }
 
         return { data, error }
     },

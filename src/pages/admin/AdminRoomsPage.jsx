@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import RoomManagementTable from '../../components/admin/RoomManagementTable'
 import AddRoomModal from '../../components/admin/AddRoomModal'
+import EditRoomModal from '../../components/admin/EditRoomModal'
 import Button from '../../components/Button'
 import { roomService } from '../../services/roomService'
 import { Plus, Search, Filter } from 'lucide-react'
@@ -15,6 +16,8 @@ export default function AdminRoomsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all')
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [selectedRoom, setSelectedRoom] = useState(null)
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -54,8 +57,7 @@ export default function AdminRoomsPage() {
     setIsAddModalOpen(true)
   }
 
-  const handleAddSuccess = async () => {
-    // Refresh rooms list
+  const refreshRooms = async () => {
     setLoading(true)
     try {
       const { data, error: fetchError } = await roomService.getAllRooms()
@@ -71,6 +73,19 @@ export default function AdminRoomsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleAddSuccess = async () => {
+    await refreshRooms()
+  }
+
+  const handleEdit = (room) => {
+    setSelectedRoom(room)
+    setIsEditModalOpen(true)
+  }
+
+  const handleEditSuccess = async () => {
+    await refreshRooms()
   }
 
   if (loading) {
@@ -166,7 +181,7 @@ export default function AdminRoomsPage() {
         </div>
 
         {/* Rooms Table */}
-        <RoomManagementTable rooms={filteredRooms} />
+        <RoomManagementTable rooms={filteredRooms} onEdit={handleEdit} />
       </div>
 
       {/* Add Room Modal */}
@@ -174,6 +189,17 @@ export default function AdminRoomsPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={handleAddSuccess}
+      />
+
+      {/* Edit Room Modal */}
+      <EditRoomModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setSelectedRoom(null)
+        }}
+        onSuccess={handleEditSuccess}
+        room={selectedRoom}
       />
     </AdminLayout>
   )

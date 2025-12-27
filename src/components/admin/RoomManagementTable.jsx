@@ -5,19 +5,15 @@ import Badge from '../Badge'
 import { Edit, Trash2, Eye, Image as ImageIcon, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import Swal from 'sweetalert2'
 
-export default function RoomManagementTable({ rooms }) {
+export default function RoomManagementTable({ rooms, onEdit }) {
   const [imageErrors, setImageErrors] = useState({})
   const [selectedImage, setSelectedImage] = useState(null)
   const [selectedRoom, setSelectedRoom] = useState(null)
 
-  const handleEdit = (roomId) => {
-    Swal.fire({
-      icon: 'info',
-      title: 'แจ้งเตือน',
-      text: `ฟีเจอร์แก้ไขห้อง "${roomId}" จะเปิดใช้งานเร็วๆ นี้`,
-      confirmButtonText: 'ตกลง',
-      confirmButtonColor: '#0d9488',
-    })
+  const handleEdit = (room) => {
+    if (onEdit) {
+      onEdit(room)
+    }
   }
 
   const handleDelete = (roomId) => {
@@ -183,7 +179,7 @@ export default function RoomManagementTable({ rooms }) {
                     </Button>
                     <Button
                       variant="ghost"
-                      onClick={() => handleEdit(room.id)}
+                      onClick={() => handleEdit(room)}
                       className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                       title="แก้ไข"
                     >

@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import { formatPrice } from '../../utils/formatters'
 import Button from '../Button'
 import Badge from '../Badge'
-import { Edit, Trash2, Eye, Image as ImageIcon, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Edit, Trash2, Eye, Image as ImageIcon, X, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import Swal from 'sweetalert2'
 import { roomService } from '../../services/roomService'
 
-export default function RoomManagementTable({ rooms, onEdit, onDelete }) {
+export default function RoomManagementTable({ rooms, onEdit, onDelete, sortBy, sortDirection, onSort }) {
   const [imageErrors, setImageErrors] = useState({})
   const [selectedImage, setSelectedImage] = useState(null)
   const [selectedRoom, setSelectedRoom] = useState(null)
@@ -103,6 +103,29 @@ export default function RoomManagementTable({ rooms, onEdit, onDelete }) {
     }
   }
 
+  const renderSortableHeader = (label, column) => {
+    const isActive = sortBy === column
+    return (
+      <th 
+        className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+        onClick={() => onSort && onSort(column)}
+      >
+        <div className="flex items-center gap-2">
+          <span>{label}</span>
+          {isActive ? (
+            sortDirection === 'asc' ? (
+              <ArrowUp size={14} className="text-teal-600" />
+            ) : (
+              <ArrowDown size={14} className="text-teal-600" />
+            )
+          ) : (
+            <ArrowUpDown size={14} className="text-slate-400 opacity-50" />
+          )}
+        </div>
+      </th>
+    )
+  }
+
   if (rooms.length === 0) {
     return (
       <div className="rounded-2xl border border-slate-100 bg-white p-12 shadow-sm text-center">
@@ -120,18 +143,10 @@ export default function RoomManagementTable({ rooms, onEdit, onDelete }) {
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                 รูปภาพ
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ชื่อห้อง
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ประเภท
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ความจุ
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ราคา/คืน
-              </th>
+              {renderSortableHeader('ชื่อห้อง', 'name')}
+              {renderSortableHeader('ประเภท', 'type')}
+              {renderSortableHeader('ความจุ', 'capacity')}
+              {renderSortableHeader('ราคา/คืน', 'price')}
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                 สิ่งอำนวยความสะดวก
               </th>

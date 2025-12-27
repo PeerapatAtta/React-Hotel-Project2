@@ -15,6 +15,8 @@ export default function AdminRoomsPage() {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all')
+  const [sortBy, setSortBy] = useState(null) // 'name', 'type', 'capacity', 'price'
+  const [sortDirection, setSortDirection] = useState('asc') // 'asc', 'desc'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedRoom, setSelectedRoom] = useState(null)
@@ -51,7 +53,50 @@ export default function AdminRoomsPage() {
     return matchesSearch && matchesType
   })
 
+  // Sort rooms
+  const sortedRooms = [...filteredRooms].sort((a, b) => {
+    if (!sortBy) return 0
+
+    let aValue, bValue
+
+    switch (sortBy) {
+      case 'name':
+        aValue = a.name.toLowerCase()
+        bValue = b.name.toLowerCase()
+        break
+      case 'type':
+        aValue = a.type.toLowerCase()
+        bValue = b.type.toLowerCase()
+        break
+      case 'capacity':
+        aValue = a.capacity || 0
+        bValue = b.capacity || 0
+        break
+      case 'price':
+        aValue = a.base_price || a.basePrice || 0
+        bValue = b.base_price || b.basePrice || 0
+        break
+      default:
+        return 0
+    }
+
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+    return 0
+  })
+
   const roomTypes = ['all', ...new Set(rooms.map(r => r.type))]
+
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      // Toggle direction if same column
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      // Set new column with ascending direction
+      setSortBy(column)
+      setSortDirection('asc')
+    }
+  }
 
   const handleAddRoom = () => {
     setIsAddModalOpen(true)
@@ -185,7 +230,14 @@ export default function AdminRoomsPage() {
         </div>
 
         {/* Rooms Table */}
-        <RoomManagementTable rooms={filteredRooms} onEdit={handleEdit} onDelete={handleDeleteSuccess} />
+        <RoomManagementTable 
+          rooms={sortedRooms} 
+          onEdit={handleEdit} 
+          onDelete={handleDeleteSuccess}
+          sortBy={sortBy}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+        />
       </div>
 
       {/* Add Room Modal */}

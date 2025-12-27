@@ -4,8 +4,27 @@ import StatCard from '../../components/admin/StatCard'
 import BookingsTable from '../../components/admin/BookingsTable'
 import RevenueChart from '../../components/admin/RevenueChart'
 import { bookingService } from '../../services/bookingService'
-import { DollarSign, Calendar, Users, Home, TrendingUp } from 'lucide-react'
+import { Calendar, Users, Home, TrendingUp } from 'lucide-react'
 import LoadingSpinner from '../../components/LoadingSpinner'
+
+// Custom Thai Baht icon component
+const BathIcon = ({ size = 24, className = '' }) => (
+  <div 
+    className={className}
+    style={{ 
+      fontSize: `${size * 0.85}px`,
+      lineHeight: 1,
+      fontWeight: 'bold',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: `${size}px`,
+      height: `${size}px`
+    }}
+  >
+    ฿
+  </div>
+)
 
 export default function AdminDashboard() {
   const [bookings, setBookings] = useState([])
@@ -85,7 +104,7 @@ export default function AdminDashboard() {
           <StatCard
             title="รายได้รวม"
             value={`฿${Math.round(statistics.totalRevenue || 0).toLocaleString()}`}
-            icon={DollarSign}
+            icon={BathIcon}
             trend="+12.5% จากเดือนที่แล้ว"
             trendUp={true}
           />

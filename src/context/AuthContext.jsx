@@ -379,10 +379,10 @@ export function AuthProvider({ children }) {
       }
       
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.jsx:315',message:'loadUserProfile completed, checking user state',data:{hasUser:!!userRef.current,userId:userRef.current?.id,attempts},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'E'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.jsx:315',message:'loadUserProfile completed, checking user state',data:{hasUser:!!userRef.current,userId:userRef.current?.id,userRole:userRef.current?.role,attempts},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'E'})}).catch(()=>{});
       // #endregion
       console.log('[AuthContext] Login successful')
-      return { success: true }
+      return { success: true, user: userRef.current }
     } catch (error) {
       // #region agent log
       fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthContext.jsx:312',message:'login catch block',data:{error:error?.message,stack:error?.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});

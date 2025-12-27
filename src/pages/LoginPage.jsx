@@ -15,9 +15,6 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  
-  // ดึง returnUrl จาก query params
-  const returnUrl = searchParams.get('returnUrl') || '/'
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -63,14 +60,20 @@ export default function LoginPage() {
       // #endregion
 
       if (result.success) {
-        console.log('[LoginPage] Login successful, navigating to:', returnUrl)
+        // Determine redirect path based on user role from login result
+        const userRole = result.user?.role
+        const redirectPath = searchParams.get('returnUrl') || 
+          (userRole === 'admin' ? '/admin' : 
+           userRole === 'member' ? '/member' : '/')
+        
+        console.log('[LoginPage] Login successful, navigating to:', redirectPath, 'user role:', userRole)
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LoginPage.jsx:64',message:'navigating after successful login',data:{returnUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LoginPage.jsx:66',message:'navigating after successful login',data:{redirectPath,userRole,returnUrl:searchParams.get('returnUrl')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
         // #endregion
-        // Redirect กลับไปหน้าที่ user ต้องการ หรือหน้าแรกถ้าไม่มี returnUrl
-        navigate(returnUrl)
+        // Redirect ไปที่ dashboard ตาม role หรือ returnUrl ถ้ามี
+        navigate(redirectPath)
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LoginPage.jsx:67',message:'navigate() called',data:{returnUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LoginPage.jsx:72',message:'navigate() called',data:{redirectPath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
         // #endregion
       } else {
         console.error('[LoginPage] Login failed:', result.error)

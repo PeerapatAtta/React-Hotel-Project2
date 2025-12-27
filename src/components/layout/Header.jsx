@@ -82,7 +82,9 @@ export default function Header() {
                   className="text-sm hidden sm:flex"
                 >
                   <LayoutDashboard size={16} />
-                  <span className="hidden sm:inline">แดชบอร์ด</span>
+                  <span className="hidden sm:inline">
+                    {user.role === 'admin' ? 'หน้าผู้จัดการโรงแรม' : 'หน้าสมาชิก'}
+                  </span>
                 </Button>
               </Link>
               <span className="hidden md:inline-block text-sm font-medium text-slate-700">

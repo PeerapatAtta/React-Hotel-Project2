@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import { formatPrice } from '../../utils/formatters'
 import Button from '../Button'
 import Badge from '../Badge'
-import { Edit, Trash2, Eye, Image as ImageIcon } from 'lucide-react'
+import { Edit, Trash2, Eye, Image as ImageIcon, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import Swal from 'sweetalert2'
 
 export default function RoomManagementTable({ rooms }) {
   const [imageErrors, setImageErrors] = useState({})
+  const [selectedImage, setSelectedImage] = useState(null)
+  const [selectedRoom, setSelectedRoom] = useState(null)
 
   const handleEdit = (roomId) => {
     Swal.fire({
@@ -47,6 +49,28 @@ export default function RoomManagementTable({ rooms }) {
 
   const handleImageError = (roomId) => {
     setImageErrors(prev => ({ ...prev, [roomId]: true }))
+  }
+
+  const handleImageClick = (room, imageIndex = 0) => {
+    setSelectedRoom(room)
+    setSelectedImage(imageIndex)
+  }
+
+  const handleCloseImageModal = () => {
+    setSelectedImage(null)
+    setSelectedRoom(null)
+  }
+
+  const handleNextImage = () => {
+    if (selectedRoom && selectedImage < selectedRoom.images.length - 1) {
+      setSelectedImage(selectedImage + 1)
+    }
+  }
+
+  const handlePrevImage = () => {
+    if (selectedRoom && selectedImage > 0) {
+      setSelectedImage(selectedImage - 1)
+    }
   }
 
   if (rooms.length === 0) {
@@ -90,20 +114,28 @@ export default function RoomManagementTable({ rooms }) {
             {rooms.map((room) => (
               <tr key={room.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-6 py-4">
-                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-100">
+                  <div 
+                    className="w-32 h-32 rounded-lg overflow-hidden bg-slate-100 cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => handleImageClick(room, 0)}
+                  >
                     {imageErrors[room.id] ? (
                       <div className="w-full h-full flex items-center justify-center bg-slate-200">
-                        <ImageIcon size={24} className="text-slate-400" />
+                        <ImageIcon size={32} className="text-slate-400" />
                       </div>
                     ) : (
                       <img
-                        src={room.images[0]}
+                        src={room.images?.[0] || ''}
                         alt={room.name}
                         className="w-full h-full object-cover"
                         onError={() => handleImageError(room.id)}
                       />
                     )}
                   </div>
+                  {room.images?.length > 1 && (
+                    <p className="text-xs text-slate-500 mt-1 text-center">
+                      +{room.images.length - 1} รูปเพิ่มเติม
+                    </p>
+                  )}
                 </td>
                 <td className="px-6 py-4">
                   <div>
@@ -172,6 +204,95 @@ export default function RoomManagementTable({ rooms }) {
           </tbody>
         </table>
       </div>
+
+      {/* Image Modal */}
+      {selectedRoom && selectedImage !== null && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={handleCloseImageModal}
+        >
+          <div className="relative max-w-6xl max-h-[90vh] w-full" onClick={(e) => e.stopPropagation()}>
+            {/* Close Button */}
+            <button
+              onClick={handleCloseImageModal}
+              className="absolute top-4 right-4 z-10 rounded-full bg-white/10 backdrop-blur-sm p-2 text-white hover:bg-white/20 transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Navigation Buttons */}
+            {selectedRoom.images.length > 1 && (
+              <>
+                {selectedImage > 0 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handlePrevImage()
+                    }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/10 backdrop-blur-sm p-3 text-white hover:bg-white/20 transition-colors"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+                {selectedImage < selectedRoom.images.length - 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleNextImage()
+                    }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 rounded-full bg-white/10 backdrop-blur-sm p-3 text-white hover:bg-white/20 transition-colors"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+              </>
+            )}
+
+            {/* Image */}
+            <div className="rounded-lg overflow-hidden bg-slate-900">
+              <img
+                src={selectedRoom.images[selectedImage]}
+                alt={`${selectedRoom.name} - Image ${selectedImage + 1}`}
+                className="w-full h-auto max-h-[90vh] object-contain"
+              />
+            </div>
+
+            {/* Image Info */}
+            <div className="mt-4 text-center text-white">
+              <p className="text-lg font-semibold">{selectedRoom.name}</p>
+              <p className="text-sm text-white/70">
+                รูปภาพ {selectedImage + 1} จาก {selectedRoom.images.length}
+              </p>
+            </div>
+
+            {/* Thumbnail Navigation */}
+            {selectedRoom.images.length > 1 && (
+              <div className="mt-4 flex gap-2 justify-center overflow-x-auto pb-2">
+                {selectedRoom.images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedImage(idx)
+                    }}
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                      idx === selectedImage
+                        ? 'border-teal-500 ring-2 ring-teal-500/50'
+                        : 'border-transparent hover:border-white/50'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import RoomManagementTable from '../../components/admin/RoomManagementTable'
+import AddRoomModal from '../../components/admin/AddRoomModal'
 import Button from '../../components/Button'
 import { roomService } from '../../services/roomService'
 import { Plus, Search, Filter } from 'lucide-react'
 import Input from '../../components/Input'
-import Swal from 'sweetalert2'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function AdminRoomsPage() {
@@ -14,6 +14,7 @@ export default function AdminRoomsPage() {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all')
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -50,13 +51,26 @@ export default function AdminRoomsPage() {
   const roomTypes = ['all', ...new Set(rooms.map(r => r.type))]
 
   const handleAddRoom = () => {
-    Swal.fire({
-      icon: 'info',
-      title: 'แจ้งเตือน',
-      text: 'ฟีเจอร์เพิ่มห้องจะเปิดใช้งานเร็วๆ นี้',
-      confirmButtonText: 'ตกลง',
-      confirmButtonColor: '#0d9488',
-    })
+    setIsAddModalOpen(true)
+  }
+
+  const handleAddSuccess = async () => {
+    // Refresh rooms list
+    setLoading(true)
+    try {
+      const { data, error: fetchError } = await roomService.getAllRooms()
+      if (fetchError) {
+        console.error('Error fetching rooms:', fetchError)
+        setError(fetchError.message)
+      } else {
+        setRooms(data || [])
+      }
+    } catch (err) {
+      console.error('Error:', err)
+      setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (loading) {
@@ -154,6 +168,13 @@ export default function AdminRoomsPage() {
         {/* Rooms Table */}
         <RoomManagementTable rooms={filteredRooms} />
       </div>
+
+      {/* Add Room Modal */}
+      <AddRoomModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddSuccess}
+      />
     </AdminLayout>
   )
 }

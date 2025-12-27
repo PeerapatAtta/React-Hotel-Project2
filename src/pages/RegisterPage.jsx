@@ -68,7 +68,15 @@ export default function RegisterPage() {
     try {
       const result = await register(formData.name, formData.email, formData.password)
       if (result.success) {
-        navigate('/')
+        // Check if email confirmation is required
+        if (result.requiresConfirmation) {
+          // If email confirmation is required, show message but don't redirect yet
+          setErrors({ submit: result.message || 'กรุณาตรวจสอบอีเมลเพื่อยืนยันบัญชีของคุณ' })
+          return
+        }
+        // Redirect to member dashboard after successful registration
+        // User state should already be set by register function
+        navigate('/member')
       } else {
         setErrors({ submit: result.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง' })
       }

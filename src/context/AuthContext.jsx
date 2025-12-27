@@ -449,13 +449,23 @@ export function AuthProvider({ children }) {
         try {
           await loadUserProfile(data.user.id)
           console.log('Profile loaded successfully')
+          
+          // Wait a bit to ensure React state has updated
+          await new Promise(resolve => setTimeout(resolve, 100))
+          
+          // Verify user state is set
+          let attempts = 0
+          while (attempts < 10 && !userRef.current) {
+            await new Promise(resolve => setTimeout(resolve, 50))
+            attempts++
+          }
         } catch (profileError) {
           console.error('Error loading profile after registration:', profileError)
           // ไม่ return error เพราะ user ถูกสร้างแล้ว
         }
       }
 
-      return { success: true }
+      return { success: true, user: userRef.current }
     } catch (error) {
       console.error('Registration error:', error)
       console.error('Error stack:', error.stack)

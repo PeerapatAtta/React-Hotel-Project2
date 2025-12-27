@@ -6,6 +6,22 @@ import { roomService } from '../../services/roomService'
 import { supabase } from '../../lib/supabaseClient'
 import Swal from 'sweetalert2'
 
+const AMENITY_OPTIONS = [
+  'Wi-Fi ความเร็วสูง',
+  'เครื่องปรับอากาศ',
+  'โทรทัศน์',
+  'ตู้เย็น',
+  'ห้องน้ำในตัว',
+  'ระเบียง',
+  'ตู้เซฟ',
+  'ไมโครเวฟ',
+  'กาต้มน้ำ',
+  'เครื่องเป่าผม',
+  'ชุดเครื่องนอนคุณภาพ',
+  'ห้องนั่งเล่น',
+  'อื่นๆ'
+]
+
 export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     id: '',
@@ -14,7 +30,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
     capacity: '',
     base_price: '',
     images: [{ type: 'url', value: '', file: null, preview: null }],
-    amenities: ['']
+    amenities: [{ type: 'select', value: '' }]
   })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
@@ -32,8 +48,15 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
     if (field === 'images') {
       setFormData(prev => ({
         ...prev,
-        [field]: prev[field].map((item, i) => 
+        [field]: prev[field].map((item, i) =>
           i === index ? { ...item, value } : item
+        )
+      }))
+    } else if (field === 'amenities') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: prev[field].map((item, i) =>
+          i === index ? { type: item.type || 'select', value } : item
         )
       }))
     } else {
@@ -47,7 +70,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
   const handleImageTypeChange = (index, type) => {
     setFormData(prev => ({
       ...prev,
-      images: prev.images.map((item, i) => 
+      images: prev.images.map((item, i) =>
         i === index ? { type, value: '', file: null, preview: null } : item
       )
     }))
@@ -85,7 +108,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
     reader.onloadend = () => {
       setFormData(prev => ({
         ...prev,
-        images: prev.images.map((item, i) => 
+        images: prev.images.map((item, i) =>
           i === index ? { ...item, file, preview: reader.result } : item
         )
       }))
@@ -162,6 +185,11 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
         ...prev,
         [field]: [...prev[field], { type: 'url', value: '', file: null, preview: null }]
       }))
+    } else if (field === 'amenities') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: [...prev[field], { type: 'select', value: '' }]
+      }))
     } else {
       setFormData(prev => ({
         ...prev,
@@ -206,7 +234,9 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
         return img.file !== null
       }
     })
-    const amenities = formData.amenities.filter(amenity => amenity.trim() !== '')
+    const amenities = formData.amenities
+      .map(amenity => typeof amenity === 'object' ? amenity.value : amenity)
+      .filter(amenity => amenity && amenity.trim() !== '')
 
     if (images.length === 0) {
       newErrors.images = 'กรุณาเพิ่มรูปภาพอย่างน้อย 1 รูป'
@@ -289,7 +319,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
         capacity: '',
         base_price: '',
         images: [{ type: 'url', value: '', file: null, preview: null }],
-        amenities: ['']
+        amenities: [{ type: 'select', value: '' }]
       })
       setUploadingImages({})
       setDragActive({})
@@ -314,7 +344,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl">
+      <div className="relative w-[60vw] max-h-[85vh] overflow-y-auto rounded-2xl bg-white shadow-xl">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between border-b border-slate-200 bg-white p-6">
           <h2 className="text-2xl font-bold text-primary">เพิ่มห้องใหม่</h2>
@@ -349,6 +379,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
                 onChange={(e) => handleChange('name', e.target.value)}
                 error={errors.name}
                 placeholder="เช่น Deluxe City View"
+                helperText="กรอกชื่อห้องเป็นภาษาไทยหรืออังกฤษ (เช่น Deluxe City View)"
               />
             </div>
 
@@ -360,9 +391,8 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
               <select
                 value={formData.type}
                 onChange={(e) => handleChange('type', e.target.value)}
-                className={`w-full rounded-lg border ${
-                  errors.type ? 'border-red-300' : 'border-slate-200'
-                } bg-white px-4 py-2.5 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
+                className={`w-full rounded-lg border ${errors.type ? 'border-red-300' : 'border-slate-200'
+                  } bg-white px-4 py-2.5 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
               >
                 <option value="">เลือกประเภทห้อง</option>
                 <option value="Deluxe">Deluxe</option>
@@ -371,8 +401,10 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
                 <option value="Penthouse">Penthouse</option>
                 <option value="Standard">Standard</option>
               </select>
-              {errors.type && (
+              {errors.type ? (
                 <p className="mt-1 text-sm text-red-600">{errors.type}</p>
+              ) : (
+                <p className="mt-1 text-sm text-slate-500">เลือกประเภทห้องที่เหมาะสม (เช่น Deluxe)</p>
               )}
             </div>
 
@@ -386,6 +418,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
                 error={errors.capacity}
                 placeholder="เช่น 2"
                 min="1"
+                helperText="จำนวนคนที่สามารถพักได้ในห้องนี้ (เช่น 2)"
               />
             </div>
 
@@ -400,6 +433,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
                 placeholder="เช่น 3200"
                 min="0"
                 step="0.01"
+                helperText="ราคาต่อคืนเป็นบาท (ไม่รวมภาษี) (เช่น 3200)"
               />
             </div>
           </div>
@@ -417,11 +451,10 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
                     <button
                       type="button"
                       onClick={() => handleImageTypeChange(index, 'url')}
-                      className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                        image.type === 'url'
-                          ? 'border-teal-500 bg-teal-50 text-teal-700'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
+                      className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${image.type === 'url'
+                        ? 'border-teal-500 bg-teal-50 text-teal-700'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
                       <LinkIcon size={16} />
                       URL
@@ -429,11 +462,10 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
                     <button
                       type="button"
                       onClick={() => handleImageTypeChange(index, 'upload')}
-                      className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-                        image.type === 'upload'
-                          ? 'border-teal-500 bg-teal-50 text-teal-700'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
+                      className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${image.type === 'upload'
+                        ? 'border-teal-500 bg-teal-50 text-teal-700'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        }`}
                     >
                       <Upload size={16} />
                       อัปโหลด
@@ -463,12 +495,11 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
                   {/* File Upload */}
                   {image.type === 'upload' && (
                     <div className="space-y-2">
-                      <label 
-                        className={`flex flex-col items-center justify-center w-full min-h-[200px] max-h-[400px] border-2 border-dashed rounded-lg cursor-pointer transition-colors overflow-hidden ${
-                          dragActive[index] 
-                            ? 'border-teal-500 bg-teal-50' 
-                            : 'border-slate-300 bg-slate-50 hover:bg-slate-100'
-                        }`}
+                      <label
+                        className={`flex flex-col items-center justify-center w-full min-h-[200px] max-h-[400px] border-2 border-dashed rounded-lg cursor-pointer transition-colors overflow-hidden ${dragActive[index]
+                          ? 'border-teal-500 bg-teal-50'
+                          : 'border-slate-300 bg-slate-50 hover:bg-slate-100'
+                          }`}
                         onDragEnter={(e) => handleDrag(e, index)}
                         onDragLeave={(e) => handleDrag(e, index)}
                         onDragOver={(e) => handleDrag(e, index)}
@@ -487,7 +518,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
                                 e.preventDefault()
                                 setFormData(prev => ({
                                   ...prev,
-                                  images: prev.images.map((item, i) => 
+                                  images: prev.images.map((item, i) =>
                                     i === index ? { ...item, file: null, preview: null } : item
                                   )
                                 }))
@@ -539,15 +570,43 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               ความสะดวก * {errors.amenities && <span className="text-red-600">({errors.amenities})</span>}
             </label>
+            <p className="mb-2 text-sm text-slate-500">เลือกความสะดวกที่ต้องการ (เช่น Wi-Fi ความเร็วสูง)</p>
             <div className="space-y-2">
               {formData.amenities.map((amenity, index) => (
                 <div key={index} className="flex gap-2">
-                  <Input
-                    value={amenity}
-                    onChange={(e) => handleArrayChange('amenities', index, e.target.value)}
-                    placeholder="เช่น Wi-Fi ความเร็วสูง"
-                    className="flex-1"
-                  />
+                  {amenity.type === 'select' ? (
+                    <select
+                      value={amenity.value}
+                      onChange={(e) => {
+                        const selectedValue = e.target.value
+                        if (selectedValue === 'อื่นๆ') {
+                          setFormData(prev => ({
+                            ...prev,
+                            amenities: prev.amenities.map((item, i) =>
+                              i === index ? { type: 'custom', value: '' } : item
+                            )
+                          }))
+                        } else {
+                          handleArrayChange('amenities', index, selectedValue)
+                        }
+                      }}
+                      className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                    >
+                      <option value="">เลือกความสะดวก</option>
+                      {AMENITY_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      value={amenity.value}
+                      onChange={(e) => handleArrayChange('amenities', index, e.target.value)}
+                      placeholder="กรอกความสะดวกเอง"
+                      className="flex-1"
+                    />
+                  )}
                   {formData.amenities.length > 1 && (
                     <button
                       type="button"

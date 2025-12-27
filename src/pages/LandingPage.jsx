@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Wifi, Coffee, ShieldCheck, Droplet, Calendar, Users, DollarSign, Bed, Search, ArrowRight, Star, CheckCircle } from 'lucide-react'
+import { Wifi, Coffee, ShieldCheck, Droplet, Calendar, Users, Bed, Search, ArrowRight, Star, CheckCircle } from 'lucide-react'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Card from '../components/Card'
@@ -8,7 +8,7 @@ import Container from '../components/layout/Container'
 import SectionTitle from '../components/SectionTitle'
 import IconLabel from '../components/IconLabel'
 import { roomService } from '../services/roomService'
-import { formatPrice } from '../utils/formatters'
+import { formatPriceNumber } from '../utils/formatters'
 
 const amenities = [
   {
@@ -315,7 +315,7 @@ export default function LandingPage() {
                         </div>
                         <div className="space-y-2 flex-1">
                           <IconLabel icon={Users} text={`รองรับ ${room.capacity} คน`} size={16} />
-                          <IconLabel icon={DollarSign} text={`เริ่มต้น ${formatPrice(room.basePrice)}/คืน`} size={16} className="font-semibold text-teal-600" />
+                          <IconLabel iconText="฿" text={`เริ่มต้น ${formatPriceNumber(room.basePrice)}/คืน`} size={16} className="font-semibold text-teal-600" />
                         </div>
                         <div className="flex flex-wrap gap-2 pt-2">
                           {room.amenities.slice(0, 3).map((amenity) => (

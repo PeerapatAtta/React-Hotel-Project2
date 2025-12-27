@@ -1,8 +1,8 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Calendar, Users, DollarSign, Bed, Check, Image as ImageIcon, Search, ArrowRight } from 'lucide-react'
+import { Calendar, Users, Bed, Check, Image as ImageIcon, Search, ArrowRight } from 'lucide-react'
 import { roomService } from '../services/roomService'
-import { formatPrice, formatDate } from '../utils/formatters'
+import { formatPriceNumber, formatDate } from '../utils/formatters'
 import Button from '../components/Button'
 import Card from '../components/Card'
 import Input from '../components/Input'
@@ -53,8 +53,8 @@ function RoomCard({ room }) {
         <div className="space-y-2">
           <IconLabel icon={Users} text={`รองรับ ${room.capacity} คน`} size={16} />
           <IconLabel
-            icon={DollarSign}
-            text={`${formatPrice(room.basePrice)} / คืน`}
+            iconText="฿"
+            text={`${formatPriceNumber(room.basePrice)} / คืน`}
             size={16}
             className="font-semibold text-accent"
           />

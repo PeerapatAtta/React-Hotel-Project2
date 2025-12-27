@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Users, DollarSign, Bed, Check, ArrowLeft, Image as ImageIcon } from 'lucide-react'
+import { Users, Bed, Check, ArrowLeft, Image as ImageIcon } from 'lucide-react'
 import { roomService } from '../services/roomService'
-import { formatPrice } from '../utils/formatters'
+import { formatPriceNumber } from '../utils/formatters'
 import Button from '../components/Button'
 import Badge from '../components/Badge'
 import Card from '../components/Card'
@@ -151,8 +151,8 @@ export default function RoomDetailPage() {
                       size={18}
                     />
                     <IconLabel 
-                      icon={DollarSign} 
-                      text={`${formatPrice(room.basePrice)} / คืน`}
+                      iconText="฿"
+                      text={`${formatPriceNumber(room.basePrice)} / คืน`}
                       size={18}
                       className="font-semibold text-accent"
                     />

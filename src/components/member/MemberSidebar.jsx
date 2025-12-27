@@ -8,9 +8,12 @@ export default function MemberSidebar({ isOpen, onClose }) {
   const navigate = useNavigate()
   const { logout } = useAuth()
 
-  const handleLogout = () => {
-    logout()
-    navigate('/')
+  const handleLogout = async () => {
+    // Navigate to home first to avoid RequireAuth redirect to login
+    navigate('/', { replace: true })
+    // Wait a bit for navigation to complete
+    await new Promise(resolve => setTimeout(resolve, 100))
+    await logout()
   }
 
   const menuItems = [

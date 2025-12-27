@@ -58,13 +58,25 @@ export default function LoginPage() {
     try {
       const result = await login(formData.email, formData.password)
       console.log('[LoginPage] Login result:', result)
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LoginPage.jsx:59',message:'login result received',data:{success:result?.success,hasError:!!result?.error,errorMessage:result?.error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+      // #endregion
 
       if (result.success) {
         console.log('[LoginPage] Login successful, navigating to:', returnUrl)
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LoginPage.jsx:64',message:'navigating after successful login',data:{returnUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+        // #endregion
         // Redirect กลับไปหน้าที่ user ต้องการ หรือหน้าแรกถ้าไม่มี returnUrl
         navigate(returnUrl)
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LoginPage.jsx:67',message:'navigate() called',data:{returnUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+        // #endregion
       } else {
         console.error('[LoginPage] Login failed:', result.error)
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'LoginPage.jsx:70',message:'login failed, setting error',data:{error:result?.error},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'G'})}).catch(()=>{});
+        // #endregion
         setErrors({ submit: result.error || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง' })
       }
     } catch (error) {

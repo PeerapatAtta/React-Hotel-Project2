@@ -1,11 +1,36 @@
 import React, { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, User, LogOut, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import Button from '../Button'
 
 export default function Header() {
   const { user, loading, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Header.jsx:11',message:'handleLogout called',data:{hasUser:!!user,userId:user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    try {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Header.jsx:14',message:'calling logout()',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      await logout()
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Header.jsx:17',message:'logout() completed, calling navigate',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      navigate('/')
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Header.jsx:20',message:'navigate() called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+    } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Header.jsx:23',message:'handleLogout error',data:{error:error?.message,stack:error?.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      console.error('Logout error:', error)
+    }
+  }
 
   // ใช้ useMemo เพื่อ cache dashboard path และลดการคำนวณซ้ำ
   const dashboardPath = useMemo(() => {
@@ -92,7 +117,12 @@ export default function Header() {
               </span>
               <Button
                 variant="ghost"
-                onClick={logout}
+                onClick={(e) => {
+                  // #region agent log
+                  fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Header.jsx:99',message:'Button onClick fired',data:{eventType:e?.type,defaultPrevented:e?.defaultPrevented},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+                  // #endregion
+                  handleLogout()
+                }}
                 className="text-sm"
               >
                 <LogOut size={16} />

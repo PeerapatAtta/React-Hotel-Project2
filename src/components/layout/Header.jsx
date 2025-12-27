@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Sparkles, User, LogOut, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
@@ -7,13 +7,13 @@ import Button from '../Button'
 export default function Header() {
   const { user, loading, logout } = useAuth()
 
-  // กำหนด dashboard path ตาม role
-  const getDashboardPath = () => {
+  // ใช้ useMemo เพื่อ cache dashboard path และลดการคำนวณซ้ำ
+  const dashboardPath = useMemo(() => {
     if (!user) return '/login'
     if (user.role === 'admin') return '/admin'
     if (user.role === 'member') return '/member'
     return '/' // default fallback
-  }
+  }, [user?.role])
 
   // ✅ สำคัญ: กัน refresh แล้ว UI แสดงเหมือนหลุด login
   // ระหว่าง loading ห้ามตัดสินว่า user = null คือหลุด
@@ -76,7 +76,7 @@ export default function Header() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <Link to={getDashboardPath()}>
+              <Link to={dashboardPath}>
                 <Button
                   variant="ghost"
                   className="text-sm hidden sm:flex"

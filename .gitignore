@@ -10,9 +10,15 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-*.local
+
+# Environment variables
+# .env.example should be committed (template file)
+# .env.local and .env*.local should NOT be committed (contains real secrets)
+# Environment variables
+.env
 .env.local
-.env*.local
+.env.*.local
+*.local
 
 # Editor directories and files
 .vscode/*

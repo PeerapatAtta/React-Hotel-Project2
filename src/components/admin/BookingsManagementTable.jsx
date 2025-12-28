@@ -3,12 +3,13 @@ import { formatDate } from '../../utils/formatters'
 import Badge from '../Badge'
 import { formatPrice } from '../../utils/formatters'
 import Button from '../Button'
-import { Check, X, Eye, Phone, Mail, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Check, X, Eye, Phone, Mail, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react'
 import Swal from 'sweetalert2'
 import { bookingService } from '../../services/bookingService'
 
 export default function BookingsManagementTable({ bookings, onRefresh, sortField, sortDirection, onSort }) {
   const [cancellingId, setCancellingId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
   const getStatusBadge = (status) => {
     const variants = {
       confirmed: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
@@ -65,7 +66,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
     if (result.isConfirmed) {
       setCancellingId(bookingId)
       try {
-        const { data, error } = await bookingService.updateBookingStatus(bookingId, 'cancelled')
+        const { error } = await bookingService.updateBookingStatus(bookingId, 'cancelled')
 
         if (error) {
           console.error('Error cancelling booking:', error)
@@ -113,6 +114,62 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
       confirmButtonText: 'ตกลง',
       confirmButtonColor: '#0d9488',
     })
+  }
+
+  const handleDelete = async (bookingId) => {
+    const result = await Swal.fire({
+      title: 'ลบการจอง?',
+      text: `คุณต้องการลบการจอง "${bookingId}" ออกจากระบบใช่หรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ใช่, ลบ',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      dangerMode: true,
+    })
+
+    if (result.isConfirmed) {
+      setDeletingId(bookingId)
+      try {
+        const { error } = await bookingService.deleteBooking(bookingId)
+
+        if (error) {
+          console.error('Error deleting booking:', error)
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: error.message || 'ไม่สามารถลบการจองได้ กรุณาลองใหม่อีกครั้ง',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#0d9488',
+          })
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: 'สำเร็จ',
+            text: `ลบการจอง "${bookingId}" เรียบร้อยแล้ว`,
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#0d9488',
+          })
+          
+          // รีเฟรชข้อมูลการจอง
+          if (onRefresh) {
+            onRefresh()
+          }
+        }
+      } catch (err) {
+        console.error('Error:', err)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถลบการจองได้ กรุณาลองใหม่อีกครั้ง',
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#0d9488',
+        })
+      } finally {
+        setDeletingId(null)
+      }
+    }
   }
 
   if (bookings.length === 0) {
@@ -276,29 +333,29 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                     <Button
                       variant="ghost"
                       onClick={() => handleView(booking.id)}
-                      className="p-2"
+                      className="p-2! min-w-[36px]"
                       title="ดูรายละเอียด"
                     >
-                      <Eye size={16} />
+                      <Eye size={22} />
                     </Button>
                     {booking.status === 'pending' && (
                       <>
                         <Button
                           variant="ghost"
                           onClick={() => handleConfirm(booking.id)}
-                          className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          className="p-2! min-w-[36px] text-green-600 hover:text-green-700 hover:bg-green-50"
                           title="ยืนยันการจอง"
                         >
-                          <Check size={16} />
+                          <Check size={22} />
                         </Button>
                         <Button
                           variant="ghost"
                           onClick={() => handleCancel(booking.id)}
                           disabled={cancellingId === booking.id}
-                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+                          className="p-2! min-w-[36px] text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
                           title="ยกเลิกการจอง"
                         >
-                          <X size={16} />
+                          <X size={22} />
                         </Button>
                       </>
                     )}
@@ -307,12 +364,21 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                         variant="ghost"
                         onClick={() => handleCancel(booking.id)}
                         disabled={cancellingId === booking.id}
-                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+                        className="p-2! min-w-[36px] text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
                         title="ยกเลิกการจอง"
                       >
-                        <X size={16} />
+                        <X size={22} />
                       </Button>
                     )}
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleDelete(booking.id)}
+                      disabled={deletingId === booking.id}
+                      className="p-2! min-w-[36px] text-red-700 hover:text-red-800 hover:bg-red-50 disabled:opacity-50"
+                      title="ลบการจอง"
+                    >
+                      <Trash2 size={22} />
+                    </Button>
                   </div>
                 </td>
               </tr>

@@ -73,17 +73,52 @@ export const bookingService = {
    * ดึงข้อมูลการจองตาม ID
    */
   async getBookingById(id) {
-    const { data, error } = await supabase
+    // Query แบบง่ายเพื่อหลีกเลี่ยงปัญหา foreign key join
+    const { data: booking, error: bookingError } = await supabase
       .from('bookings')
-      .select(`
-        *,
-        rooms:room_id (*),
-        profiles:user_id (*)
-      `)
+      .select('*')
       .eq('id', id)
       .single()
     
-    return { data, error }
+    if (bookingError) {
+      console.error('Error fetching booking:', bookingError)
+      return { data: null, error: bookingError }
+    }
+
+    if (!booking) {
+      return { data: null, error: { message: 'ไม่พบข้อมูลการจอง' } }
+    }
+
+    // ดึงข้อมูล rooms และ profiles แยก (ถ้าต้องการ)
+    try {
+      const roomId = booking.room_id
+      const userId = booking.user_id
+
+      const [roomsResult, profilesResult] = await Promise.all([
+        roomId 
+          ? supabase.from('rooms').select('id, name, type, images').eq('id', roomId).single()
+          : Promise.resolve({ data: null, error: null }),
+        userId
+          ? supabase.from('profiles').select('id, name, email').eq('id', userId).single()
+          : Promise.resolve({ data: null, error: null })
+      ])
+
+      const room = roomsResult.data || null
+      const profile = profilesResult.data || null
+
+      // รวมข้อมูล
+      const bookingWithRelations = {
+        ...booking,
+        rooms: room,
+        profiles: profile,
+      }
+
+      return { data: bookingWithRelations, error: null }
+    } catch (err) {
+      console.error('Error fetching related data:', err)
+      // ถ้าเกิด error ในการดึง related data ให้ return booking แบบธรรมดา
+      return { data: booking, error: null }
+    }
   },
 
   /**

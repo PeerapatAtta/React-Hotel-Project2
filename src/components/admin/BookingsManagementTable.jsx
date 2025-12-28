@@ -6,10 +6,13 @@ import Button from '../Button'
 import { Check, X, Eye, Phone, Mail, ArrowUpDown, ArrowUp, ArrowDown, Trash2 } from 'lucide-react'
 import Swal from 'sweetalert2'
 import { bookingService } from '../../services/bookingService'
+import ViewBookingModal from './ViewBookingModal'
 
 export default function BookingsManagementTable({ bookings, onRefresh, sortField, sortDirection, onSort }) {
   const [cancellingId, setCancellingId] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
+  const [viewBookingId, setViewBookingId] = useState(null)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const getStatusBadge = (status) => {
     const variants = {
       confirmed: 'bg-emerald-200 text-emerald-900 border-2 border-emerald-400 font-semibold',
@@ -107,13 +110,8 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
   }
 
   const handleView = (bookingId) => {
-    Swal.fire({
-      icon: 'info',
-      title: 'แจ้งเตือน',
-      text: `ฟีเจอร์ดูรายละเอียดการจอง "${bookingId}" จะเปิดใช้งานเร็วๆ นี้`,
-      confirmButtonText: 'ตกลง',
-      confirmButtonColor: '#0d9488',
-    })
+    setViewBookingId(bookingId)
+    setIsViewModalOpen(true)
   }
 
   const handleDelete = async (bookingId) => {
@@ -387,6 +385,16 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
           </tbody>
         </table>
       </div>
+
+      {/* View Booking Modal */}
+      <ViewBookingModal
+        isOpen={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false)
+          setViewBookingId(null)
+        }}
+        bookingId={viewBookingId}
+      />
     </div>
   )
 }

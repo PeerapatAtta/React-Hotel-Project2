@@ -3,11 +3,11 @@ import { formatDate } from '../../utils/formatters'
 import Badge from '../Badge'
 import { formatPrice } from '../../utils/formatters'
 import Button from '../Button'
-import { Check, X, Eye, Phone, Mail } from 'lucide-react'
+import { Check, X, Eye, Phone, Mail, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import Swal from 'sweetalert2'
 import { bookingService } from '../../services/bookingService'
 
-export default function BookingsManagementTable({ bookings, onRefresh }) {
+export default function BookingsManagementTable({ bookings, onRefresh, sortField, sortDirection, onSort }) {
   const [cancellingId, setCancellingId] = useState(null)
   const getStatusBadge = (status) => {
     const variants = {
@@ -129,26 +129,86 @@ export default function BookingsManagementTable({ bookings, onRefresh }) {
         <table className="w-full">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                รหัสการจอง
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'id' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('id')}
+              >
+                <div className="flex items-center gap-1">
+                  รหัสการจอง
+                  {sortField === 'id' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ห้องพัก
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'room_name' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('room_name')}
+              >
+                <div className="flex items-center gap-1">
+                  ห้องพัก
+                  {sortField === 'room_name' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ผู้เข้าพัก
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'guest_name' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('guest_name')}
+              >
+                <div className="flex items-center gap-1">
+                  ผู้เข้าพัก
+                  {sortField === 'guest_name' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                วันที่เข้าพัก
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'check_in' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('check_in')}
+              >
+                <div className="flex items-center gap-1">
+                  วันที่เข้าพัก
+                  {sortField === 'check_in' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                 จำนวนคืน/คน
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ราคารวม
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'total_price' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('total_price')}
+              >
+                <div className="flex items-center gap-1">
+                  ราคารวม
+                  {sortField === 'total_price' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                สถานะ
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'status' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('status')}
+              >
+                <div className="flex items-center gap-1">
+                  สถานะ
+                  {sortField === 'status' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
               <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
                 การจัดการ

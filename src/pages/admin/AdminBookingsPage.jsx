@@ -4,7 +4,7 @@ import BookingsManagementTable from '../../components/admin/BookingsManagementTa
 import AddBookingModal from '../../components/admin/AddBookingModal'
 import Button from '../../components/Button'
 import { bookingService } from '../../services/bookingService'
-import { Search, Filter, Download, Calendar, Plus } from 'lucide-react'
+import { Search, Filter, Download, Calendar, Plus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import Input from '../../components/Input'
 import { formatPrice } from '../../utils/formatters'
 import Swal from 'sweetalert2'
@@ -17,6 +17,8 @@ export default function AdminBookingsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterDate, setFilterDate] = useState('')
+  const [sortField, setSortField] = useState('created_at') // default sort by created date
+  const [sortDirection, setSortDirection] = useState('desc') // 'asc' or 'desc'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   const fetchBookings = async () => {
@@ -42,9 +44,9 @@ export default function AdminBookingsPage() {
     fetchBookings()
   }, [])
 
-  // Filter bookings
+  // Filter and sort bookings
   const filteredBookings = useMemo(() => {
-    return bookings.filter((booking) => {
+    let result = bookings.filter((booking) => {
       const matchesSearch = 
         booking.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         booking.guest_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -61,7 +63,51 @@ export default function AdminBookingsPage() {
       
       return matchesSearch && matchesStatus && matchesDate
     })
-  }, [bookings, searchQuery, filterStatus, filterDate])
+
+    // Sort bookings
+    result = [...result].sort((a, b) => {
+      let aValue, bValue
+
+      switch (sortField) {
+        case 'id':
+          aValue = (a.id || '').toLowerCase()
+          bValue = (b.id || '').toLowerCase()
+          break
+        case 'created_at':
+          aValue = new Date(a.created_at || a.createdAt || 0)
+          bValue = new Date(b.created_at || b.createdAt || 0)
+          break
+        case 'check_in':
+          aValue = new Date(a.check_in || a.checkIn || 0)
+          bValue = new Date(b.check_in || b.checkIn || 0)
+          break
+        case 'total_price':
+          aValue = parseFloat(a.total_price || a.totalPrice || 0)
+          bValue = parseFloat(b.total_price || b.totalPrice || 0)
+          break
+        case 'guest_name':
+          aValue = (a.guest_name || a.guestName || '').toLowerCase()
+          bValue = (b.guest_name || b.guestName || '').toLowerCase()
+          break
+        case 'room_name':
+          aValue = (a.room_name || a.roomName || '').toLowerCase()
+          bValue = (b.room_name || b.roomName || '').toLowerCase()
+          break
+        case 'status':
+          aValue = a.status || ''
+          bValue = b.status || ''
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+
+    return result
+  }, [bookings, searchQuery, filterStatus, filterDate, sortField, sortDirection])
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -183,7 +229,7 @@ export default function AdminBookingsPage() {
               </div>
             </div>
           </div>
-          <div className="mt-4">
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
             <div className="relative max-w-xs">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                 <Calendar size={18} />
@@ -196,6 +242,34 @@ export default function AdminBookingsPage() {
                 className="pl-10"
               />
             </div>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <ArrowUpDown size={18} />
+                </div>
+                <select
+                  value={sortField}
+                  onChange={(e) => setSortField(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                >
+                  <option value="id">เรียงตามรหัสการจอง</option>
+                  <option value="created_at">เรียงตามวันที่สร้าง</option>
+                  <option value="check_in">เรียงตามวันที่เช็กอิน</option>
+                  <option value="total_price">เรียงตามราคา</option>
+                  <option value="guest_name">เรียงตามชื่อผู้เข้าพัก</option>
+                  <option value="room_name">เรียงตามชื่อห้อง</option>
+                  <option value="status">เรียงตามสถานะ</option>
+                </select>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                className="px-4"
+                title={sortDirection === 'asc' ? 'เรียงจากน้อยไปมาก' : 'เรียงจากมากไปน้อย'}
+              >
+                {sortDirection === 'asc' ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -206,7 +280,20 @@ export default function AdminBookingsPage() {
               พบ {filteredBookings.length} การจอง
             </p>
           </div>
-          <BookingsManagementTable bookings={filteredBookings} onRefresh={fetchBookings} />
+          <BookingsManagementTable 
+            bookings={filteredBookings} 
+            onRefresh={fetchBookings}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={(field) => {
+              if (sortField === field) {
+                setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+              } else {
+                setSortField(field)
+                setSortDirection('asc')
+              }
+            }}
+          />
         </div>
       </div>
 

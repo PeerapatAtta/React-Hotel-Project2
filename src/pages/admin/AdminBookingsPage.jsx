@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import BookingsManagementTable from '../../components/admin/BookingsManagementTable'
+import AddBookingModal from '../../components/admin/AddBookingModal'
 import Button from '../../components/Button'
 import { bookingService } from '../../services/bookingService'
-import { Search, Filter, Download, Calendar } from 'lucide-react'
+import { Search, Filter, Download, Calendar, Plus } from 'lucide-react'
 import Input from '../../components/Input'
 import { formatPrice } from '../../utils/formatters'
 import Swal from 'sweetalert2'
@@ -16,27 +17,28 @@ export default function AdminBookingsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterDate, setFilterDate] = useState('')
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+
+  const fetchBookings = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data, error: fetchError } = await bookingService.getAllBookings()
+      if (fetchError) {
+        console.error('Error fetching bookings:', fetchError)
+        setError(fetchError.message)
+      } else {
+        setBookings(data || [])
+      }
+    } catch (err) {
+      console.error('Error:', err)
+      setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      setLoading(true)
-      setError(null)
-      try {
-        const { data, error: fetchError } = await bookingService.getAllBookings()
-        if (fetchError) {
-          console.error('Error fetching bookings:', fetchError)
-          setError(fetchError.message)
-        } else {
-          setBookings(data || [])
-        }
-      } catch (err) {
-        console.error('Error:', err)
-        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchBookings()
   }, [])
 
@@ -110,10 +112,19 @@ export default function AdminBookingsPage() {
             <h1 className="text-3xl font-bold text-primary">การจอง</h1>
             <p className="text-slate-600 mt-1">จัดการการจองทั้งหมด</p>
           </div>
-          <Button onClick={handleExport} variant="secondary" className="w-full md:w-auto">
-            <Download size={18} />
-            ส่งออกข้อมูล
-          </Button>
+          <div className="flex gap-3 w-full md:w-auto">
+            <Button 
+              onClick={() => setIsAddModalOpen(true)} 
+              className="w-full md:w-auto"
+            >
+              <Plus size={18} />
+              เพิ่มการจอง
+            </Button>
+            <Button onClick={handleExport} variant="secondary" className="w-full md:w-auto">
+              <Download size={18} />
+              ส่งออกข้อมูล
+            </Button>
+          </div>
         </div>
 
         {/* Stats Summary */}
@@ -198,6 +209,13 @@ export default function AdminBookingsPage() {
           <BookingsManagementTable bookings={filteredBookings} />
         </div>
       </div>
+
+      {/* Add Booking Modal */}
+      <AddBookingModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={fetchBookings}
+      />
     </AdminLayout>
   )
 }

@@ -122,47 +122,56 @@ export default function BookingsManagementTable({ bookings }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {bookings.map((booking) => (
-              <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm font-medium text-primary">{booking.id}</span>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {new Date(booking.createdAt).toLocaleDateString('th-TH')}
-                  </p>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="text-sm font-medium text-slate-700">{booking.roomName}</span>
-                </td>
-                <td className="px-6 py-4">
-                  <div>
-                    <p className="text-sm font-medium text-slate-700">{booking.guestName}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Mail size={12} className="text-slate-400" />
-                      <p className="text-xs text-slate-500">{booking.email}</p>
+            {bookings.map((booking) => {
+              // รองรับทั้ง snake_case และ camelCase
+              const roomName = booking.roomName || booking.room_name
+              const guestName = booking.guestName || booking.guest_name
+              const checkIn = booking.checkIn || booking.check_in
+              const checkOut = booking.checkOut || booking.check_out
+              const totalPrice = booking.totalPrice || booking.total_price
+              const createdAt = booking.createdAt || booking.created_at
+
+              return (
+                <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-sm font-medium text-primary">{booking.id}</span>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {createdAt ? new Date(createdAt).toLocaleDateString('th-TH') : '-'}
+                    </p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm font-medium text-slate-700">{roomName}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">{guestName}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Mail size={12} className="text-slate-400" />
+                        <p className="text-xs text-slate-500">{booking.email}</p>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Phone size={12} className="text-slate-400" />
+                        <p className="text-xs text-slate-500">{booking.phone}</p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Phone size={12} className="text-slate-400" />
-                      <p className="text-xs text-slate-500">{booking.phone}</p>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <p className="text-sm text-slate-700">{formatDate(checkIn)}</p>
+                      <p className="text-xs text-slate-500">ถึง {formatDate(checkOut)}</p>
                     </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <p className="text-sm text-slate-700">{formatDate(booking.checkIn)}</p>
-                    <p className="text-xs text-slate-500">ถึง {formatDate(booking.checkOut)}</p>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <span className="text-sm text-slate-700">{booking.nights} คืน</span>
-                    <p className="text-xs text-slate-500">{booking.guests} คน</p>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm font-semibold text-primary">
-                    {formatPrice(booking.totalPrice)}
-                  </span>
-                </td>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <span className="text-sm text-slate-700">{booking.nights} คืน</span>
+                      <p className="text-xs text-slate-500">{booking.guests} คน</p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-sm font-semibold text-primary">
+                      {formatPrice(totalPrice)}
+                    </span>
+                  </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Badge className={`text-xs ${getStatusBadge(booking.status)}`}>
                     {getStatusText(booking.status)}
@@ -211,7 +220,8 @@ export default function BookingsManagementTable({ bookings }) {
                   </div>
                 </td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       </div>

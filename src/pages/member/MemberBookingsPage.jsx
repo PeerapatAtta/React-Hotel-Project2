@@ -80,9 +80,9 @@ export default function MemberBookingsPage() {
 
   const getStatusBadge = (status) => {
     const styles = {
-      confirmed: 'bg-green-100 text-green-700',
-      pending: 'bg-yellow-100 text-yellow-700',
-      cancelled: 'bg-red-100 text-red-700',
+      confirmed: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+      pending: 'bg-amber-100 text-amber-800 border border-amber-300',
+      cancelled: 'bg-rose-100 text-rose-800 border border-rose-300',
     }
     const labels = {
       confirmed: 'ยืนยันแล้ว',

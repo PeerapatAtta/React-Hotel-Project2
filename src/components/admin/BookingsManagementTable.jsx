@@ -1,19 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { formatDate } from '../../utils/formatters'
 import Badge from '../Badge'
 import { formatPrice } from '../../utils/formatters'
 import Button from '../Button'
 import { Check, X, Eye, Phone, Mail } from 'lucide-react'
 import Swal from 'sweetalert2'
+import { bookingService } from '../../services/bookingService'
 
-export default function BookingsManagementTable({ bookings }) {
+export default function BookingsManagementTable({ bookings, onRefresh }) {
+  const [cancellingId, setCancellingId] = useState(null)
   const getStatusBadge = (status) => {
     const variants = {
-      confirmed: 'bg-green-100 text-green-700',
-      pending: 'bg-yellow-100 text-yellow-700',
-      cancelled: 'bg-red-100 text-red-700',
+      confirmed: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+      pending: 'bg-amber-100 text-amber-800 border border-amber-300',
+      cancelled: 'bg-rose-100 text-rose-800 border border-rose-300',
     }
-    return variants[status] || 'bg-slate-100 text-slate-700'
+    return variants[status] || 'bg-slate-100 text-slate-700 border border-slate-300'
   }
 
   const getStatusText = (status) => {
@@ -48,8 +50,8 @@ export default function BookingsManagementTable({ bookings }) {
     })
   }
 
-  const handleCancel = (bookingId) => {
-    Swal.fire({
+  const handleCancel = async (bookingId) => {
+    const result = await Swal.fire({
       title: 'ยกเลิกการจอง?',
       text: `คุณต้องการยกเลิกการจอง "${bookingId}" ใช่หรือไม่?`,
       icon: 'warning',
@@ -58,17 +60,49 @@ export default function BookingsManagementTable({ bookings }) {
       cancelButtonText: 'ไม่',
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#64748b',
-    }).then((result) => {
-      if (result.isConfirmed) {
+    })
+
+    if (result.isConfirmed) {
+      setCancellingId(bookingId)
+      try {
+        const { data, error } = await bookingService.updateBookingStatus(bookingId, 'cancelled')
+
+        if (error) {
+          console.error('Error cancelling booking:', error)
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: error.message || 'ไม่สามารถยกเลิกการจองได้ กรุณาลองใหม่อีกครั้ง',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#0d9488',
+          })
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: 'สำเร็จ',
+            text: `ยกเลิกการจอง "${bookingId}" เรียบร้อยแล้ว`,
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#0d9488',
+          })
+          
+          // รีเฟรชข้อมูลการจอง
+          if (onRefresh) {
+            onRefresh()
+          }
+        }
+      } catch (err) {
+        console.error('Error:', err)
         Swal.fire({
-          icon: 'info',
-          title: 'แจ้งเตือน',
-          text: `ฟีเจอร์ยกเลิกการจอง "${bookingId}" จะเปิดใช้งานเร็วๆ นี้`,
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถยกเลิกการจองได้ กรุณาลองใหม่อีกครั้ง',
           confirmButtonText: 'ตกลง',
           confirmButtonColor: '#0d9488',
         })
+      } finally {
+        setCancellingId(null)
       }
-    })
+    }
   }
 
   const handleView = (bookingId) => {
@@ -173,7 +207,7 @@ export default function BookingsManagementTable({ bookings }) {
                     </span>
                   </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge className={`text-xs ${getStatusBadge(booking.status)}`}>
+                  <Badge className={getStatusBadge(booking.status)}>
                     {getStatusText(booking.status)}
                   </Badge>
                 </td>
@@ -200,7 +234,8 @@ export default function BookingsManagementTable({ bookings }) {
                         <Button
                           variant="ghost"
                           onClick={() => handleCancel(booking.id)}
-                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          disabled={cancellingId === booking.id}
+                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
                           title="ยกเลิกการจอง"
                         >
                           <X size={16} />
@@ -211,7 +246,8 @@ export default function BookingsManagementTable({ bookings }) {
                       <Button
                         variant="ghost"
                         onClick={() => handleCancel(booking.id)}
-                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        disabled={cancellingId === booking.id}
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
                         title="ยกเลิกการจอง"
                       >
                         <X size={16} />

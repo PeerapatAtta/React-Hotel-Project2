@@ -206,7 +206,7 @@ export default function AdminBookingsPage() {
               พบ {filteredBookings.length} การจอง
             </p>
           </div>
-          <BookingsManagementTable bookings={filteredBookings} />
+          <BookingsManagementTable bookings={filteredBookings} onRefresh={fetchBookings} />
         </div>
       </div>
 

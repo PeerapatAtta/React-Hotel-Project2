@@ -8,11 +8,11 @@ export default function BookingsTable({ bookings, showAll = false }) {
   
   const getStatusBadge = (status) => {
     const variants = {
-      confirmed: 'bg-green-100 text-green-700',
-      pending: 'bg-yellow-100 text-yellow-700',
-      cancelled: 'bg-red-100 text-red-700',
+      confirmed: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+      pending: 'bg-amber-100 text-amber-800 border border-amber-300',
+      cancelled: 'bg-rose-100 text-rose-800 border border-rose-300',
     }
-    return variants[status] || 'bg-slate-100 text-slate-700'
+    return variants[status] || 'bg-slate-100 text-slate-700 border border-slate-300'
   }
 
   const getStatusText = (status) => {
@@ -88,7 +88,7 @@ export default function BookingsTable({ bookings, showAll = false }) {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge className={`text-xs ${getStatusBadge(booking.status)}`}>
+                  <Badge className={getStatusBadge(booking.status)}>
                     {getStatusText(booking.status)}
                   </Badge>
                 </td>

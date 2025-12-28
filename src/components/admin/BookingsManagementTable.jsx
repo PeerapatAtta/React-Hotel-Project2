@@ -265,6 +265,19 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   )}
                 </div>
               </th>
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'creator_name' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('creator_name')}
+              >
+                <div className="flex items-center gap-1">
+                  ผู้สร้าง
+                  {sortField === 'creator_name' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
+              </th>
               <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
                 การจัดการ
               </th>
@@ -325,6 +338,16 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   <Badge className={getStatusBadge(booking.status)}>
                     {getStatusText(booking.status)}
                   </Badge>
+                </td>
+                <td className="px-6 py-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">
+                      {booking.profiles?.name || booking.profiles?.email || '-'}
+                    </p>
+                    {booking.profiles?.email && booking.profiles?.name && (
+                      <p className="text-xs text-slate-500 mt-1">{booking.profiles.email}</p>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">

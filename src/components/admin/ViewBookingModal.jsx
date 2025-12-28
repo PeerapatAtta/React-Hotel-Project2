@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, Calendar, Users, Mail, Phone, Home, CreditCard, Hash, Clock } from 'lucide-react'
+import { X, Calendar, Users, Mail, Phone, Home, CreditCard, Hash, Clock, User } from 'lucide-react'
 import Button from '../Button'
 import Badge from '../Badge'
 import { bookingService } from '../../services/bookingService'
@@ -213,6 +213,25 @@ export default function ViewBookingModal({ isOpen, onClose, bookingId }) {
                   </div>
                 </div>
               </div>
+
+              {/* Creator Information */}
+              {booking.profiles && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                  <h3 className="mb-4 text-lg font-semibold text-slate-800">ผู้สร้างการจอง</h3>
+                  <div className="flex items-start gap-3">
+                    <User size={20} className="mt-0.5 text-slate-400" />
+                    <div>
+                      <p className="text-xs text-slate-500">ชื่อผู้สร้าง</p>
+                      <p className="font-medium text-slate-800">
+                        {booking.profiles.name || booking.profiles.email || '-'}
+                      </p>
+                      {booking.profiles.email && booking.profiles.name && (
+                        <p className="text-xs text-slate-500 mt-1">{booking.profiles.email}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Created Date */}
               {booking.created_at && (

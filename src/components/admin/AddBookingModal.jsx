@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { X, Calendar, Users, Mail, Phone, Home } from 'lucide-react'
+import { X, Calendar, Users, Mail, Phone, Home, User } from 'lucide-react'
 import Button from '../Button'
 import Input from '../Input'
 import { bookingService } from '../../services/bookingService'
 import { roomService } from '../../services/roomService'
 import Swal from 'sweetalert2'
 import { formatPrice } from '../../utils/formatters'
+import { useAuth } from '../../hooks/useAuth'
 
 export default function AddBookingModal({ isOpen, onClose, onSuccess }) {
+  const { user } = useAuth()
   const [formData, setFormData] = useState({
     room_id: '',
     guest_name: '',
@@ -148,9 +150,8 @@ export default function AddBookingModal({ isOpen, onClose, onSuccess }) {
     if (!formData.guest_name.trim()) {
       newErrors.guest_name = 'กรุณากรอกชื่อผู้เข้าพัก'
     }
-    if (!formData.email.trim()) {
-      newErrors.email = 'กรุณากรอกอีเมล'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    // Email เป็น optional แต่ถ้ากรอกต้องเป็นรูปแบบที่ถูกต้อง
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       newErrors.email = 'รูปแบบอีเมลไม่ถูกต้อง'
     }
     if (!formData.phone.trim()) {
@@ -230,14 +231,14 @@ export default function AddBookingModal({ isOpen, onClose, onSuccess }) {
         room_id: formData.room_id,
         room_name: selectedRoom.name,
         guest_name: formData.guest_name.trim(),
-        email: formData.email.trim(),
+        email: formData.email.trim() || '',
         phone: formData.phone.trim(),
         check_in: formData.check_in,
         check_out: formData.check_out,
         guests: parseInt(formData.guests),
         total_price: totalPrice,
         status: formData.status,
-        user_id: null, // Admin สร้างการจองอาจไม่มี user_id
+        user_id: user?.id || null, // เก็บ user_id ของ admin ที่สร้างการจอง
       }
 
       const { data, error } = await bookingService.createBooking(bookingData)
@@ -312,6 +313,22 @@ export default function AddBookingModal({ isOpen, onClose, onSuccess }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* ชื่อผู้จอง (Admin) */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              <User size={16} className="inline mr-2" />
+              ชื่อผู้จอง
+            </label>
+            <Input
+              type="text"
+              value={user?.name || ''}
+              disabled
+              readOnly
+              className="bg-slate-50 cursor-not-allowed"
+            />
+            <p className="mt-1 text-xs text-slate-500">ชื่อผู้ดูแลระบบที่สร้างการจองนี้</p>
+          </div>
+
           {/* เลือกห้อง */}
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -370,7 +387,7 @@ export default function AddBookingModal({ isOpen, onClose, onSuccess }) {
             <div>
               <label className="mb-2 block text-sm font-medium text-slate-700">
                 <Mail size={16} className="inline mr-2" />
-                อีเมล *
+                อีเมล
               </label>
               <Input
                 type="email"

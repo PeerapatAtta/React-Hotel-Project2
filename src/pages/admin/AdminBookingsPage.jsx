@@ -148,6 +148,10 @@ export default function AdminBookingsPage() {
           aValue = a.status || ''
           bValue = b.status || ''
           break
+        case 'creator_name':
+          aValue = ((a.profiles?.name || a.profiles?.email || '')).toLowerCase()
+          bValue = ((b.profiles?.name || b.profiles?.email || '')).toLowerCase()
+          break
         default:
           return 0
       }
@@ -345,6 +349,7 @@ export default function AdminBookingsPage() {
                   <option value="guest_name">เรียงตามชื่อผู้เข้าพัก</option>
                   <option value="room_name">เรียงตามชื่อห้อง</option>
                   <option value="status">เรียงตามสถานะ</option>
+                  <option value="creator_name">เรียงตามผู้สร้าง</option>
                 </select>
               </div>
               <Button

@@ -12,11 +12,11 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
   const [deletingId, setDeletingId] = useState(null)
   const getStatusBadge = (status) => {
     const variants = {
-      confirmed: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
-      pending: 'bg-amber-100 text-amber-800 border border-amber-300',
-      cancelled: 'bg-rose-100 text-rose-800 border border-rose-300',
+      confirmed: 'bg-emerald-200 text-emerald-900 border-2 border-emerald-400 font-semibold',
+      pending: 'bg-amber-200 text-amber-900 border-2 border-amber-400 font-semibold',
+      cancelled: 'bg-rose-200 text-rose-900 border-2 border-rose-400 font-semibold',
     }
-    return variants[status] || 'bg-slate-100 text-slate-700 border border-slate-300'
+    return variants[status] || 'bg-slate-200 text-slate-800 border-2 border-slate-400 font-semibold'
   }
 
   const getStatusText = (status) => {

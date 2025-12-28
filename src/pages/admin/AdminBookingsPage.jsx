@@ -15,7 +15,7 @@ export default function AdminBookingsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchType, setSearchType] = useState('all') // 'all', 'id', 'guest_name', 'email', 'room_name'
+  const [searchType, setSearchType] = useState('all') // 'all', 'id', 'guest_name', 'email', 'room_name', 'creator_name'
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterDate, setFilterDate] = useState('')
   const [sortField, setSortField] = useState('created_at') // default sort by created date
@@ -83,14 +83,24 @@ export default function AdminBookingsPage() {
           case 'room_name':
             matchesSearch = roomName.toLowerCase().includes(queryLower)
             break
+          case 'creator_name':
+            // ค้นหาตามชื่อผู้สร้าง (จาก profiles)
+            const creatorName = (booking.profiles?.name || '').toLowerCase()
+            const creatorEmail = (booking.profiles?.email || '').toLowerCase()
+            matchesSearch = creatorName.includes(queryLower) || creatorEmail.includes(queryLower)
+            break
           case 'all':
           default:
             // ค้นหาทั้งหมด
+            const creatorNameAll = (booking.profiles?.name || '').toLowerCase()
+            const creatorEmailAll = (booking.profiles?.email || '').toLowerCase()
             matchesSearch = 
               booking.id?.toLowerCase().includes(queryLower) ||
               guestName.toLowerCase().includes(queryLower) ||
               booking.email?.toLowerCase().includes(queryLower) ||
-              roomName.toLowerCase().includes(queryLower)
+              roomName.toLowerCase().includes(queryLower) ||
+              creatorNameAll.includes(queryLower) ||
+              creatorEmailAll.includes(queryLower)
             break
         }
       }
@@ -271,6 +281,7 @@ export default function AdminBookingsPage() {
                 <option value="guest_name">ชื่อผู้เข้าพัก</option>
                 <option value="email">อีเมล</option>
                 <option value="room_name">ชื่อห้อง</option>
+                <option value="creator_name">ผู้สร้าง</option>
               </select>
             </div>
             
@@ -282,11 +293,13 @@ export default function AdminBookingsPage() {
                 </div>
                 <Input
                   placeholder={
-                    searchType === 'all' ? "ค้นหาการจอง (รหัส, ชื่อผู้เข้าพัก, อีเมล, ห้อง)..." :
+                    searchType === 'all' ? "ค้นหาการจอง (รหัส, ชื่อผู้เข้าพัก, อีเมล, ห้อง, ผู้สร้าง)..." :
                     searchType === 'id' ? "ค้นหาตามรหัสการจอง..." :
                     searchType === 'guest_name' ? "ค้นหาตามชื่อผู้เข้าพัก..." :
                     searchType === 'email' ? "ค้นหาตามอีเมล..." :
-                    "ค้นหาตามชื่อห้อง..."
+                    searchType === 'room_name' ? "ค้นหาตามชื่อห้อง..." :
+                    searchType === 'creator_name' ? "ค้นหาตามชื่อผู้สร้าง..." :
+                    "ค้นหาการจอง..."
                   }
                   value={searchQuery}
                   onChange={(e) => {

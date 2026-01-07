@@ -361,6 +361,61 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      // ตรวจสอบว่ามี user อยู่
+      if (!userRef.current || !userRef.current.email) {
+        return { success: false, error: 'ไม่พบข้อมูลผู้ใช้' }
+      }
+
+      // ตรวจสอบรหัสผ่านปัจจุบันโดยการลอง login
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: userRef.current.email,
+        password: currentPassword,
+      })
+
+      if (verifyError) {
+        // แปลง error message เป็นภาษาไทย
+        let errorMessage = 'รหัสผ่านปัจจุบันไม่ถูกต้อง'
+        if (verifyError.message?.includes('Invalid login credentials')) {
+          errorMessage = 'รหัสผ่านปัจจุบันไม่ถูกต้อง'
+        } else if (verifyError.message?.includes('Email not confirmed')) {
+          errorMessage = 'กรุณายืนยันอีเมลก่อนเปลี่ยนรหัสผ่าน'
+        }
+        return { success: false, error: errorMessage }
+      }
+
+      // ตรวจสอบความยาวรหัสผ่านใหม่
+      if (!newPassword || newPassword.length < 6) {
+        return { success: false, error: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร' }
+      }
+
+      // เปลี่ยนรหัสผ่าน
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+
+      if (updateError) {
+        console.error('[AuthContext] Error updating password:', updateError)
+        
+        // แปลง error message เป็นภาษาไทย
+        let errorMessage = 'ไม่สามารถเปลี่ยนรหัสผ่านได้'
+        if (updateError.message?.includes('Password')) {
+          errorMessage = 'รหัสผ่านใหม่ไม่ถูกต้อง กรุณาตรวจสอบความยาวและรูปแบบ'
+        } else if (updateError.message?.includes('same')) {
+          errorMessage = 'รหัสผ่านใหม่ต้องแตกต่างจากรหัสผ่านปัจจุบัน'
+        }
+        
+        return { success: false, error: errorMessage }
+      }
+
+      return { success: true, message: 'เปลี่ยนรหัสผ่านสำเร็จ' }
+    } catch (error) {
+      console.error('[AuthContext] Change password exception:', error)
+      return { success: false, error: error.message || 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน' }
+    }
+  }
+
   const logout = async () => {
     // Clear user state immediately for better UX, regardless of signOut result
     setUser(null)
@@ -386,7 +441,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, changePassword, loading }}>
       {children}
     </AuthContext.Provider>
   )

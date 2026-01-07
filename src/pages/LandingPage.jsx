@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Wifi, Coffee, ShieldCheck, Droplet, Calendar, Users, Bed, Search, ArrowRight, Star, CheckCircle } from 'lucide-react'
+import { Wifi, Coffee, ShieldCheck, Droplet, Calendar, Users, Bed, Search, ArrowRight, Star, CheckCircle, Sparkles, Dumbbell, UtensilsCrossed, Car } from 'lucide-react'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Card from '../components/Card'
@@ -12,24 +12,60 @@ import { formatPriceNumber } from '../utils/formatters'
 
 const amenities = [
   {
+    title: 'สระว่ายน้ำอินฟินิตี้',
+    description: 'สระว่ายน้ำบนดาดฟ้าพร้อมวิวเมืองที่สวยงาม ให้คุณผ่อนคลายได้ทุกเวลา',
+    icon: Droplet,
+    image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80',
+    size: 'large', // large card
+  },
+  {
+    title: 'สปาและนวดแผนไทย',
+    description: 'บริการนวดและสปาที่ทำให้คุณรู้สึกผ่อนคลายและสบายใจ',
+    icon: Sparkles,
+    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
+    size: 'small',
+  },
+  {
+    title: 'ศูนย์ฟิตเนส',
+    description: 'อุปกรณ์ออกกำลังกายที่ทันสมัย พร้อมเทรนเนอร์ส่วนตัวที่พร้อมช่วยคุณ',
+    icon: Dumbbell,
+    image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80',
+    size: 'small',
+  },
+  {
+    title: 'ร้านอาหาร',
+    description: 'อาหารรสเลิศที่คัดสรรมาสำหรับคุณ พร้อมบรรยากาศที่อบอุ่น',
+    icon: UtensilsCrossed,
+    image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
+    size: 'small',
+  },
+  {
+    title: 'ที่จอดรถ',
+    description: 'ที่จอดรถฟรีสำหรับคุณ สะดวกและปลอดภัยตลอดการเข้าพัก',
+    icon: Car,
+    image: 'https://www.gmcparking.com/media/hotel-parking-01.jpg',
+    size: 'small',
+  },
+  {
     title: 'Wi-Fi แรงเร็ว',
     description: 'เชื่อมต่อฟรีทุกมุมโรงแรม',
     icon: Wifi,
-  },
-  {
-    title: 'สระว่ายน้ำ',
-    description: 'เปิดบริการ 06:00 - 21:00',
-    icon: Droplet,
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80',
+    size: 'small',
   },
   {
     title: 'อาหารเช้า',
     description: 'บุฟเฟต์ไทย-นานาชาติ',
     icon: Coffee,
+    image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80',
+    size: 'small',
   },
   {
     title: 'บริการส่วนตัว',
     description: 'พนักงานดูแลตลอด 24 ชั่วโมง',
     icon: ShieldCheck,
+    image: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=80',
+    size: 'small',
   },
 ]
 
@@ -343,34 +379,108 @@ export default function LandingPage() {
         </Container>
 
         {/* Amenities */}
-        <Container>
-          <section id="amenities" className="mx-auto max-w-4xl space-y-10 rounded-3xl bg-white p-6 shadow-xl shadow-teal-900/10 md:p-10">
-            <div className="text-center space-y-2">
-              <SectionTitle
-                subtitle="สิ่งอำนวยความสะดวก"
-                title="อัปเกรดการพักผ่อนด้วยบริการที่ครบครัน"
-              />
-              <p className="text-sm text-slate-500" style={{ color: '#64748b' }}>บริการที่เรามอบให้เพื่อความสะดวกสบายของคุณ</p>
+        <div className="mx-auto w-[80%] px-6 sm:px-8 md:px-12 lg:px-16 xl:px-20">
+          <section id="amenities" className="py-16 md:py-20 lg:py-24">
+            <div className="text-center space-y-4 mb-12 md:mb-16 lg:mb-20">
+              <p className="text-sm md:text-base font-semibold text-amber-600 uppercase tracking-wider">บริการ</p>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-slate-900 font-bold leading-tight">
+                สิ่งอำนวยความสะดวก
+              </h2>
+              <p className="text-sm md:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed px-4">
+                เราคัดสรรสิ่งอำนวยความสะดวกที่ทำให้คุณรู้สึกผ่อนคลายและสะดวกสบายตลอดการเข้าพัก
+              </p>
             </div>
-            <div className="grid gap-6 md:grid-cols-2">
-              {amenities.map((item, index) => (
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5 md:gap-6 lg:gap-8">
+              {/* Large Card - Infinity Pool */}
+              {amenities.filter(item => item.size === 'large').map((item) => (
                 <div
                   key={item.title}
-                  className="group flex items-start gap-5 rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 to-white p-6 transition-all duration-300 hover:shadow-xl hover:border-teal-300 hover:-translate-y-1"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  className="md:col-span-2 md:row-span-2 relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.01]"
                 >
-                  <div className="rounded-xl bg-teal-600 p-4 shadow-md group-hover:scale-110 transition-transform duration-300">
-                    <item.icon size={24} className="text-white" />
+                  <div className="relative h-full min-h-[400px] md:h-full w-full">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                    {/* Content */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 lg:p-10 text-white">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3">
+                          <item.icon size={24} className="text-white" />
+                        </div>
+                      </div>
+                      <h3 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">{item.title}</h3>
+                      <p className="text-white/90 text-sm md:text-base leading-relaxed">{item.description}</p>
+                    </div>
                   </div>
-                  <div className="space-y-1 flex-1">
-                    <p className="text-lg font-semibold text-primary group-hover:text-teal-600 transition-colors">{item.title}</p>
-                    <p className="text-sm leading-relaxed text-slate-500">{item.description}</p>
+                </div>
+              ))}
+
+              {/* Small Cards - Column 3: Card 1 & 2 */}
+              {amenities.filter(item => item.size === 'small').slice(0, 2).map((item, index) => (
+                <div
+                  key={item.title}
+                  className={`md:col-start-3 ${index === 0 ? 'md:row-start-1' : 'md:row-start-2'} relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]`}
+                >
+                  <div className="relative h-56 md:h-60 lg:h-64 aspect-[4/3] w-full">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
+
+                    {/* Icon */}
+                    <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm rounded-lg p-2.5 z-10">
+                      <item.icon size={20} className="text-white" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 text-white">
+                      <h3 className="text-base md:text-lg font-bold mb-1.5">{item.title}</h3>
+                      <p className="text-white/90 text-xs md:text-sm leading-relaxed">{item.description}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Small Cards - Column 4: Card 3 & 4 */}
+              {amenities.filter(item => item.size === 'small').slice(2, 4).map((item, index) => (
+                <div
+                  key={item.title}
+                  className={`md:col-start-4 ${index === 0 ? 'md:row-start-1' : 'md:row-start-2'} relative group overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]`}
+                >
+                  <div className="relative h-56 md:h-60 lg:h-64 aspect-[4/3] w-full">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20" />
+
+                    {/* Icon */}
+                    <div className="absolute top-4 left-4 bg-white/20 backdrop-blur-sm rounded-lg p-2.5 z-10">
+                      <item.icon size={20} className="text-white" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6 text-white">
+                      <h3 className="text-base md:text-lg font-bold mb-1.5">{item.title}</h3>
+                      <p className="text-white/90 text-xs md:text-sm leading-relaxed">{item.description}</p>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           </section>
-        </Container>
+        </div>
       </div>
     </div>
   )

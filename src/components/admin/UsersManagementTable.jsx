@@ -4,7 +4,7 @@ import Button from '../Button'
 import { Edit, Trash2, Eye, Mail, Phone, Shield, User as UserIcon, Ban, CheckCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import Swal from 'sweetalert2'
 
-export default function UsersManagementTable({ users, sortField, sortDirection, onSort, onView, onEdit }) {
+export default function UsersManagementTable({ users, sortField, sortDirection, onSort, onView, onEdit, onToggleStatus }) {
   const getRoleBadge = (role) => {
     const variants = {
       admin: 'bg-purple-100 text-purple-700',
@@ -110,28 +110,35 @@ export default function UsersManagementTable({ users, sortField, sortDirection, 
     }
   }
 
-  const handleToggleStatus = (userId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
-    Swal.fire({
-      title: 'เปลี่ยนสถานะ?',
-      text: `คุณต้องการเปลี่ยนสถานะผู้ใช้ "${userId}" เป็น "${getStatusText(newStatus)}" ใช่หรือไม่?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'ใช่, เปลี่ยน',
-      cancelButtonText: 'ยกเลิก',
-      confirmButtonColor: '#0d9488',
-      cancelButtonColor: '#64748b',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          icon: 'info',
-          title: 'แจ้งเตือน',
-          text: `ฟีเจอร์เปลี่ยนสถานะผู้ใช้ "${userId}" จะเปิดใช้งานเร็วๆ นี้`,
-          confirmButtonText: 'ตกลง',
-          confirmButtonColor: '#0d9488',
-        })
-      }
-    })
+  const handleToggleStatus = (user) => {
+    const newStatus = user.status === 'active' ? 'inactive' : 'active'
+    
+    if (onToggleStatus) {
+      // ใช้ callback function จาก parent
+      Swal.fire({
+        title: 'เปลี่ยนสถานะ?',
+        text: `คุณต้องการเปลี่ยนสถานะผู้ใช้ "${user.name || user.email || user.id}" เป็น "${getStatusText(newStatus)}" ใช่หรือไม่?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ใช่, เปลี่ยน',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#0d9488',
+        cancelButtonColor: '#64748b',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          onToggleStatus(user.id, newStatus, user.name || user.email)
+        }
+      })
+    } else {
+      // Fallback: แสดง alert ถ้าไม่มี callback
+      Swal.fire({
+        icon: 'info',
+        title: 'แจ้งเตือน',
+        text: `ฟีเจอร์เปลี่ยนสถานะผู้ใช้ "${user.name || user.email || user.id}" จะเปิดใช้งานเร็วๆ นี้`,
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#0d9488',
+      })
+    }
   }
 
   if (users.length === 0) {
@@ -299,7 +306,7 @@ export default function UsersManagementTable({ users, sortField, sortDirection, 
                     </Button>
                     <Button
                       variant="ghost"
-                      onClick={() => handleToggleStatus(user.id, user.status)}
+                      onClick={() => handleToggleStatus(user)}
                       className={`p-2 ${
                         user.status === 'active'
                           ? 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50'

@@ -268,6 +268,50 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleToggleStatus = async (userId, newStatus, userName) => {
+    try {
+      const { data, error } = await userService.updateUserStatus(userId, newStatus)
+      
+      if (error) {
+        console.error('Error updating user status:', error)
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: error.message || 'ไม่สามารถเปลี่ยนสถานะผู้ใช้ได้',
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#0d9488',
+        })
+        return
+      }
+
+      const statusText = newStatus === 'active' ? 'ใช้งาน' : 'ไม่ใช้งาน'
+      Swal.fire({
+        icon: 'success',
+        title: 'สำเร็จ',
+        text: `เปลี่ยนสถานะผู้ใช้ "${userName || userId}" เป็น "${statusText}" เรียบร้อยแล้ว`,
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#0d9488',
+      })
+
+      // รีเฟรชข้อมูลผู้ใช้
+      const { data: usersData, error: usersError } = await userService.getAllUsers()
+      if (usersError) {
+        console.error('Error refreshing users:', usersError)
+      } else {
+        setUsers(usersData || [])
+      }
+    } catch (err) {
+      console.error('Error:', err)
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'ไม่สามารถเปลี่ยนสถานะผู้ใช้ได้ กรุณาลองใหม่อีกครั้ง',
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#0d9488',
+      })
+    }
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -431,6 +475,7 @@ export default function AdminUsersPage() {
             onSort={handleSort}
             onView={handleViewUser}
             onEdit={handleEditUser}
+            onToggleStatus={handleToggleStatus}
           />
         </div>
 

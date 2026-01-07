@@ -344,7 +344,7 @@ export default function LandingPage() {
 
         {/* Amenities */}
         <Container>
-          <section className="mx-auto max-w-4xl space-y-10 rounded-3xl bg-white p-6 shadow-xl shadow-teal-900/10 md:p-10">
+          <section id="amenities" className="mx-auto max-w-4xl space-y-10 rounded-3xl bg-white p-6 shadow-xl shadow-teal-900/10 md:p-10">
             <div className="text-center space-y-2">
               <SectionTitle
                 subtitle="สิ่งอำนวยความสะดวก"

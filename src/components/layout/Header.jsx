@@ -96,6 +96,30 @@ export default function Header() {
             ห้องพัก
           </Link>
           <a
+            href="/#amenities"
+            onClick={(e) => {
+              e.preventDefault()
+              if (window.location.pathname === '/') {
+                const element = document.getElementById('amenities')
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }
+              } else {
+                navigate('/#amenities')
+                setTimeout(() => {
+                  const element = document.getElementById('amenities')
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }, 100)
+              }
+            }}
+            className="relative text-slate-700 hover:text-teal-600 px-3 py-1.5 rounded-lg transition-all duration-300 hover:bg-teal-50 hover:scale-105 hover:font-semibold after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-teal-600 after:transition-all after:duration-300 hover:after:w-3/4"
+            style={{ color: '#334155' }}
+          >
+            สิ่งอำนวยความสะดวก
+          </a>
+          <a
             href="#contact"
             className="relative text-slate-700 hover:text-teal-600 px-3 py-1.5 rounded-lg transition-all duration-300 hover:bg-teal-50 hover:scale-105 hover:font-semibold after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-teal-600 after:transition-all after:duration-300 hover:after:w-3/4"
             style={{ color: '#334155' }}

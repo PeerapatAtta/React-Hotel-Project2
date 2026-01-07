@@ -1,5 +1,6 @@
 import React from 'react'
 import { MapPin, Phone, Mail, Globe, Facebook, Instagram } from 'lucide-react'
+import { getHotelWebsite } from '../../config/hotelConfig'
 
 export default function Footer() {
   // LINE OA Icon Component (custom SVG)
@@ -44,12 +45,12 @@ export default function Footer() {
             <div className="flex items-center gap-2 text-teal-100">
               <Globe size={16} className="flex-shrink-0 text-white" />
               <a 
-                href="http://localhost:5173" 
+                href={getHotelWebsite()} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-white hover:text-teal-200 underline break-all"
               >
-                http://localhost:5173
+                {getHotelWebsite()}
               </a>
             </div>
           </div>

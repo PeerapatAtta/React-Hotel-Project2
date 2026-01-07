@@ -15,15 +15,16 @@ import {
   RefreshCw
 } from 'lucide-react'
 import Swal from 'sweetalert2'
+import { hotelConfig } from '../../config/hotelConfig'
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
     // ข้อมูลโรงแรม
-    hotelName: 'Prima Hotel & Rooms',
-    hotelAddress: '123/4 ถนนสยาม กรุงเทพฯ',
-    hotelPhone: '02-123-4567',
-    hotelEmail: 'hello@prima.stay',
-    hotelWebsite: 'https://prima.stay',
+    hotelName: hotelConfig.hotelName,
+    hotelAddress: hotelConfig.hotelAddress,
+    hotelPhone: hotelConfig.hotelPhone,
+    hotelEmail: hotelConfig.hotelEmail,
+    hotelWebsite: hotelConfig.hotelWebsite,
     
     // การแจ้งเตือน
     emailNotifications: true,
@@ -80,11 +81,11 @@ export default function AdminSettingsPage() {
       if (result.isConfirmed) {
         // Reset to default values
         setSettings({
-          hotelName: 'Prima Hotel & Rooms',
-          hotelAddress: '123/4 ถนนสยาม กรุงเทพฯ',
-          hotelPhone: '02-123-4567',
-          hotelEmail: 'hello@prima.stay',
-          hotelWebsite: 'https://prima.stay',
+          hotelName: hotelConfig.hotelName,
+          hotelAddress: hotelConfig.hotelAddress,
+          hotelPhone: hotelConfig.hotelPhone,
+          hotelEmail: hotelConfig.hotelEmail,
+          hotelWebsite: hotelConfig.hotelWebsite,
           emailNotifications: true,
           smsNotifications: false,
           bookingConfirmations: true,

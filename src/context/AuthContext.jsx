@@ -368,6 +368,17 @@ export function AuthProvider({ children }) {
       console.log('[AuthContext] Loading user profile for:', data.user.id)
       await loadUserProfile(data.user.id)
       
+      // อัปเดต last_login เมื่อ login สำเร็จ
+      try {
+        await supabase
+          .from('profiles')
+          .update({ last_login: new Date().toISOString() })
+          .eq('id', data.user.id)
+      } catch (updateError) {
+        console.error('[AuthContext] Error updating last_login:', updateError)
+        // ไม่ throw error เพราะ login สำเร็จแล้ว แค่บันทึก last_login ไม่ได้
+      }
+      
       // Wait a bit to ensure React state has updated
       await new Promise(resolve => setTimeout(resolve, 100))
       

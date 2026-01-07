@@ -58,3 +58,4 @@ DROP POLICY IF EXISTS "Admins can delete all bookings" ON bookings;
 CREATE POLICY "Admins can delete all bookings" ON bookings
   FOR DELETE USING (public.is_admin(auth.uid()));
 
+

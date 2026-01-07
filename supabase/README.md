@@ -35,3 +35,4 @@ supabase/
 - อย่าแก้ไข migration ที่รันไปแล้ว (สร้าง migration ใหม่แทน)
 - ทดสอบ migration ใน development ก่อน production
 
+

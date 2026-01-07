@@ -75,3 +75,4 @@ INSERT INTO rooms (id, name, type, capacity, base_price, images, amenities) VALU
  ARRAY['โต๊ะทำงาน', 'Wi-Fi ความเร็วสูง', 'เครื่องพิมพ์', 'ห้องประชุมส่วนตัว', 'บริการธุรกิจ'])
 ON CONFLICT (id) DO NOTHING;
 
+

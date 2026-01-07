@@ -40,11 +40,23 @@ export default function UsersManagementTable({ users }) {
   }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('th-TH', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
+    if (!dateString) {
+      return 'ยังไม่เคยเข้าสู่ระบบ'
+    }
+    
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) {
+        return 'ยังไม่เคยเข้าสู่ระบบ'
+      }
+      return date.toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    } catch (error) {
+      return 'ยังไม่เคยเข้าสู่ระบบ'
+    }
   }
 
   const handleEdit = (userId) => {
@@ -197,7 +209,7 @@ export default function UsersManagementTable({ users }) {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <p className="text-sm text-slate-700">{formatDate(user.lastLogin)}</p>
+                  <p className="text-sm text-slate-700">{formatDate(user.lastLogin || user.last_login)}</p>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">

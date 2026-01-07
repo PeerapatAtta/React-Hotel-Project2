@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import UsersManagementTable from '../../components/admin/UsersManagementTable'
+import AddUserModal from '../../components/admin/AddUserModal'
 import Button from '../../components/Button'
 import { userService } from '../../services/userService'
 import { useAuth } from '../../hooks/useAuth'
@@ -19,12 +20,13 @@ export default function AdminUsersPage() {
   const [filterStatus, setFilterStatus] = useState('all')
   const [sortField, setSortField] = useState('name') // default sort by name
   const [sortDirection, setSortDirection] = useState('asc') // 'asc' or 'desc'
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true)
       setError(null)
-      
+
       // ตรวจสอบ current user
       console.log('[AdminUsersPage] Current user:', {
         id: currentUser?.id,
@@ -32,35 +34,35 @@ export default function AdminUsersPage() {
         role: currentUser?.role,
         name: currentUser?.name
       })
-      
+
       if (!currentUser) {
         console.error('[AdminUsersPage] No current user found')
         setError('ไม่พบข้อมูลผู้ใช้ปัจจุบัน')
         setLoading(false)
         return
       }
-      
+
       if (currentUser.role !== 'admin') {
         console.error('[AdminUsersPage] User is not admin:', currentUser.role)
         setError('คุณไม่มีสิทธิ์เข้าถึงหน้านี้')
         setLoading(false)
         return
       }
-      
+
       try {
         console.log('[AdminUsersPage] Fetching users...')
         const { data, error: fetchError } = await userService.getAllUsers()
-        
+
         console.log('[AdminUsersPage] Fetch result:', {
           hasData: !!data,
           dataLength: data?.length,
           hasError: !!fetchError,
           error: fetchError
         })
-        
+
         if (fetchError) {
           console.error('[AdminUsersPage] Error fetching users:', fetchError)
-          
+
           // แสดง error message ที่เข้าใจง่าย
           let errorMessage = 'ไม่สามารถโหลดข้อมูลผู้ใช้ได้'
           if (fetchError.code === 'PGRST116') {
@@ -68,23 +70,23 @@ export default function AdminUsersPage() {
           } else if (fetchError.message) {
             errorMessage = fetchError.message
           }
-          
+
           setError(errorMessage)
         } else {
           const usersData = data || []
           console.log('[AdminUsersPage] Users loaded:', usersData.length, 'users')
           console.log('[AdminUsersPage] Users data:', usersData)
-          
+
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:72',message:'before setUsers',data:{usersDataLength:usersData.length,firstUser:usersData[0]?{id:usersData[0].id,name:usersData[0].name,email:usersData[0].email,role:usersData[0].role,status:usersData[0].status,phone:usersData[0].phone}:null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,C'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:72', message: 'before setUsers', data: { usersDataLength: usersData.length, firstUser: usersData[0] ? { id: usersData[0].id, name: usersData[0].name, email: usersData[0].email, role: usersData[0].role, status: usersData[0].status, phone: usersData[0].phone } : null }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A,C' }) }).catch(() => { });
           // #endregion
-          
+
           setUsers(usersData)
-          
+
           // #region agent log
-          fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:76',message:'after setUsers',data:{usersDataLength:usersData.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+          fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:76', message: 'after setUsers', data: { usersDataLength: usersData.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'E' }) }).catch(() => { });
           // #endregion
-          
+
           if (usersData.length === 0) {
             console.warn('[AdminUsersPage] No users found. This might be due to RLS policies or empty database.')
           }
@@ -115,38 +117,38 @@ export default function AdminUsersPage() {
   // Filter and sort users
   const filteredUsers = useMemo(() => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:93',message:'filteredUsers useMemo entry',data:{usersLength:users.length,searchQuery,filterRole,filterStatus},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C,D'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:93', message: 'filteredUsers useMemo entry', data: { usersLength: users.length, searchQuery, filterRole, filterStatus }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A,B,C,D' }) }).catch(() => { });
     // #endregion
-    
+
     let result = users.filter((user) => {
       // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:96',message:'filtering user',data:{userId:user.id,userName:user.name,userEmail:user.email,userPhone:user.phone,userRole:user.role,userStatus:user.status,phoneIsNull:user.phone===null,phoneIsUndefined:user.phone===undefined},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,C'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:96', message: 'filtering user', data: { userId: user.id, userName: user.name, userEmail: user.email, userPhone: user.phone, userRole: user.role, userStatus: user.status, phoneIsNull: user.phone === null, phoneIsUndefined: user.phone === undefined }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A,C' }) }).catch(() => { });
       // #endregion
-      
+
       try {
-        const matchesSearch = 
+        const matchesSearch =
           user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (user.phone && user.phone.includes(searchQuery))
-        
+
         const matchesRole = filterRole === 'all' || user.role === filterRole
         const matchesStatus = filterStatus === 'all' || user.status === filterStatus
-        
+
         const passes = matchesSearch && matchesRole && matchesStatus
-        
+
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:103',message:'filter result for user',data:{userId:user.id,matchesSearch,matchesRole,matchesStatus,passes},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:103', message: 'filter result for user', data: { userId: user.id, matchesSearch, matchesRole, matchesStatus, passes }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A,B,C' }) }).catch(() => { });
         // #endregion
-        
+
         return passes
       } catch (err) {
         // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:110',message:'filter error',data:{userId:user.id,error:err.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:110', message: 'filter error', data: { userId: user.id, error: err.message }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A' }) }).catch(() => { });
         // #endregion
         return false
       }
     })
-    
+
     // Sort users
     result = [...result].sort((a, b) => {
       let aValue, bValue
@@ -189,20 +191,20 @@ export default function AdminUsersPage() {
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
       return 0
     })
-    
+
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:115',message:'filteredUsers useMemo exit',data:{inputLength:users.length,outputLength:result.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:115', message: 'filteredUsers useMemo exit', data: { inputLength: users.length, outputLength: result.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'A,B' }) }).catch(() => { });
     // #endregion
-    
+
     return result
   }, [users, searchQuery, filterRole, filterStatus, sortField, sortDirection])
 
   // Calculate statistics
   const stats = useMemo(() => {
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:108',message:'stats useMemo entry',data:{filteredUsersLength:filteredUsers.length,usersLength:users.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:108', message: 'stats useMemo entry', data: { filteredUsersLength: filteredUsers.length, usersLength: users.length }, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'B' }) }).catch(() => { });
     // #endregion
-    
+
     const total = filteredUsers.length
     const active = filteredUsers.filter(u => u.status === 'active').length
     const inactive = filteredUsers.filter(u => u.status === 'inactive').length
@@ -211,22 +213,30 @@ export default function AdminUsersPage() {
     const regularUsers = filteredUsers.filter(u => u.role === 'user').length
 
     const result = { total, active, inactive, admins, members, regularUsers }
-    
+
     // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:117',message:'stats useMemo exit',data:result,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'AdminUsersPage.jsx:117', message: 'stats useMemo exit', data: result, timestamp: Date.now(), sessionId: 'debug-session', runId: 'run1', hypothesisId: 'B' }) }).catch(() => { });
     // #endregion
-    
+
     return result
   }, [filteredUsers, users])
 
   const handleAddUser = () => {
-    Swal.fire({
-      icon: 'info',
-      title: 'แจ้งเตือน',
-      text: 'ฟีเจอร์เพิ่มผู้ใช้จะเปิดใช้งานเร็วๆ นี้',
-      confirmButtonText: 'ตกลง',
-      confirmButtonColor: '#0d9488',
-    })
+    setIsAddModalOpen(true)
+  }
+
+  const handleAddUserSuccess = async () => {
+    // รีเฟรชข้อมูลผู้ใช้
+    try {
+      const { data, error } = await userService.getAllUsers()
+      if (error) {
+        console.error('Error refreshing users:', error)
+      } else {
+        setUsers(data || [])
+      }
+    } catch (err) {
+      console.error('Error refreshing users:', err)
+    }
   }
 
   if (loading) {
@@ -252,8 +262,8 @@ export default function AdminUsersPage() {
               <p className="text-sm text-red-600 mt-4">
                 ตรวจสอบ Console (F12) เพื่อดูรายละเอียดเพิ่มเติม
               </p>
-              <Button 
-                onClick={() => window.location.reload()} 
+              <Button
+                onClick={() => window.location.reload()}
                 className="mt-4"
               >
                 รีเฟรชหน้า
@@ -392,6 +402,13 @@ export default function AdminUsersPage() {
             onSort={handleSort}
           />
         </div>
+
+        {/* Add User Modal */}
+        <AddUserModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onSuccess={handleAddUserSuccess}
+        />
       </div>
     </AdminLayout>
   )

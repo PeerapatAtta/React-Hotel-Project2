@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+﻿import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 
 import LandingPage from './pages/LandingPage'
@@ -21,9 +21,6 @@ import { useAuth } from './hooks/useAuth'
 // --- Guards (กันเด้งตอน loading) ---
 function RequireAuth({ children }) {
   const { user, loading } = useAuth()
-  // #region agent log
-  fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'App.jsx:23',message:'RequireAuth render',data:{loading,hasUser:!!user},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-  // #endregion
   if (loading) return <div className="p-6">กำลังตรวจสอบการเข้าสู่ระบบ...</div>
   if (!user) return <Navigate to="/login" replace />
   return children

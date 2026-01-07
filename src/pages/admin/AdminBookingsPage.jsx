@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+﻿import React, { useState, useMemo, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import BookingsManagementTable from '../../components/admin/BookingsManagementTable'
 import AddBookingModal from '../../components/admin/AddBookingModal'
@@ -27,9 +27,7 @@ export default function AdminBookingsPage() {
     setError(null)
     try {
       const { data, error: fetchError } = await bookingService.getAllBookings()
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminBookingsPage.jsx:28',message:'Bookings fetched',data:{bookingsCount:data?.length||0,firstBooking:data?.[0]?{id:data[0].id,guest_name:data[0].guest_name,guestName:data[0].guestName,hasGuestName:!!data[0].guest_name,hasGuestNameCamel:!!data[0].guestName,allKeys:Object.keys(data[0]||{})}:null},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
+
       if (fetchError) {
         console.error('Error fetching bookings:', fetchError)
         setError(fetchError.message)
@@ -50,24 +48,17 @@ export default function AdminBookingsPage() {
 
   // Filter and sort bookings
   const filteredBookings = useMemo(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminBookingsPage.jsx:48',message:'filteredBookings useMemo triggered',data:{searchQuery,bookingsCount:bookings.length,filterStatus,filterDate},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     let result = bookings.filter((booking) => {
       // รองรับทั้ง snake_case และ camelCase
       const guestName = booking.guest_name || booking.guestName || ''
       const roomName = booking.room_name || booking.roomName || ''
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminBookingsPage.jsx:52',message:'Filtering booking',data:{bookingId:booking.id,guestName,roomName,hasGuestName:!!booking.guest_name,hasGuestNameCamel:!!booking.guestName,guestNameType:typeof guestName,guestNameLength:guestName.length,searchQuery,bookingKeys:Object.keys(booking)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-      
+
       // ถ้า searchQuery ว่าง ให้ผ่านทั้งหมด (ไม่กรอง)
       const trimmedQuery = searchQuery?.trim() || ''
       const queryLower = trimmedQuery.toLowerCase()
-      
+
       let matchesSearch = true
-      
+
       // ถ้ามี searchQuery ให้ตรวจสอบตามประเภทที่เลือก
       if (trimmedQuery !== '') {
         switch (searchType) {
@@ -94,7 +85,7 @@ export default function AdminBookingsPage() {
             // ค้นหาทั้งหมด
             const creatorNameAll = (booking.profiles?.name || '').toLowerCase()
             const creatorEmailAll = (booking.profiles?.email || '').toLowerCase()
-            matchesSearch = 
+            matchesSearch =
               booking.id?.toLowerCase().includes(queryLower) ||
               guestName.toLowerCase().includes(queryLower) ||
               booking.email?.toLowerCase().includes(queryLower) ||
@@ -104,24 +95,16 @@ export default function AdminBookingsPage() {
             break
         }
       }
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminBookingsPage.jsx:96',message:'Search match result',data:{bookingId:booking.id,matchesSearch,searchQuery,trimmedQuery,queryLower,searchType,guestName:guestName.toLowerCase(),roomName:roomName.toLowerCase()},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
-      
+
       const matchesStatus = filterStatus === 'all' || booking.status === filterStatus
-      
-      const matchesDate = !filterDate || 
-        booking.check_in === filterDate || 
+
+      const matchesDate = !filterDate ||
+        booking.check_in === filterDate ||
         booking.check_out === filterDate ||
-        (new Date(booking.check_in) <= new Date(filterDate) && 
-         new Date(booking.check_out) >= new Date(filterDate))
-      
+        (new Date(booking.check_in) <= new Date(filterDate) &&
+          new Date(booking.check_out) >= new Date(filterDate))
+
       const finalMatch = matchesSearch && matchesStatus && matchesDate
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminBookingsPage.jsx:85',message:'Final filter result',data:{bookingId:booking.id,finalMatch,matchesSearch,matchesStatus,matchesDate},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
-      
       return finalMatch
     })
 
@@ -171,9 +154,6 @@ export default function AdminBookingsPage() {
       return 0
     })
 
-    // #region agent log
-    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminBookingsPage.jsx:134',message:'filteredBookings result',data:{filteredCount:result.length,originalCount:bookings.length,searchQuery,filteredIds:result.map(b=>b.id)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     return result
   }, [bookings, searchQuery, searchType, filterStatus, filterDate, sortField, sortDirection])
 
@@ -227,8 +207,8 @@ export default function AdminBookingsPage() {
             <p className="text-slate-600 mt-1">จัดการการจองทั้งหมด</p>
           </div>
           <div className="flex gap-3 w-full md:w-auto">
-            <Button 
-              onClick={() => setIsAddModalOpen(true)} 
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
               className="w-full md:w-auto"
             >
               <Plus size={18} />
@@ -284,7 +264,7 @@ export default function AdminBookingsPage() {
                 <option value="creator_name">ผู้สร้าง</option>
               </select>
             </div>
-            
+
             {/* Search Input */}
             <div className="md:col-span-2">
               <div className="relative">
@@ -294,25 +274,22 @@ export default function AdminBookingsPage() {
                 <Input
                   placeholder={
                     searchType === 'all' ? "ค้นหาการจอง (รหัส, ชื่อผู้เข้าพัก, อีเมล, ห้อง, ผู้สร้าง)..." :
-                    searchType === 'id' ? "ค้นหาตามรหัสการจอง..." :
-                    searchType === 'guest_name' ? "ค้นหาตามชื่อผู้เข้าพัก..." :
-                    searchType === 'email' ? "ค้นหาตามอีเมล..." :
-                    searchType === 'room_name' ? "ค้นหาตามชื่อห้อง..." :
-                    searchType === 'creator_name' ? "ค้นหาตามชื่อผู้สร้าง..." :
-                    "ค้นหาการจอง..."
+                      searchType === 'id' ? "ค้นหาตามรหัสการจอง..." :
+                        searchType === 'guest_name' ? "ค้นหาตามชื่อผู้เข้าพัก..." :
+                          searchType === 'email' ? "ค้นหาตามอีเมล..." :
+                            searchType === 'room_name' ? "ค้นหาตามชื่อห้อง..." :
+                              searchType === 'creator_name' ? "ค้นหาตามชื่อผู้สร้าง..." :
+                                "ค้นหาการจอง..."
                   }
                   value={searchQuery}
                   onChange={(e) => {
-                    // #region agent log
-                    fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminBookingsPage.jsx:236',message:'Search input onChange triggered',data:{newValue:e.target.value,oldValue:searchQuery,trimmedNew:e.target.value.trim()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                    // #endregion
                     setSearchQuery(e.target.value)
                   }}
                   className="pl-10"
                 />
               </div>
             </div>
-            
+
             {/* Status Filter */}
             <div>
               <div className="relative">
@@ -384,8 +361,8 @@ export default function AdminBookingsPage() {
               พบ {filteredBookings.length} การจอง
             </p>
           </div>
-          <BookingsManagementTable 
-            bookings={filteredBookings} 
+          <BookingsManagementTable
+            bookings={filteredBookings}
             onRefresh={fetchBookings}
             sortField={sortField}
             sortDirection={sortDirection}

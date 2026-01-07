@@ -4,7 +4,7 @@ import Button from '../Button'
 import { Edit, Trash2, Eye, Mail, Phone, Shield, User as UserIcon, Ban, CheckCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import Swal from 'sweetalert2'
 
-export default function UsersManagementTable({ users, sortField, sortDirection, onSort, onView }) {
+export default function UsersManagementTable({ users, sortField, sortDirection, onSort, onView, onEdit }) {
   const getRoleBadge = (role) => {
     const variants = {
       admin: 'bg-purple-100 text-purple-700',
@@ -60,13 +60,17 @@ export default function UsersManagementTable({ users, sortField, sortDirection, 
   }
 
   const handleEdit = (userId) => {
-    Swal.fire({
-      icon: 'info',
-      title: 'แจ้งเตือน',
-      text: `ฟีเจอร์แก้ไขผู้ใช้ "${userId}" จะเปิดใช้งานเร็วๆ นี้`,
-      confirmButtonText: 'ตกลง',
-      confirmButtonColor: '#0d9488',
-    })
+    if (onEdit) {
+      onEdit(userId)
+    } else {
+      Swal.fire({
+        icon: 'info',
+        title: 'แจ้งเตือน',
+        text: `ฟีเจอร์แก้ไขผู้ใช้ "${userId}" จะเปิดใช้งานเร็วๆ นี้`,
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#0d9488',
+      })
+    }
   }
 
   const handleDelete = (userId) => {

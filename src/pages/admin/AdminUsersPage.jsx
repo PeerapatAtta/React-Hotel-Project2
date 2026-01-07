@@ -3,6 +3,7 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import UsersManagementTable from '../../components/admin/UsersManagementTable'
 import AddUserModal from '../../components/admin/AddUserModal'
 import ViewUserModal from '../../components/admin/ViewUserModal'
+import EditUserModal from '../../components/admin/EditUserModal'
 import Button from '../../components/Button'
 import { userService } from '../../services/userService'
 import { useAuth } from '../../hooks/useAuth'
@@ -23,6 +24,7 @@ export default function AdminUsersPage() {
   const [sortDirection, setSortDirection] = useState('asc') // 'asc' or 'desc'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState(null)
 
   useEffect(() => {
@@ -247,6 +249,25 @@ export default function AdminUsersPage() {
     setIsViewModalOpen(true)
   }
 
+  const handleEditUser = (userId) => {
+    setSelectedUserId(userId)
+    setIsEditModalOpen(true)
+  }
+
+  const handleEditUserSuccess = async () => {
+    // รีเฟรชข้อมูลผู้ใช้
+    try {
+      const { data, error } = await userService.getAllUsers()
+      if (error) {
+        console.error('Error refreshing users:', error)
+      } else {
+        setUsers(data || [])
+      }
+    } catch (err) {
+      console.error('Error refreshing users:', err)
+    }
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -409,6 +430,7 @@ export default function AdminUsersPage() {
             sortDirection={sortDirection}
             onSort={handleSort}
             onView={handleViewUser}
+            onEdit={handleEditUser}
           />
         </div>
 
@@ -426,6 +448,17 @@ export default function AdminUsersPage() {
             setIsViewModalOpen(false)
             setSelectedUserId(null)
           }}
+          userId={selectedUserId}
+        />
+
+        {/* Edit User Modal */}
+        <EditUserModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false)
+            setSelectedUserId(null)
+          }}
+          onSuccess={handleEditUserSuccess}
           userId={selectedUserId}
         />
       </div>

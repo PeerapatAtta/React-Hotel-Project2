@@ -4,7 +4,7 @@ import Button from '../Button'
 import { Edit, Trash2, Eye, Mail, Phone, Shield, User as UserIcon, Ban, CheckCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import Swal from 'sweetalert2'
 
-export default function UsersManagementTable({ users, sortField, sortDirection, onSort, onView, onEdit, onToggleStatus }) {
+export default function UsersManagementTable({ users, sortField, sortDirection, onSort, onView, onEdit, onToggleStatus, onDelete }) {
   const getRoleBadge = (role) => {
     const variants = {
       admin: 'bg-purple-100 text-purple-700',
@@ -73,27 +73,33 @@ export default function UsersManagementTable({ users, sortField, sortDirection, 
     }
   }
 
-  const handleDelete = (userId) => {
-    Swal.fire({
-      title: 'ลบผู้ใช้?',
-      text: `คุณต้องการลบผู้ใช้ "${userId}" ใช่หรือไม่?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'ใช่, ลบ',
-      cancelButtonText: 'ยกเลิก',
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#64748b',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          icon: 'info',
-          title: 'แจ้งเตือน',
-          text: `ฟีเจอร์ลบผู้ใช้ "${userId}" จะเปิดใช้งานเร็วๆ นี้`,
-          confirmButtonText: 'ตกลง',
-          confirmButtonColor: '#0d9488',
-        })
-      }
-    })
+  const handleDelete = (user) => {
+    if (onDelete) {
+      // ใช้ callback function จาก parent
+      Swal.fire({
+        title: 'ลบผู้ใช้?',
+        text: `คุณต้องการลบผู้ใช้ "${user.name || user.email || user.id}" ใช่หรือไม่?\n\nการกระทำนี้ไม่สามารถยกเลิกได้`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'ใช่, ลบ',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          onDelete(user.id, user.name || user.email)
+        }
+      })
+    } else {
+      // Fallback: แสดง alert ถ้าไม่มี callback
+      Swal.fire({
+        icon: 'info',
+        title: 'แจ้งเตือน',
+        text: `ฟีเจอร์ลบผู้ใช้ "${user.name || user.email || user.id}" จะเปิดใช้งานเร็วๆ นี้`,
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#0d9488',
+      })
+    }
   }
 
   const handleView = (userId) => {
@@ -323,7 +329,7 @@ export default function UsersManagementTable({ users, sortField, sortDirection, 
                     {user.role !== 'admin' && (
                       <Button
                         variant="ghost"
-                        onClick={() => handleDelete(user.id)}
+                        onClick={() => handleDelete(user)}
                         className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
                         title="ลบ"
                       >

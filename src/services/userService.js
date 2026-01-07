@@ -123,6 +123,30 @@ export const userService = {
             .single()
 
         return { data, error }
+    },
+
+    /**
+     * ลบผู้ใช้ (Admin only)
+     * หมายเหตุ: ฟังก์ชันนี้จะลบเฉพาะจาก profiles table
+     * สำหรับการลบจาก auth.users ต้องใช้ Supabase Admin API
+     */
+    async deleteUser(id) {
+        console.log('[userService] Deleting user:', id)
+        
+        // ลบจาก profiles table
+        const { data, error } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', id)
+            .select()
+
+        if (error) {
+            console.error('[userService] Error deleting user:', error)
+            return { error }
+        }
+
+        console.log('[userService] User deleted successfully:', data)
+        return { data, error: null }
     }
 }
 

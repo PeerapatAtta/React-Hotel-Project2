@@ -312,6 +312,63 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleDeleteUser = async (userId, userName) => {
+    try {
+      console.log('[AdminUsersPage] Deleting user:', { userId, userName })
+      const { data, error } = await userService.deleteUser(userId)
+      
+      if (error) {
+        console.error('[AdminUsersPage] Error deleting user:', error)
+        
+        let errorMessage = error.message || 'ไม่สามารถลบผู้ใช้ได้'
+        
+        // แปลง error message เป็นภาษาไทย
+        if (error.message?.includes('permission') || error.message?.includes('policy')) {
+          errorMessage = 'คุณไม่มีสิทธิ์ลบผู้ใช้ กรุณาตรวจสอบ RLS policy'
+        } else if (error.message?.includes('foreign key') || error.message?.includes('constraint')) {
+          errorMessage = 'ไม่สามารถลบผู้ใช้ได้ เนื่องจากมีข้อมูลที่เกี่ยวข้อง (เช่น การจอง)'
+        }
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: errorMessage,
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#0d9488',
+        })
+        return
+      }
+
+      console.log('[AdminUsersPage] User deleted successfully:', data)
+
+      Swal.fire({
+        icon: 'success',
+        title: 'สำเร็จ',
+        text: `ลบผู้ใช้ "${userName || userId}" เรียบร้อยแล้ว`,
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#0d9488',
+      })
+
+      // รีเฟรชข้อมูลผู้ใช้
+      const { data: usersData, error: usersError } = await userService.getAllUsers()
+      if (usersError) {
+        console.error('[AdminUsersPage] Error refreshing users:', usersError)
+      } else {
+        console.log('[AdminUsersPage] Users refreshed:', usersData?.length)
+        setUsers(usersData || [])
+      }
+    } catch (err) {
+      console.error('[AdminUsersPage] Exception deleting user:', err)
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: err.message || 'ไม่สามารถลบผู้ใช้ได้ กรุณาลองใหม่อีกครั้ง',
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#0d9488',
+      })
+    }
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -476,6 +533,7 @@ export default function AdminUsersPage() {
             onView={handleViewUser}
             onEdit={handleEditUser}
             onToggleStatus={handleToggleStatus}
+            onDelete={handleDeleteUser}
           />
         </div>
 

@@ -26,7 +26,7 @@ export default function AdminLayout({ children }) {
                   {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
                 <div className="hidden lg:block">
-                  <p className="text-sm font-semibold text-slate-700">
+                  <p className="text-lg md:text-xl font-semibold text-slate-700">
                     หน้าผู้จัดการโรงแรม
                   </p>
                 </div>

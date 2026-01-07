@@ -1,8 +1,30 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { MapPin, Phone, Mail, Globe, Facebook, Instagram } from 'lucide-react'
-import { getHotelWebsite } from '../../config/hotelConfig'
+import { getHotelSettings } from '../../config/hotelConfig'
 
 export default function Footer() {
+  const [hotelInfo, setHotelInfo] = useState({
+    hotelName: 'Prima Hotel & Rooms',
+    hotelAddress: '123/4 ถนนสยาม กรุงเทพฯ',
+    hotelPhone: '02-123-4567',
+    hotelEmail: 'hello@prima.stay',
+    hotelWebsite: 'https://prima.stay',
+  })
+
+  useEffect(() => {
+    const loadHotelInfo = async () => {
+      const settings = await getHotelSettings()
+      setHotelInfo({
+        hotelName: settings.hotelName,
+        hotelAddress: settings.hotelAddress,
+        hotelPhone: settings.hotelPhone,
+        hotelEmail: settings.hotelEmail,
+        hotelWebsite: settings.hotelWebsite,
+      })
+    }
+    loadHotelInfo()
+  }, [])
+
   // LINE OA Icon Component (custom SVG)
   const LineIcon = ({ size = 20, className = '' }) => (
     <svg
@@ -23,7 +45,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="space-y-2 flex-shrink-0">
-            <p className="text-lg font-semibold text-white">Prima Hotel &amp; Rooms</p>
+            <p className="text-lg font-semibold text-white">{hotelInfo.hotelName}</p>
             <p className="text-teal-100 leading-relaxed">โรงแรมบูติกใจกลางเมือง พร้อมบริการที่เป็นมิตร</p>
           </div>
 
@@ -32,25 +54,25 @@ export default function Footer() {
             <p className="text-lg font-semibold text-teal-50">ติดต่อเรา</p>
             <div className="flex items-start gap-2 text-teal-100">
               <MapPin size={16} className="flex-shrink-0 text-white mt-0.5" />
-              <span className="text-white break-words">123/4 ถนนสยาม กรุงเทพฯ</span>
+              <span className="text-white break-words">{hotelInfo.hotelAddress}</span>
             </div>
             <div className="flex items-center gap-2 text-teal-100">
               <Phone size={16} className="flex-shrink-0 text-white" />
-              <span className="text-white">02-123-4567</span>
+              <span className="text-white">{hotelInfo.hotelPhone}</span>
             </div>
             <div className="flex items-center gap-2 text-teal-100">
               <Mail size={16} className="flex-shrink-0 text-white" />
-              <span className="text-white break-all">hello@prima.stay</span>
+              <span className="text-white break-all">{hotelInfo.hotelEmail}</span>
             </div>
             <div className="flex items-center gap-2 text-teal-100">
               <Globe size={16} className="flex-shrink-0 text-white" />
               <a 
-                href={getHotelWebsite()} 
+                href={hotelInfo.hotelWebsite} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-white hover:text-teal-200 underline break-all"
               >
-                {getHotelWebsite()}
+                {hotelInfo.hotelWebsite}
               </a>
             </div>
           </div>

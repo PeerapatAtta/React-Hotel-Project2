@@ -9,7 +9,6 @@ import {
   Phone, 
   Globe, 
   Save,
-  RefreshCw,
   Lock,
   Eye,
   EyeOff
@@ -129,37 +128,6 @@ export default function AdminSettingsPage() {
     }
   }
 
-  const handleReset = () => {
-    Swal.fire({
-      title: 'รีเซ็ตการตั้งค่า?',
-      text: 'คุณต้องการรีเซ็ตข้อมูลโรงแรมกลับเป็นค่าเริ่มต้นหรือไม่?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'ใช่, รีเซ็ต',
-      cancelButtonText: 'ยกเลิก',
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#64748b',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Reset to default values
-        setSettings({
-          hotelName: hotelConfig.hotelName,
-          hotelAddress: hotelConfig.hotelAddress,
-          hotelPhone: hotelConfig.hotelPhone,
-          hotelEmail: hotelConfig.hotelEmail,
-          hotelWebsite: hotelConfig.hotelWebsite,
-        })
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'รีเซ็ตสำเร็จ',
-          text: 'ข้อมูลโรงแรมถูกรีเซ็ตเป็นค่าเริ่มต้นแล้ว',
-          confirmButtonText: 'ตกลง',
-          confirmButtonColor: '#0d9488',
-        })
-      }
-    })
-  }
 
   const handlePasswordChange = (field, value) => {
     setPasswordData(prev => ({
@@ -260,19 +228,9 @@ export default function AdminSettingsPage() {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-primary">ตั้งค่า</h1>
-            <p className="text-slate-600 mt-1">จัดการข้อมูลโรงแรม</p>
-          </div>
-          <Button 
-            onClick={handleReset} 
-            variant="secondary" 
-            className="w-full md:w-auto"
-          >
-            <RefreshCw size={18} />
-            รีเซ็ตการตั้งค่า
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-primary">ตั้งค่า</h1>
+          <p className="text-slate-600 mt-1">จัดการข้อมูลโรงแรม</p>
         </div>
 
         {/* ข้อมูลโรงแรม */}

@@ -7,25 +7,58 @@ export const userService = {
     async getAllUsers() {
         console.log('[userService] Fetching all users from profiles table...')
         
-        const { data, error } = await supabase
+        // ดึงข้อมูล profiles
+        const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
             .select('*')
             .order('created_at', { ascending: false })
 
-        console.log('[userService] Query result:', {
-            hasData: !!data,
-            dataLength: data?.length,
-            hasError: !!error,
-            errorCode: error?.code,
-            errorMessage: error?.message,
-            errorDetails: error
-        })
-
-        if (error) {
-            console.error('[userService] Supabase error:', error)
+        if (profilesError) {
+            console.error('[userService] Error fetching profiles:', profilesError)
+            return { data: null, error: profilesError }
         }
 
-        return { data, error }
+        if (!profiles || profiles.length === 0) {
+            console.log('[userService] No profiles found')
+            return { data: [], error: null }
+        }
+
+        // ดึงจำนวนการจองของแต่ละ user
+        const userIds = profiles.map(p => p.id)
+        const { data: bookingsCount, error: bookingsError } = await supabase
+            .from('bookings')
+            .select('user_id')
+            .in('user_id', userIds)
+
+        if (bookingsError) {
+            console.error('[userService] Error fetching bookings count:', bookingsError)
+            // ถ้าเกิด error ในการนับ bookings ให้ return profiles โดยไม่มี totalBookings
+            return { data: profiles.map(p => ({ ...p, totalBookings: 0 })), error: null }
+        }
+
+        // นับจำนวนการจองของแต่ละ user
+        const bookingsCountMap = {}
+        if (bookingsCount) {
+            bookingsCount.forEach(booking => {
+                if (booking.user_id) {
+                    bookingsCountMap[booking.user_id] = (bookingsCountMap[booking.user_id] || 0) + 1
+                }
+            })
+        }
+
+        // รวมข้อมูล profiles กับจำนวนการจอง
+        const usersWithBookings = profiles.map(profile => ({
+            ...profile,
+            totalBookings: bookingsCountMap[profile.id] || 0
+        }))
+
+        console.log('[userService] Query result:', {
+            hasData: !!usersWithBookings,
+            dataLength: usersWithBookings?.length,
+            hasError: false
+        })
+
+        return { data: usersWithBookings, error: null }
     },
 
     /**

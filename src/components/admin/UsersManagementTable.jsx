@@ -193,7 +193,7 @@ export default function UsersManagementTable({ users }) {
                 </td>
                 <td className="px-6 py-4">
                   <span className="text-sm font-medium text-slate-700">
-                    {user.totalBookings} ครั้ง
+                    {user.totalBookings || 0} ครั้ง
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

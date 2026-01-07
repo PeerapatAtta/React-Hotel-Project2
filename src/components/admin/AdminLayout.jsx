@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import Sidebar from './Sidebar'
+import Footer from '../layout/Footer'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function AdminLayout({ children }) {
@@ -25,8 +26,8 @@ export default function AdminLayout({ children }) {
                   {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
                 <div className="hidden lg:block">
-                  <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-                    Admin Panel
+                  <p className="text-sm font-semibold text-slate-700">
+                    หน้าผู้จัดการโรงแรม
                   </p>
                 </div>
               </div>
@@ -46,9 +47,12 @@ export default function AdminLayout({ children }) {
         </header>
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="p-4 sm:p-6 lg:p-8 pb-8">
           {children}
         </main>
+
+        {/* Footer */}
+        <Footer />
       </div>
     </div>
   )

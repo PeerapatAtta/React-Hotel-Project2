@@ -66,51 +66,51 @@ export default function App() {
           }
         />
 
-        {/* Admin */}
-        <Route
-          path="/admin"
-          element={
-            <RequireAdmin>
-              <AdminDashboard />
-            </RequireAdmin>
-          }
-        />
-        <Route
-          path="/admin/rooms"
-          element={
-            <RequireAdmin>
-              <AdminRoomsPage />
-            </RequireAdmin>
-          }
-        />
-        <Route
-          path="/admin/bookings"
-          element={
-            <RequireAdmin>
-              <AdminBookingsPage />
-            </RequireAdmin>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <RequireAdmin>
-              <AdminUsersPage />
-            </RequireAdmin>
-          }
-        />
-        <Route
-          path="/admin/settings"
-          element={
-            <RequireAdmin>
-              <AdminSettingsPage />
-            </RequireAdmin>
-          }
-        />
-
         {/* Not Found */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
+
+      {/* Admin Routes (without Layout wrapper) */}
+      <Route
+        path="/admin"
+        element={
+          <RequireAdmin>
+            <AdminDashboard />
+          </RequireAdmin>
+        }
+      />
+      <Route
+        path="/admin/rooms"
+        element={
+          <RequireAdmin>
+            <AdminRoomsPage />
+          </RequireAdmin>
+        }
+      />
+      <Route
+        path="/admin/bookings"
+        element={
+          <RequireAdmin>
+            <AdminBookingsPage />
+          </RequireAdmin>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <RequireAdmin>
+            <AdminUsersPage />
+          </RequireAdmin>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <RequireAdmin>
+            <AdminSettingsPage />
+          </RequireAdmin>
+        }
+      />
     </Routes>
   )
 }

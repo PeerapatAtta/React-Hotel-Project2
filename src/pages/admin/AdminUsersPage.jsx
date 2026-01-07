@@ -4,7 +4,7 @@ import UsersManagementTable from '../../components/admin/UsersManagementTable'
 import Button from '../../components/Button'
 import { userService } from '../../services/userService'
 import { useAuth } from '../../hooks/useAuth'
-import { Search, Filter, UserPlus, Users, Shield, User as UserIcon } from 'lucide-react'
+import { Search, Filter, UserPlus, Users, Shield, User as UserIcon, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import Input from '../../components/Input'
 import Swal from 'sweetalert2'
 import LoadingSpinner from '../../components/LoadingSpinner'
@@ -17,6 +17,8 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterRole, setFilterRole] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [sortField, setSortField] = useState('name') // default sort by name
+  const [sortDirection, setSortDirection] = useState('asc') // 'asc' or 'desc'
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -98,13 +100,25 @@ export default function AdminUsersPage() {
     fetchUsers()
   }, [currentUser])
 
-  // Filter users
+  // Handle sort
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // Toggle direction if same field
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      // Set new field with ascending direction
+      setSortField(field)
+      setSortDirection('asc')
+    }
+  }
+
+  // Filter and sort users
   const filteredUsers = useMemo(() => {
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:93',message:'filteredUsers useMemo entry',data:{usersLength:users.length,searchQuery,filterRole,filterStatus},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B,C,D'})}).catch(()=>{});
     // #endregion
     
-    const result = users.filter((user) => {
+    let result = users.filter((user) => {
       // #region agent log
       fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:96',message:'filtering user',data:{userId:user.id,userName:user.name,userEmail:user.email,userPhone:user.phone,userRole:user.role,userStatus:user.status,phoneIsNull:user.phone===null,phoneIsUndefined:user.phone===undefined},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,C'})}).catch(()=>{});
       // #endregion
@@ -133,12 +147,55 @@ export default function AdminUsersPage() {
       }
     })
     
+    // Sort users
+    result = [...result].sort((a, b) => {
+      let aValue, bValue
+
+      switch (sortField) {
+        case 'name':
+          aValue = (a.name || '').toLowerCase()
+          bValue = (b.name || '').toLowerCase()
+          break
+        case 'email':
+          aValue = (a.email || '').toLowerCase()
+          bValue = (b.email || '').toLowerCase()
+          break
+        case 'role':
+          aValue = a.role || ''
+          bValue = b.role || ''
+          break
+        case 'status':
+          aValue = a.status || ''
+          bValue = b.status || ''
+          break
+        case 'totalBookings':
+          aValue = a.totalBookings || 0
+          bValue = b.totalBookings || 0
+          break
+        case 'lastLogin':
+          const aDate = a.lastLogin || a.last_login
+          const bDate = b.lastLogin || b.last_login
+          if (!aDate && !bDate) return 0
+          if (!aDate) return 1
+          if (!bDate) return -1
+          aValue = new Date(aDate)
+          bValue = new Date(bDate)
+          break
+        default:
+          return 0
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+    
     // #region agent log
     fetch('http://127.0.0.1:7242/ingest/4a7ba6e6-b3d4-4517-a9a2-7b182113fea9',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AdminUsersPage.jsx:115',message:'filteredUsers useMemo exit',data:{inputLength:users.length,outputLength:result.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,B'})}).catch(()=>{});
     // #endregion
     
     return result
-  }, [users, searchQuery, filterRole, filterStatus])
+  }, [users, searchQuery, filterRole, filterStatus, sortField, sortDirection])
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -328,7 +385,12 @@ export default function AdminUsersPage() {
               พบ {filteredUsers.length} ผู้ใช้
             </p>
           </div>
-          <UsersManagementTable users={filteredUsers} />
+          <UsersManagementTable 
+            users={filteredUsers} 
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          />
         </div>
       </div>
     </AdminLayout>

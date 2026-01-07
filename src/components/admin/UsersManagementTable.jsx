@@ -1,10 +1,10 @@
 import React from 'react'
 import Badge from '../Badge'
 import Button from '../Button'
-import { Edit, Trash2, Eye, Mail, Phone, Shield, User as UserIcon, Ban, CheckCircle } from 'lucide-react'
+import { Edit, Trash2, Eye, Mail, Phone, Shield, User as UserIcon, Ban, CheckCircle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import Swal from 'sweetalert2'
 
-export default function UsersManagementTable({ users }) {
+export default function UsersManagementTable({ users, sortField, sortDirection, onSort }) {
   const getRoleBadge = (role) => {
     const variants = {
       admin: 'bg-purple-100 text-purple-700',
@@ -140,23 +140,83 @@ export default function UsersManagementTable({ users }) {
         <table className="w-full">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ผู้ใช้
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'name' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('name')}
+              >
+                <div className="flex items-center gap-1">
+                  ผู้ใช้
+                  {sortField === 'name' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                ติดต่อ
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'email' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('email')}
+              >
+                <div className="flex items-center gap-1">
+                  ติดต่อ
+                  {sortField === 'email' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                บทบาท
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'role' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('role')}
+              >
+                <div className="flex items-center gap-1">
+                  บทบาท
+                  {sortField === 'role' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                สถานะ
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'status' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('status')}
+              >
+                <div className="flex items-center gap-1">
+                  สถานะ
+                  {sortField === 'status' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                การจอง
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'totalBookings' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('totalBookings')}
+              >
+                <div className="flex items-center gap-1">
+                  การจอง
+                  {sortField === 'totalBookings' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
-                เข้าสู่ระบบล่าสุด
+              <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors whitespace-nowrap ${sortField === 'lastLogin' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('lastLogin')}
+              >
+                <div className="flex items-center gap-1">
+                  เข้าสู่ระบบล่าสุด
+                  {sortField === 'lastLogin' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
               </th>
               <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-600">
                 การจัดการ

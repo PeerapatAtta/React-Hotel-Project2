@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import UsersManagementTable from '../../components/admin/UsersManagementTable'
 import AddUserModal from '../../components/admin/AddUserModal'
+import ViewUserModal from '../../components/admin/ViewUserModal'
 import Button from '../../components/Button'
 import { userService } from '../../services/userService'
 import { useAuth } from '../../hooks/useAuth'
@@ -21,6 +22,8 @@ export default function AdminUsersPage() {
   const [sortField, setSortField] = useState('name') // default sort by name
   const [sortDirection, setSortDirection] = useState('asc') // 'asc' or 'desc'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState(null)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -239,6 +242,11 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleViewUser = (userId) => {
+    setSelectedUserId(userId)
+    setIsViewModalOpen(true)
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -400,6 +408,7 @@ export default function AdminUsersPage() {
             sortField={sortField}
             sortDirection={sortDirection}
             onSort={handleSort}
+            onView={handleViewUser}
           />
         </div>
 
@@ -408,6 +417,16 @@ export default function AdminUsersPage() {
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
           onSuccess={handleAddUserSuccess}
+        />
+
+        {/* View User Modal */}
+        <ViewUserModal
+          isOpen={isViewModalOpen}
+          onClose={() => {
+            setIsViewModalOpen(false)
+            setSelectedUserId(null)
+          }}
+          userId={selectedUserId}
         />
       </div>
     </AdminLayout>

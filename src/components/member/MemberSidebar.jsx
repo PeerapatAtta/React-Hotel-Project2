@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Home, Calendar, LogOut, Sparkles } from 'lucide-react'
+import { LayoutDashboard, Calendar, LogOut, Sparkles } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function MemberSidebar({ isOpen, onClose }) {
@@ -18,7 +18,6 @@ export default function MemberSidebar({ isOpen, onClose }) {
 
   const menuItems = [
     { path: '/member', label: 'หน้าสรุปข้อมูล', icon: LayoutDashboard },
-    { path: '/rooms', label: 'ค้นหาห้องพัก', icon: Home },
     { path: '/member/bookings', label: 'การจองของฉัน', icon: Calendar },
   ]
 

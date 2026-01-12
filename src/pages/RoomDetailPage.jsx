@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Users, Bed, Check, ArrowLeft, Image as ImageIcon } from 'lucide-react'
+import { Users, Bed, Check, ArrowLeft, Image as ImageIcon, Calendar } from 'lucide-react'
 import { roomService } from '../services/roomService'
 import { formatPriceNumber } from '../utils/formatters'
 import { useAuth } from '../hooks/useAuth'
@@ -11,6 +11,7 @@ import Container from '../components/layout/Container'
 import SectionTitle from '../components/SectionTitle'
 import IconLabel from '../components/IconLabel'
 import ErrorState from '../components/ErrorState'
+import BookingModal from '../components/member/BookingModal'
 import Swal from 'sweetalert2'
 
 // Fallback image URL
@@ -49,6 +50,8 @@ export default function RoomDetailPage() {
   const [room, setRoom] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const [showStickyBar, setShowStickyBar] = useState(false)
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -82,6 +85,18 @@ export default function RoomDetailPage() {
 
     fetchRoom()
   }, [id])
+
+  // ตรวจสอบ scroll position เพื่อแสดง sticky bar
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      // แสดง sticky bar เมื่อ scroll ลงมากกว่า 200px
+      setShowStickyBar(scrollPosition > 200)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   if (loading || authLoading) {
     return (
@@ -117,15 +132,19 @@ export default function RoomDetailPage() {
       return
     }
 
-    // ถ้า login แล้ว ให้ redirect ไปหน้า rooms พร้อม query params เพื่อให้ user เลือกวันที่และจอง
-    const today = new Date()
-    const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
-    const params = new URLSearchParams({
-      checkIn: today.toISOString().split('T')[0],
-      checkOut: tomorrow.toISOString().split('T')[0],
-      guests: '2',
+    // ถ้า login แล้ว ให้เปิด modal จองห้อง
+    setIsBookingModalOpen(true)
+  }
+
+  const handleBookingSuccess = () => {
+    // หลังจากจองสำเร็จ อาจจะ redirect ไปหน้าจองของฉัน หรือแสดงข้อความสำเร็จ
+    Swal.fire({
+      icon: 'success',
+      title: 'จองห้องสำเร็จ',
+      text: 'คุณสามารถดูรายละเอียดการจองได้ที่หน้า "การจองของฉัน"',
+      confirmButtonText: 'ตกลง',
+      confirmButtonColor: '#0d9488',
     })
-    navigate(`/rooms?${params.toString()}`)
   }
 
   return (
@@ -146,7 +165,7 @@ export default function RoomDetailPage() {
           <Card className="p-6 md:p-8">
             <div className="space-y-6">
               <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                <div className="space-y-4">
+                <div className="space-y-4 flex-1">
                   <SectionTitle
                     subtitle="รายละเอียดห้องพัก"
                     title={room.name}
@@ -170,7 +189,13 @@ export default function RoomDetailPage() {
                     />
                   </div>
                 </div>
-                <Badge className="bg-slate-100 text-slate-600">{room.type}</Badge>
+                <div className="flex flex-col items-end gap-3">
+                  <Badge className="bg-slate-100 text-slate-600">{room.type}</Badge>
+                  <Button onClick={handleBooking} className="w-full md:w-auto">
+                    <Calendar size={18} />
+                    จองห้อง
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
@@ -202,6 +227,7 @@ export default function RoomDetailPage() {
                   />
                 </div>
                 <Button onClick={handleBooking} className="w-full md:w-auto">
+                  <Calendar size={18} />
                   จองห้อง
                 </Button>
               </div>
@@ -225,6 +251,40 @@ export default function RoomDetailPage() {
           </Card>
         </div>
       </Container>
+
+      {/* Sticky Booking Bar */}
+      {showStickyBar && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg">
+          <Container>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+              <div className="flex-1">
+                <h3 className="font-semibold text-primary text-lg">{room.name}</h3>
+                <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
+                  <span className="flex items-center gap-1">
+                    <Users size={16} />
+                    {room.capacity} คน
+                  </span>
+                  <span className="font-semibold text-primary text-base">
+                    ฿{formatPriceNumber(room.base_price || room.basePrice)} / คืน
+                  </span>
+                </div>
+              </div>
+              <Button onClick={handleBooking} className="w-full sm:w-auto min-w-[200px]">
+                <Calendar size={18} />
+                จองห้อง
+              </Button>
+            </div>
+          </Container>
+        </div>
+      )}
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        onSuccess={handleBookingSuccess}
+        room={room}
+      />
     </div>
   )
 }

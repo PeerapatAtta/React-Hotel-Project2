@@ -60,7 +60,7 @@ export default function MemberDashboard() {
           <div className="space-y-6">
           {/* Welcome Section */}
           <div>
-            <h1 className="text-3xl font-bold text-primary">แดชบอร์ดสมาชิก</h1>
+            <h1 className="text-3xl font-bold text-primary">หน้าสรุปข้อมูลสมาชิก</h1>
             <p className="text-slate-600 mt-1">ยินดีต้อนรับ, {user?.name || 'สมาชิก'}</p>
           </div>
 

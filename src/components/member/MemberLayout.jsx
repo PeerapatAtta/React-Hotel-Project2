@@ -26,7 +26,7 @@ export default function MemberLayout({ children }) {
                 </button>
                 <div className="hidden lg:block">
                   <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-                    Member Dashboard
+                    หน้าสมาชิก
                   </p>
                 </div>
               </div>

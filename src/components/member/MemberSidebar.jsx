@@ -17,7 +17,7 @@ export default function MemberSidebar({ isOpen, onClose }) {
   }
 
   const menuItems = [
-    { path: '/member', label: 'แดชบอร์ด', icon: LayoutDashboard },
+    { path: '/member', label: 'หน้าสรุปข้อมูล', icon: LayoutDashboard },
     { path: '/rooms', label: 'ค้นหาห้องพัก', icon: Home },
     { path: '/member/bookings', label: 'การจองของฉัน', icon: Calendar },
   ]

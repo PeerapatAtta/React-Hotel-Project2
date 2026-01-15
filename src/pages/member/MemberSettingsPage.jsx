@@ -309,66 +309,58 @@ export default function MemberSettingsPage() {
 
             <div className="space-y-4">
               {/* Name */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  ชื่อ <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Input
-                    type="text"
-                    placeholder="กรอกชื่อของคุณ"
-                    value={profileData.name}
-                    onChange={(e) => handleProfileChange('name', e.target.value)}
-                    className={profileErrors.name ? 'border-red-500' : ''}
-                  />
+              <div className="relative">
+                <div className="absolute left-3 top-9 text-slate-400">
+                  <User size={18} />
                 </div>
-                {profileErrors.name && (
-                  <p className="mt-1 text-sm text-red-600">{profileErrors.name}</p>
-                )}
+                <Input
+                  label="ชื่อ *"
+                  type="text"
+                  placeholder="กรอกชื่อของคุณ"
+                  value={profileData.name}
+                  onChange={(e) => handleProfileChange('name', e.target.value)}
+                  className={`pl-10 ${profileErrors.name ? 'border-red-500' : ''}`}
+                  error={profileErrors.name}
+                />
               </div>
 
               {/* Email (Read-only) */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  อีเมล
-                </label>
-                <div className="relative">
-                  <Input
-                    type="email"
-                    value={profileData.email}
-                    disabled
-                    className="bg-slate-50 cursor-not-allowed"
-                  />
-                  <Mail size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <div className="relative">
+                <div className="absolute left-3 top-9 text-slate-400">
+                  <Mail size={18} />
                 </div>
-                <p className="mt-1 text-xs text-slate-500">ไม่สามารถแก้ไขอีเมลได้</p>
+                <Input
+                  label="อีเมล"
+                  type="email"
+                  value={profileData.email}
+                  disabled
+                  className="!bg-blue-50 !border-blue-200 text-slate-600 cursor-not-allowed pl-10"
+                  style={{ backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}
+                  helperText="ไม่สามารถแก้ไขอีเมลได้"
+                />
               </div>
 
               {/* Phone */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  เบอร์โทรศัพท์
-                </label>
-                <div className="relative">
-                  <Input
-                    type="tel"
-                    placeholder="02-123-4567"
-                    value={profileData.phone && !profileData.phone.includes('@') && profileData.phone !== profileData.email ? profileData.phone : ''}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      // ป้องกันการกรอก email ในช่อง phone
-                      if (!value.includes('@') && value !== profileData.email) {
-                        handleProfileChange('phone', value)
-                      }
-                    }}
-                    className={profileErrors.phone ? 'border-red-500' : ''}
-                  />
-                  <Phone size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <div className="relative">
+                <div className="absolute left-3 top-9 text-slate-400">
+                  <Phone size={18} />
                 </div>
-                <p className="mt-1 text-xs text-slate-500">กรอกเบอร์โทรศัพท์ (ไม่บังคับ)</p>
-                {profileErrors.phone && (
-                  <p className="mt-1 text-sm text-red-600">{profileErrors.phone}</p>
-                )}
+                <Input
+                  label="เบอร์โทรศัพท์"
+                  type="tel"
+                  placeholder="02-123-4567"
+                  value={profileData.phone && !profileData.phone.includes('@') && profileData.phone !== profileData.email ? profileData.phone : ''}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    // ป้องกันการกรอก email ในช่อง phone
+                    if (!value.includes('@') && value !== profileData.email) {
+                      handleProfileChange('phone', value)
+                    }
+                  }}
+                  className={`pl-10 ${profileErrors.phone ? 'border-red-500' : ''}`}
+                  error={profileErrors.phone}
+                  helperText="กรอกเบอร์โทรศัพท์ (ไม่บังคับ)"
+                />
               </div>
             </div>
 
@@ -394,83 +386,77 @@ export default function MemberSettingsPage() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="grid gap-6 md:grid-cols-2">
               {/* Current Password */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  รหัสผ่านปัจจุบัน
-                </label>
-                <div className="relative">
-                  <Input
-                    type={showCurrentPassword ? 'text' : 'password'}
-                    placeholder="กรอกรหัสผ่านปัจจุบัน"
-                    value={passwordData.currentPassword}
-                    onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                    className={passwordErrors.currentPassword ? 'border-red-500' : ''}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+              <div className="relative md:col-span-2">
+                <div className="absolute left-3 top-9 text-slate-400 z-10">
+                  <Lock size={18} />
                 </div>
-                {passwordErrors.currentPassword && (
-                  <p className="mt-1 text-sm text-red-600">{passwordErrors.currentPassword}</p>
-                )}
+                <Input
+                  label="รหัสผ่านปัจจุบัน"
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  placeholder="กรอกรหัสผ่านปัจจุบัน"
+                  value={passwordData.currentPassword}
+                  onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                  className="pl-10 pr-10"
+                  error={passwordErrors.currentPassword}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                  tabIndex={-1}
+                >
+                  {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
 
               {/* New Password */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  รหัสผ่านใหม่
-                </label>
-                <div className="relative">
-                  <Input
-                    type={showNewPassword ? 'text' : 'password'}
-                    placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
-                    value={passwordData.newPassword}
-                    onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                    className={passwordErrors.newPassword ? 'border-red-500' : ''}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+              <div className="relative">
+                <div className="absolute left-3 top-9 text-slate-400 z-10">
+                  <Lock size={18} />
                 </div>
-                {passwordErrors.newPassword && (
-                  <p className="mt-1 text-sm text-red-600">{passwordErrors.newPassword}</p>
-                )}
+                <Input
+                  label="รหัสผ่านใหม่"
+                  type={showNewPassword ? 'text' : 'password'}
+                  placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
+                  value={passwordData.newPassword}
+                  onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                  className="pl-10 pr-10"
+                  error={passwordErrors.newPassword}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                  tabIndex={-1}
+                >
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
 
               {/* Confirm Password */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  ยืนยันรหัสผ่านใหม่
-                </label>
-                <div className="relative">
-                  <Input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="ยืนยันรหัสผ่านใหม่"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                    className={passwordErrors.confirmPassword ? 'border-red-500' : ''}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
+              <div className="relative">
+                <div className="absolute left-3 top-9 text-slate-400 z-10">
+                  <Lock size={18} />
                 </div>
-                {passwordErrors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{passwordErrors.confirmPassword}</p>
-                )}
+                <Input
+                  label="ยืนยันรหัสผ่านใหม่"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="ยืนยันรหัสผ่านใหม่"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                  className="pl-10 pr-10"
+                  error={passwordErrors.confirmPassword}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 

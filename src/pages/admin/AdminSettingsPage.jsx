@@ -11,7 +11,8 @@ import {
   Save,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  MapPin
 } from 'lucide-react'
 import Swal from 'sweetalert2'
 import { hotelConfig, clearHotelSettingsCache } from '../../config/hotelConfig'
@@ -246,20 +247,32 @@ export default function AdminSettingsPage() {
           </div>
           
           <div className="grid gap-6 md:grid-cols-2">
-            <Input
-              label="ชื่อโรงแรม"
-              value={settings.hotelName}
-              onChange={(e) => handleChange('hotelName', e.target.value)}
-              placeholder="ชื่อโรงแรม"
-            />
-            <Input
-              label="ที่อยู่"
-              value={settings.hotelAddress}
-              onChange={(e) => handleChange('hotelAddress', e.target.value)}
-              placeholder="ที่อยู่โรงแรม"
-            />
             <div className="relative">
-              <div className="absolute left-3 top-9 text-slate-400">
+              <div className="absolute left-3 top-9 text-slate-400 z-10">
+                <Building2 size={18} />
+              </div>
+              <Input
+                label="ชื่อโรงแรม"
+                value={settings.hotelName}
+                onChange={(e) => handleChange('hotelName', e.target.value)}
+                placeholder="ชื่อโรงแรม"
+                className="pl-10"
+              />
+            </div>
+            <div className="relative">
+              <div className="absolute left-3 top-9 text-slate-400 z-10">
+                <MapPin size={18} />
+              </div>
+              <Input
+                label="ที่อยู่"
+                value={settings.hotelAddress}
+                onChange={(e) => handleChange('hotelAddress', e.target.value)}
+                placeholder="ที่อยู่โรงแรม"
+                className="pl-10"
+              />
+            </div>
+            <div className="relative">
+              <div className="absolute left-3 top-9 text-slate-400 z-10">
                 <Phone size={18} />
               </div>
               <Input
@@ -271,7 +284,7 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="relative">
-              <div className="absolute left-3 top-9 text-slate-400">
+              <div className="absolute left-3 top-9 text-slate-400 z-10">
                 <Mail size={18} />
               </div>
               <Input
@@ -284,7 +297,7 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div className="relative md:col-span-2">
-              <div className="absolute left-3 top-9 text-slate-400">
+              <div className="absolute left-3 top-9 text-slate-400 z-10">
                 <Globe size={18} />
               </div>
               <Input

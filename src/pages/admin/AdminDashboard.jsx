@@ -85,7 +85,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <AdminLayout>
-        <LoadingSpinner text="กำลังโหลดข้อมูลแดชบอร์ด..." />
+        <LoadingSpinner text="กำลังโหลดข้อมูลสรุป..." />
       </AdminLayout>
     )
   }
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         {/* Welcome Section */}
         <div>
-          <h1 className="text-3xl font-bold text-primary">แดชบอร์ด</h1>
+          <h1 className="text-3xl font-bold text-primary">หน้าสรุปข้อมูล</h1>
           <p className="text-slate-600 mt-1">ภาพรวมการจัดการโรงแรม</p>
         </div>
 

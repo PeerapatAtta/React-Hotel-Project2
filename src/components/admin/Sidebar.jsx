@@ -17,7 +17,7 @@ export default function Sidebar({ isOpen, onClose }) {
   }
 
   const menuItems = [
-    { path: '/admin', label: 'แดชบอร์ด', icon: LayoutDashboard },
+    { path: '/admin', label: 'หน้าสรุปข้อมูล', icon: LayoutDashboard },
     { path: '/admin/rooms', label: 'จัดการห้อง', icon: Home },
     { path: '/admin/bookings', label: 'การจอง', icon: Calendar },
     { path: '/admin/users', label: 'ผู้ใช้', icon: Users },

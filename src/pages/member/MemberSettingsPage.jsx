@@ -17,6 +17,39 @@ import Swal from 'sweetalert2'
 import { useAuth } from '../../hooks/useAuth'
 import { userService } from '../../services/userService'
 
+// ฟังก์ชัน format เบอร์โทรศัพท์ให้มี "-"
+function formatPhoneNumber(phone) {
+  if (!phone) return ''
+  
+  // ลบ "-" และช่องว่างออกก่อน
+  const cleaned = phone.replace(/[-\s]/g, '')
+  
+  // ถ้าไม่ใช่ตัวเลขทั้งหมด ให้คืนค่าเดิม
+  if (!/^\d+$/.test(cleaned)) {
+    return phone
+  }
+  
+  // Format ตามรูปแบบเบอร์โทรศัพท์ไทย
+  if (cleaned.startsWith('0')) {
+    if (cleaned.length === 10) {
+      // มือถือ: 0XX-XXX-XXXX (เช่น 087-697-6306)
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`
+    } else if (cleaned.length === 9) {
+      // เบอร์บ้าน/สำนักงาน: 0X-XXX-XXXX (เช่น 02-123-4567)
+      return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 5)}-${cleaned.slice(5)}`
+    }
+  }
+  
+  // ถ้าไม่ใช่รูปแบบที่รู้จัก ให้คืนค่าเดิม
+  return phone
+}
+
+// ฟังก์ชันลบ "-" ออกจากเบอร์โทรศัพท์
+function cleanPhoneNumber(phone) {
+  if (!phone) return ''
+  return phone.replace(/[-\s]/g, '')
+}
+
 export default function MemberSettingsPage() {
   const { changePassword, user, loadUserProfile } = useAuth()
   
@@ -62,6 +95,11 @@ export default function MemberSettingsPage() {
         phoneValue = ''
       }
       
+      // Format เบอร์โทรศัพท์ให้มี "-"
+      if (phoneValue) {
+        phoneValue = formatPhoneNumber(phoneValue)
+      }
+      
       setProfileData({
         name: user.name || '',
         phone: phoneValue,
@@ -85,10 +123,23 @@ export default function MemberSettingsPage() {
   }
 
   const handleProfileChange = (field, value) => {
-    setProfileData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    // ถ้าเป็น phone field ให้ format เบอร์โทรศัพท์
+    if (field === 'phone') {
+      // ลบ "-" ออกก่อน format ใหม่
+      const cleaned = cleanPhoneNumber(value)
+      // Format ใหม่
+      const formatted = formatPhoneNumber(cleaned)
+      setProfileData(prev => ({
+        ...prev,
+        [field]: formatted
+      }))
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
+    
     // Clear error when user types
     if (profileErrors[field]) {
       setProfileErrors(prev => ({
@@ -125,7 +176,7 @@ export default function MemberSettingsPage() {
     try {
       const { data, error: updateError } = await userService.updateUser(user.id, {
         name: profileData.name.trim(),
-        phone: profileData.phone.trim() || null,
+        phone: cleanPhoneNumber(profileData.phone.trim()) || null, // ลบ "-" ออกก่อนส่งไป backend
       })
 
       if (updateError) {

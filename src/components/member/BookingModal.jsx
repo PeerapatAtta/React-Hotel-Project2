@@ -7,6 +7,39 @@ import Swal from 'sweetalert2'
 import { formatPrice } from '../../utils/formatters'
 import { useAuth } from '../../hooks/useAuth'
 
+// ฟังก์ชัน format เบอร์โทรศัพท์ให้มี "-"
+function formatPhoneNumber(phone) {
+  if (!phone) return ''
+  
+  // ลบ "-" และช่องว่างออกก่อน
+  const cleaned = phone.replace(/[-\s]/g, '')
+  
+  // ถ้าไม่ใช่ตัวเลขทั้งหมด ให้คืนค่าเดิม
+  if (!/^\d+$/.test(cleaned)) {
+    return phone
+  }
+  
+  // Format ตามรูปแบบเบอร์โทรศัพท์ไทย
+  if (cleaned.startsWith('0')) {
+    if (cleaned.length === 10) {
+      // มือถือ: 0XX-XXX-XXXX (เช่น 087-697-6306)
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`
+    } else if (cleaned.length === 9) {
+      // เบอร์บ้าน/สำนักงาน: 0X-XXX-XXXX (เช่น 02-123-4567)
+      return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 5)}-${cleaned.slice(5)}`
+    }
+  }
+  
+  // ถ้าไม่ใช่รูปแบบที่รู้จัก ให้คืนค่าเดิม
+  return phone
+}
+
+// ฟังก์ชันลบ "-" ออกจากเบอร์โทรศัพท์
+function cleanPhoneNumber(phone) {
+  if (!phone) return ''
+  return phone.replace(/[-\s]/g, '')
+}
+
 export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
   const { user } = useAuth()
   const [formData, setFormData] = useState({
@@ -24,10 +57,20 @@ export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
   // เติมข้อมูล user เมื่อเปิด modal
   useEffect(() => {
     if (isOpen && user) {
+      // ตรวจสอบเบอร์โทรศัพท์ - ถ้ามีและไม่ใช่ email ให้ใช้
+      let phoneValue = ''
+      if (user.phone) {
+        // ถ้า phone ไม่มี @ และไม่เท่ากับ email ให้ใช้
+        if (!user.phone.includes('@') && user.phone !== user.email) {
+          phoneValue = formatPhoneNumber(user.phone)
+        }
+      }
+
       setFormData(prev => ({
         ...prev,
         guest_name: user.name || prev.guest_name,
         email: user.email || prev.email,
+        phone: phoneValue || prev.phone,
       }))
     }
   }, [isOpen, user])
@@ -35,10 +78,19 @@ export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
   // Reset form เมื่อปิด modal
   useEffect(() => {
     if (!isOpen) {
+      // ตรวจสอบเบอร์โทรศัพท์ - ถ้ามีและไม่ใช่ email ให้ใช้
+      let phoneValue = ''
+      if (user?.phone) {
+        // ถ้า phone ไม่มี @ และไม่เท่ากับ email ให้ใช้
+        if (!user.phone.includes('@') && user.phone !== user.email) {
+          phoneValue = formatPhoneNumber(user.phone)
+        }
+      }
+
       setFormData({
         guest_name: user?.name || '',
         email: user?.email || '',
-        phone: '',
+        phone: phoneValue,
         check_in: '',
         check_out: '',
         guests: '2',
@@ -48,7 +100,17 @@ export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
   }, [isOpen, user])
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    // ถ้าเป็น phone field ให้ format เบอร์โทรศัพท์
+    if (field === 'phone') {
+      // ลบ "-" ออกก่อน format ใหม่
+      const cleaned = cleanPhoneNumber(value)
+      // Format ใหม่
+      const formatted = formatPhoneNumber(cleaned)
+      setFormData(prev => ({ ...prev, [field]: formatted }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
+    
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }))
     }
@@ -215,7 +277,7 @@ export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
         room_name: room.name,
         guest_name: formData.guest_name.trim(),
         email: formData.email.trim(),
-        phone: formData.phone.trim(),
+        phone: cleanPhoneNumber(formData.phone.trim()), // ลบ "-" ออกก่อนส่งไป backend
         check_in: formData.check_in,
         check_out: formData.check_out,
         guests: parseInt(formData.guests),
@@ -263,10 +325,19 @@ export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
   }
 
   const handleClose = () => {
+    // ตรวจสอบเบอร์โทรศัพท์ - ถ้ามีและไม่ใช่ email ให้ใช้
+    let phoneValue = ''
+    if (user?.phone) {
+      // ถ้า phone ไม่มี @ และไม่เท่ากับ email ให้ใช้
+      if (!user.phone.includes('@') && user.phone !== user.email) {
+        phoneValue = formatPhoneNumber(user.phone)
+      }
+    }
+
     setFormData({
       guest_name: user?.name || '',
       email: user?.email || '',
-      phone: '',
+      phone: phoneValue,
       check_in: '',
       check_out: '',
       guests: '2',

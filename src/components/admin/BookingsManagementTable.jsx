@@ -32,6 +32,37 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
     return texts[status] || status
   }
 
+  // ตรวจสอบสถานะช่วงเวลา
+  const getTimeStatus = (checkIn, checkOut) => {
+    if (!checkIn || !checkOut) return null
+    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    const checkInDate = new Date(checkIn)
+    checkInDate.setHours(0, 0, 0, 0)
+    
+    const checkOutDate = new Date(checkOut)
+    checkOutDate.setHours(0, 0, 0, 0)
+    
+    // ถ้า check-out ผ่านมาแล้ว = ผ่านมาแล้ว
+    if (checkOutDate < today) {
+      return { status: 'past', text: 'ผ่านมาแล้ว', className: 'bg-slate-200 text-slate-900 border-2 border-slate-400 font-semibold' }
+    }
+    
+    // ถ้าวันนี้อยู่ระหว่าง check-in และ check-out = กำลังเข้าพัก
+    if (checkInDate <= today && checkOutDate >= today) {
+      return { status: 'ongoing', text: 'กำลังเข้าพัก', className: 'bg-teal-200 text-teal-900 border-2 border-teal-400 font-semibold' }
+    }
+    
+    // ถ้า check-in ยังไม่มาถึง = กำลังจะมาถึง
+    if (checkInDate > today) {
+      return { status: 'upcoming', text: 'กำลังจะมาถึง', className: 'bg-amber-200 text-amber-900 border-2 border-amber-400 font-semibold' }
+    }
+    
+    return null
+  }
+
   const handleConfirm = async (bookingId) => {
     const result = await Swal.fire({
       title: 'ยืนยันการจอง?',
@@ -299,6 +330,19 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                 </div>
               </th>
               <th 
+                className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'time_status' ? 'bg-slate-100' : ''}`}
+                onClick={() => onSort && onSort('time_status')}
+              >
+                <div className="flex items-center gap-1">
+                  ช่วงเวลา
+                  {sortField === 'time_status' ? (
+                    sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                  ) : (
+                    <ArrowUpDown size={14} className="opacity-40" />
+                  )}
+                </div>
+              </th>
+              <th 
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'creator_name' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('creator_name')}
               >
@@ -371,6 +415,31 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   <Badge className={getStatusBadge(booking.status)}>
                     {getStatusText(booking.status)}
                   </Badge>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {(() => {
+                    const timeStatus = getTimeStatus(checkIn, checkOut)
+                    if (!timeStatus) return <span className="text-sm text-slate-400">-</span>
+                    // ใช้ inline style เพื่อ override default Badge styles
+                    const styleMap = {
+                      past: { bg: '#e2e8f0', text: '#0f172a', border: '#94a3b8' },
+                      ongoing: { bg: '#99f6e4', text: '#134e4a', border: '#2dd4bf' },
+                      upcoming: { bg: '#fde68a', text: '#78350f', border: '#fbbf24' }
+                    }
+                    const colors = styleMap[timeStatus.status]
+                    return (
+                      <span
+                        className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border-2"
+                        style={{
+                          backgroundColor: colors.bg,
+                          color: colors.text,
+                          borderColor: colors.border
+                        }}
+                      >
+                        {timeStatus.text}
+                      </span>
+                    )
+                  })()}
                 </td>
                 <td className="px-6 py-4">
                   <div>

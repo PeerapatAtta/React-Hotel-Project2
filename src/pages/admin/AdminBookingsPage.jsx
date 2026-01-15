@@ -108,6 +108,26 @@ export default function AdminBookingsPage() {
       return finalMatch
     })
 
+    // Helper function เพื่อคำนวณสถานะเวลา
+    const getTimeStatusValue = (checkIn, checkOut) => {
+      if (!checkIn || !checkOut) return 0
+      
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      const checkInDate = new Date(checkIn)
+      checkInDate.setHours(0, 0, 0, 0)
+      
+      const checkOutDate = new Date(checkOut)
+      checkOutDate.setHours(0, 0, 0, 0)
+      
+      // past = 0, ongoing = 1, upcoming = 2
+      if (checkOutDate < today) return 0 // ผ่านมาแล้ว
+      if (checkInDate <= today && checkOutDate >= today) return 1 // กำลังเข้าพัก
+      if (checkInDate > today) return 2 // กำลังจะมาถึง
+      return 0
+    }
+
     // Sort bookings
     result = [...result].sort((a, b) => {
       let aValue, bValue
@@ -140,6 +160,10 @@ export default function AdminBookingsPage() {
         case 'status':
           aValue = a.status || ''
           bValue = b.status || ''
+          break
+        case 'time_status':
+          aValue = getTimeStatusValue(a.check_in || a.checkIn, a.check_out || a.checkOut)
+          bValue = getTimeStatusValue(b.check_in || b.checkIn, b.check_out || b.checkOut)
           break
         case 'creator_name':
           aValue = ((a.profiles?.name || a.profiles?.email || '')).toLowerCase()

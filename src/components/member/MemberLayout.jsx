@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import MemberSidebar from './MemberSidebar'
+import Footer from '../layout/Footer'
 import { useAuth } from '../../hooks/useAuth'
 
 export default function MemberLayout({ children }) {
@@ -46,9 +47,12 @@ export default function MemberLayout({ children }) {
         </header>
 
         {/* Page Content */}
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="p-4 sm:p-6 lg:p-8 pb-8">
           {children}
         </main>
+
+        {/* Footer */}
+        <Footer />
       </div>
     </div>
   )

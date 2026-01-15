@@ -45,27 +45,27 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* Member */}
-        <Route
-          path="/member"
-          element={
-            <RequireAuth>
-              <MemberDashboard />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/member/bookings"
-          element={
-            <RequireAuth>
-              <MemberBookingsPage />
-            </RequireAuth>
-          }
-        />
-
         {/* Not Found */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
+
+      {/* Member Routes (without Layout wrapper) */}
+      <Route
+        path="/member"
+        element={
+          <RequireAuth>
+            <MemberDashboard />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/member/bookings"
+        element={
+          <RequireAuth>
+            <MemberBookingsPage />
+          </RequireAuth>
+        }
+      />
 
       {/* Admin Routes (without Layout wrapper) */}
       <Route

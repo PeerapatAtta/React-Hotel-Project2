@@ -10,6 +10,7 @@ import ViewBookingModal from './ViewBookingModal'
 
 export default function BookingsManagementTable({ bookings, onRefresh, sortField, sortDirection, onSort }) {
   const [cancellingId, setCancellingId] = useState(null)
+  const [confirmingId, setConfirmingId] = useState(null)
   const [deletingId, setDeletingId] = useState(null)
   const [viewBookingId, setViewBookingId] = useState(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
@@ -31,8 +32,8 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
     return texts[status] || status
   }
 
-  const handleConfirm = (bookingId) => {
-    Swal.fire({
+  const handleConfirm = async (bookingId) => {
+    const result = await Swal.fire({
       title: 'ยืนยันการจอง?',
       text: `คุณต้องการยืนยันการจอง "${bookingId}" ใช่หรือไม่?`,
       icon: 'question',
@@ -41,17 +42,49 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
       cancelButtonText: 'ยกเลิก',
       confirmButtonColor: '#10b981',
       cancelButtonColor: '#64748b',
-    }).then((result) => {
-      if (result.isConfirmed) {
+    })
+
+    if (result.isConfirmed) {
+      setConfirmingId(bookingId)
+      try {
+        const { error } = await bookingService.updateBookingStatus(bookingId, 'confirmed')
+
+        if (error) {
+          console.error('Error confirming booking:', error)
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: error.message || 'ไม่สามารถยืนยันการจองได้ กรุณาลองใหม่อีกครั้ง',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#0d9488',
+          })
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: 'ยืนยันสำเร็จ',
+            text: `ยืนยันการจอง "${bookingId}" เรียบร้อยแล้ว`,
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#0d9488',
+          })
+          
+          // รีเฟรชข้อมูลการจอง
+          if (onRefresh) {
+            onRefresh()
+          }
+        }
+      } catch (err) {
+        console.error('Error:', err)
         Swal.fire({
-          icon: 'info',
-          title: 'แจ้งเตือน',
-          text: `ฟีเจอร์ยืนยันการจอง "${bookingId}" จะเปิดใช้งานเร็วๆ นี้`,
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'ไม่สามารถยืนยันการจองได้ กรุณาลองใหม่อีกครั้ง',
           confirmButtonText: 'ตกลง',
           confirmButtonColor: '#0d9488',
         })
+      } finally {
+        setConfirmingId(null)
       }
-    })
+    }
   }
 
   const handleCancel = async (bookingId) => {
@@ -364,7 +397,8 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                         <Button
                           variant="ghost"
                           onClick={() => handleConfirm(booking.id)}
-                          className="p-2! min-w-[36px] text-green-600 hover:text-green-700 hover:bg-green-50"
+                          disabled={confirmingId === booking.id}
+                          className="p-2! min-w-[36px] text-green-600 hover:text-green-700 hover:bg-green-50 disabled:opacity-50"
                           title="ยืนยันการจอง"
                         >
                           <Check size={22} />

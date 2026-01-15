@@ -10,6 +10,7 @@ import { bookingService } from '../../services/bookingService'
 import { formatDate, formatPrice } from '../../utils/formatters'
 import { useAuth } from '../../hooks/useAuth'
 import LoadingSpinner from '../../components/LoadingSpinner'
+import Swal from 'sweetalert2'
 
 export default function MemberBookingsPage() {
   const { user } = useAuth()
@@ -18,34 +19,93 @@ export default function MemberBookingsPage() {
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [cancellingId, setCancellingId] = useState(null)
 
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (!user?.id) {
-        setLoading(false)
-        return
-      }
-
-      setLoading(true)
-      setError(null)
-      try {
-        const { data, error: fetchError } = await bookingService.getBookingsByUserId(user.id)
-        if (fetchError) {
-          console.error('Error fetching bookings:', fetchError)
-          setError(fetchError.message)
-        } else {
-          setBookings(data || [])
-        }
-      } catch (err) {
-        console.error('Error:', err)
-        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
-      } finally {
-        setLoading(false)
-      }
+  const fetchBookings = async () => {
+    if (!user?.id) {
+      setLoading(false)
+      return
     }
 
+    setLoading(true)
+    setError(null)
+    try {
+      const { data, error: fetchError } = await bookingService.getBookingsByUserId(user.id)
+      if (fetchError) {
+        console.error('Error fetching bookings:', fetchError)
+        setError(fetchError.message)
+      } else {
+        setBookings(data || [])
+      }
+    } catch (err) {
+      console.error('Error:', err)
+      setError('เกิดข้อผิดพลาดในการโหลดข้อมูล')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchBookings()
   }, [user])
+
+  const handleCancelBooking = async (bookingId, roomName) => {
+    const result = await Swal.fire({
+      title: 'ยืนยันการยกเลิกการจอง',
+      html: `คุณต้องการยกเลิกการจองห้อง <strong>${roomName}</strong> ใช่หรือไม่?<br/><br/><span class="text-sm text-slate-500">การยกเลิกไม่สามารถยกเลิกได้</span>`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'ยกเลิกการจอง',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#64748b',
+      reverseButtons: true,
+    })
+
+    if (!result.isConfirmed) {
+      return
+    }
+
+    setCancellingId(bookingId)
+    try {
+      const { data, error: cancelError } = await bookingService.updateBookingStatus(
+        bookingId,
+        'cancelled'
+      )
+
+      if (cancelError) {
+        console.error('Error cancelling booking:', cancelError)
+        await Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: cancelError.message || 'ไม่สามารถยกเลิกการจองได้',
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#0d9488',
+        })
+      } else {
+        await Swal.fire({
+          icon: 'success',
+          title: 'ยกเลิกการจองสำเร็จ',
+          text: 'การจองของคุณถูกยกเลิกแล้ว',
+          confirmButtonText: 'ตกลง',
+          confirmButtonColor: '#0d9488',
+        })
+        // Refresh bookings list
+        await fetchBookings()
+      }
+    } catch (err) {
+      console.error('Exception cancelling booking:', err)
+      await Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'ไม่สามารถยกเลิกการจองได้',
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#0d9488',
+      })
+    } finally {
+      setCancellingId(null)
+    }
+  }
 
   // ดึงการจองของ member นี้
   const memberBookings = bookings
@@ -238,7 +298,7 @@ export default function MemberBookingsPage() {
                                 กำลังจะมาถึง
                               </span>
                             )}
-                            {isPast && booking.status === 'confirmed' && (
+                            {isPast && booking.status !== 'cancelled' && (
                               <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                                 ผ่านมาแล้ว
                               </span>
@@ -288,8 +348,13 @@ export default function MemberBookingsPage() {
                             </Button>
                           </Link>
                           {booking.status === 'pending' && (
-                            <Button variant="secondary" className="w-full lg:w-auto">
-                              ยกเลิกการจอง
+                            <Button
+                              variant="secondary"
+                              className="w-full lg:w-auto"
+                              onClick={() => handleCancelBooking(booking.id, booking.room_name)}
+                              disabled={cancellingId === booking.id}
+                            >
+                              {cancellingId === booking.id ? 'กำลังยกเลิก...' : 'ยกเลิกการจอง'}
                             </Button>
                           )}
                         </div>

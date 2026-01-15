@@ -122,10 +122,12 @@ export default function MemberDashboard() {
                   จองห้องใหม่
                 </Button>
               </Link>
-              <Button variant="ghost" className="w-full justify-start">
-                <CheckCircle size={18} />
-                ดูการจองของฉัน
-              </Button>
+              <Link to="/member/bookings">
+                <Button variant="ghost" className="w-full justify-start">
+                  <CheckCircle size={18} />
+                  ดูการจองของฉัน
+                </Button>
+              </Link>
             </div>
           </Card>
 
@@ -169,7 +171,7 @@ export default function MemberDashboard() {
                     </div>
                     <Link to={`/rooms/${booking.room_id}`}>
                       <Button variant="ghost" className="w-full sm:w-auto">
-                        ดูรายละเอียด
+                        ดูรายละเอียดห้องพัก
                       </Button>
                     </Link>
                   </div>

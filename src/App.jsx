@@ -15,6 +15,7 @@ import AdminSettingsPage from './pages/admin/AdminSettingsPage'
 
 import MemberDashboard from './pages/member/MemberDashboard'
 import MemberBookingsPage from './pages/member/MemberBookingsPage'
+import MemberSettingsPage from './pages/member/MemberSettingsPage'
 
 import { useAuth } from './hooks/useAuth'
 
@@ -63,6 +64,14 @@ export default function App() {
         element={
           <RequireAuth>
             <MemberBookingsPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/member/settings"
+        element={
+          <RequireAuth>
+            <MemberSettingsPage />
           </RequireAuth>
         }
       />

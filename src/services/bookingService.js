@@ -209,12 +209,15 @@ export const bookingService = {
    * ตรวจสอบห้องว่างในช่วงวันที่
    */
   async checkRoomAvailability(roomId, checkIn, checkOut) {
+    // ตรวจสอบว่ามีการจองที่ทับซ้อนหรือไม่
+    // ห้องไม่ว่างถ้า: check_in < checkOut และ check_out > checkIn
     const { data, error } = await supabase
       .from('bookings')
       .select('id')
       .eq('room_id', roomId)
       .in('status', ['confirmed', 'pending'])
-      .or(`check_in.lte.${checkOut},check_out.gte.${checkIn}`)
+      .lt('check_in', checkOut)  // การจองเริ่มก่อนที่เราจะออก
+      .gt('check_out', checkIn)  // การจองจบหลังที่เราจะเข้า
     
     return { 
       available: !data || data.length === 0,

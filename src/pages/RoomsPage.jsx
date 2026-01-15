@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Calendar, Users, Bed, Check, Image as ImageIcon, Search, ArrowRight } from 'lucide-react'
 import { roomService } from '../services/roomService'
+import { bookingService } from '../services/bookingService'
 import { formatPriceNumber, formatDate } from '../utils/formatters'
 import Button from '../components/Button'
 import Card from '../components/Card'
@@ -97,7 +98,7 @@ export default function RoomsPage() {
   })
   const [errors, setErrors] = useState({})
 
-  // ดึงข้อมูลห้องจาก Supabase
+  // ดึงข้อมูลห้องจาก Supabase และตรวจสอบห้องว่างตามวันที่
   useEffect(() => {
     const fetchRooms = async () => {
       setIsLoading(true)
@@ -112,7 +113,24 @@ export default function RoomsPage() {
           console.error('Error fetching rooms:', fetchError)
           setError(fetchError.message)
         } else {
-          setRooms(data || [])
+          // ตรวจสอบห้องว่างตามวันที่ที่เลือก
+          const availableRooms = []
+          for (const room of (data || [])) {
+            const { available, error: availabilityError } = await bookingService.checkRoomAvailability(
+              room.id,
+              checkIn,
+              checkOut
+            )
+            
+            if (availabilityError) {
+              console.error(`Error checking availability for room ${room.id}:`, availabilityError)
+              // ถ้าเกิด error ในการตรวจสอบ ให้แสดงห้องไว้ก่อน (เพื่อไม่ให้ผู้ใช้เห็นห้องว่างน้อยเกินไป)
+              availableRooms.push(room)
+            } else if (available) {
+              availableRooms.push(room)
+            }
+          }
+          setRooms(availableRooms)
         }
       } catch (err) {
         console.error('Error:', err)
@@ -123,7 +141,7 @@ export default function RoomsPage() {
     }
 
     fetchRooms()
-  }, [guests])
+  }, [guests, checkIn, checkOut])
 
   const filteredRooms = useMemo(() => {
     return rooms

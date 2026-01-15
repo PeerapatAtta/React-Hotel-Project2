@@ -301,7 +301,7 @@ export default function MemberSettingsPage() {
                 <div className="relative">
                   <Input
                     type="tel"
-                    placeholder="กรอกเบอร์โทรศัพท์ (ไม่บังคับ)"
+                    placeholder="02-123-4567"
                     value={profileData.phone && !profileData.phone.includes('@') && profileData.phone !== profileData.email ? profileData.phone : ''}
                     onChange={(e) => {
                       const value = e.target.value
@@ -314,6 +314,7 @@ export default function MemberSettingsPage() {
                   />
                   <Phone size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 </div>
+                <p className="mt-1 text-xs text-slate-500">กรอกเบอร์โทรศัพท์ (ไม่บังคับ)</p>
                 {profileErrors.phone && (
                   <p className="mt-1 text-sm text-red-600">{profileErrors.phone}</p>
                 )}

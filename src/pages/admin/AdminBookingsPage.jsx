@@ -4,7 +4,7 @@ import BookingsManagementTable from '../../components/admin/BookingsManagementTa
 import AddBookingModal from '../../components/admin/AddBookingModal'
 import Button from '../../components/Button'
 import { bookingService } from '../../services/bookingService'
-import { Search, Filter, Download, Calendar, Plus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { Search, Filter, Download, Calendar, Plus, ArrowUpDown, ArrowUp, ArrowDown, X } from 'lucide-react'
 import Input from '../../components/Input'
 import { formatPrice } from '../../utils/formatters'
 import Swal from 'sweetalert2'
@@ -18,6 +18,7 @@ export default function AdminBookingsPage() {
   const [searchType, setSearchType] = useState('all') // 'all', 'id', 'guest_name', 'email', 'room_name', 'creator_name'
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterDate, setFilterDate] = useState('')
+  const [filterTimeStatus, setFilterTimeStatus] = useState('all') // 'all', 'past', 'ongoing', 'upcoming'
   const [sortField, setSortField] = useState('created_at') // default sort by created date
   const [sortDirection, setSortDirection] = useState('desc') // 'asc' or 'desc'
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -104,7 +105,35 @@ export default function AdminBookingsPage() {
         (new Date(booking.check_in) <= new Date(filterDate) &&
           new Date(booking.check_out) >= new Date(filterDate))
 
-      const finalMatch = matchesSearch && matchesStatus && matchesDate
+      // Filter by time status
+      let matchesTimeStatus = true
+      if (filterTimeStatus !== 'all') {
+        const checkIn = booking.check_in || booking.checkIn
+        const checkOut = booking.check_out || booking.checkOut
+        
+        if (checkIn && checkOut) {
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          const checkInDate = new Date(checkIn)
+          checkInDate.setHours(0, 0, 0, 0)
+          
+          const checkOutDate = new Date(checkOut)
+          checkOutDate.setHours(0, 0, 0, 0)
+          
+          if (filterTimeStatus === 'past') {
+            matchesTimeStatus = checkOutDate < today
+          } else if (filterTimeStatus === 'ongoing') {
+            matchesTimeStatus = checkInDate <= today && checkOutDate >= today
+          } else if (filterTimeStatus === 'upcoming') {
+            matchesTimeStatus = checkInDate > today
+          }
+        } else {
+          matchesTimeStatus = false
+        }
+      }
+
+      const finalMatch = matchesSearch && matchesStatus && matchesDate && matchesTimeStatus
       return finalMatch
     })
 
@@ -179,7 +208,7 @@ export default function AdminBookingsPage() {
     })
 
     return result
-  }, [bookings, searchQuery, searchType, filterStatus, filterDate, sortField, sortDirection])
+  }, [bookings, searchQuery, searchType, filterStatus, filterDate, filterTimeStatus, sortField, sortDirection])
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -202,6 +231,18 @@ export default function AdminBookingsPage() {
       confirmButtonColor: '#0d9488',
     })
   }
+
+  const handleClearFilters = () => {
+    setSearchQuery('')
+    setSearchType('all')
+    setFilterStatus('all')
+    setFilterDate('')
+    setFilterTimeStatus('all')
+    setSortField('created_at')
+    setSortDirection('desc')
+  }
+
+  const hasActiveFilters = searchQuery || searchType !== 'all' || filterStatus !== 'all' || filterDate || filterTimeStatus !== 'all' || sortField !== 'created_at' || sortDirection !== 'desc'
 
   if (loading) {
     return (
@@ -268,54 +309,73 @@ export default function AdminBookingsPage() {
         </div>
 
         {/* Search and Filter */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <div className="grid gap-4 md:grid-cols-4">
-            {/* Search Type Selector */}
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                <Filter size={18} />
-              </div>
-              <select
-                value={searchType}
-                onChange={(e) => setSearchType(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
-              >
-                <option value="all">ค้นหาทั้งหมด</option>
-                <option value="id">รหัสการจอง</option>
-                <option value="guest_name">ชื่อผู้เข้าพัก</option>
-                <option value="email">อีเมล</option>
-                <option value="room_name">ชื่อห้อง</option>
-                <option value="creator_name">ผู้สร้าง</option>
-              </select>
+        <div className="space-y-4">
+          {/* Search Section */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-slate-700">ค้นหา</h3>
+              {hasActiveFilters && (
+                <button
+                  onClick={handleClearFilters}
+                  className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 transition-colors"
+                >
+                  <X size={14} />
+                  ล้างตัวกรองทั้งหมด
+                </button>
+              )}
             </div>
-
-            {/* Search Input */}
-            <div className="md:col-span-2">
+            <div className="grid gap-4 md:grid-cols-4">
+              {/* Search Type Selector */}
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                  <Search size={18} />
+                  <Filter size={18} />
                 </div>
-                <Input
-                  placeholder={
-                    searchType === 'all' ? "ค้นหาการจอง (รหัส, ชื่อผู้เข้าพัก, อีเมล, ห้อง, ผู้สร้าง)..." :
-                      searchType === 'id' ? "ค้นหาตามรหัสการจอง..." :
-                        searchType === 'guest_name' ? "ค้นหาตามชื่อผู้เข้าพัก..." :
-                          searchType === 'email' ? "ค้นหาตามอีเมล..." :
-                            searchType === 'room_name' ? "ค้นหาตามชื่อห้อง..." :
-                              searchType === 'creator_name' ? "ค้นหาตามชื่อผู้สร้าง..." :
-                                "ค้นหาการจอง..."
-                  }
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value)
-                  }}
-                  className="pl-10"
-                />
+                <select
+                  value={searchType}
+                  onChange={(e) => setSearchType(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                >
+                  <option value="all">ค้นหาทั้งหมด</option>
+                  <option value="id">รหัสการจอง</option>
+                  <option value="guest_name">ชื่อผู้เข้าพัก</option>
+                  <option value="email">อีเมล</option>
+                  <option value="room_name">ชื่อห้อง</option>
+                  <option value="creator_name">ผู้สร้าง</option>
+                </select>
+              </div>
+
+              {/* Search Input */}
+              <div className="md:col-span-3">
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Search size={18} />
+                  </div>
+                  <Input
+                    placeholder={
+                      searchType === 'all' ? "ค้นหาการจอง (รหัส, ชื่อผู้เข้าพัก, อีเมล, ห้อง, ผู้สร้าง)..." :
+                        searchType === 'id' ? "ค้นหาตามรหัสการจอง..." :
+                          searchType === 'guest_name' ? "ค้นหาตามชื่อผู้เข้าพัก..." :
+                            searchType === 'email' ? "ค้นหาตามอีเมล..." :
+                              searchType === 'room_name' ? "ค้นหาตามชื่อห้อง..." :
+                                searchType === 'creator_name' ? "ค้นหาตามชื่อผู้สร้าง..." :
+                                  "ค้นหาการจอง..."
+                    }
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value)
+                    }}
+                    className="pl-10"
+                  />
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Status Filter */}
-            <div>
+          {/* Filter and Sort Section */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+            <h3 className="text-sm font-semibold text-slate-700 mb-4">กรองและเรียง</h3>
+            <div className="grid gap-4 md:grid-cols-4">
+              {/* Status Filter */}
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                   <Filter size={18} />
@@ -331,49 +391,69 @@ export default function AdminBookingsPage() {
                   <option value="cancelled">ยกเลิก</option>
                 </select>
               </div>
-            </div>
-          </div>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <div className="relative max-w-xs">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                <Calendar size={18} />
-              </div>
-              <Input
-                type="date"
-                placeholder="กรองตามวันที่"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
+
+              {/* Date Filter */}
+              <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                  <ArrowUpDown size={18} />
+                  <Calendar size={18} />
+                </div>
+                <Input
+                  type="date"
+                  placeholder="กรองตามวันที่"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Time Status Filter */}
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Filter size={18} />
                 </div>
                 <select
-                  value={sortField}
-                  onChange={(e) => setSortField(e.target.value)}
+                  value={filterTimeStatus}
+                  onChange={(e) => setFilterTimeStatus(e.target.value)}
                   className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 >
-                  <option value="id">เรียงตามรหัสการจอง</option>
-                  <option value="created_at">เรียงตามวันที่สร้าง</option>
-                  <option value="check_in">เรียงตามวันที่เช็กอิน</option>
-                  <option value="total_price">เรียงตามราคา</option>
-                  <option value="guest_name">เรียงตามชื่อผู้เข้าพัก</option>
-                  <option value="room_name">เรียงตามชื่อห้อง</option>
-                  <option value="status">เรียงตามสถานะ</option>
-                  <option value="creator_name">เรียงตามผู้สร้าง</option>
+                  <option value="all">ทุกช่วงเวลา</option>
+                  <option value="past">ผ่านมาแล้ว</option>
+                  <option value="ongoing">กำลังเข้าพัก</option>
+                  <option value="upcoming">กำลังจะมาถึง</option>
                 </select>
               </div>
-              <Button
-                variant="secondary"
-                onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-                className="px-4"
-                title={sortDirection === 'asc' ? 'เรียงจากน้อยไปมาก' : 'เรียงจากมากไปน้อย'}
-              >
-                {sortDirection === 'asc' ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
-              </Button>
+
+              {/* Sort */}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <ArrowUpDown size={18} />
+                  </div>
+                  <select
+                    value={sortField}
+                    onChange={(e) => setSortField(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  >
+                    <option value="id">เรียงตามรหัสการจอง</option>
+                    <option value="created_at">เรียงตามวันที่สร้าง</option>
+                    <option value="check_in">เรียงตามวันที่เช็กอิน</option>
+                    <option value="total_price">เรียงตามราคา</option>
+                    <option value="guest_name">เรียงตามชื่อผู้เข้าพัก</option>
+                    <option value="room_name">เรียงตามชื่อห้อง</option>
+                    <option value="status">เรียงตามสถานะ</option>
+                    <option value="time_status">เรียงตามช่วงเวลา</option>
+                    <option value="creator_name">เรียงตามผู้สร้าง</option>
+                  </select>
+                </div>
+                <Button
+                  variant="secondary"
+                  onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                  className="px-4"
+                  title={sortDirection === 'asc' ? 'เรียงจากน้อยไปมาก' : 'เรียงจากมากไปน้อย'}
+                >
+                  {sortDirection === 'asc' ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import BookingsManagementTable from '../../components/admin/BookingsManagementTable'
 import AddBookingModal from '../../components/admin/AddBookingModal'

@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, User, LogOut, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'

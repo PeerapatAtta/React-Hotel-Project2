@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, Home, Clock, CheckCircle } from 'lucide-react'
+import { Calendar, Home, Clock, CheckCircle, LogIn } from 'lucide-react'
 import Card from '../../components/Card'
 import Container from '../../components/layout/Container'
 import SectionTitle from '../../components/SectionTitle'
@@ -44,13 +44,31 @@ export default function MemberDashboard() {
   // แสดงเฉพาะ 5 รายการล่าสุด
   const displayBookings = bookings.slice(0, 5)
   
-  const upcomingBookings = displayBookings.filter(b => {
+  // คำนวณการจองต่างๆ
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  // กรองเฉพาะการจองที่ไม่ใช่ cancelled
+  const activeBookings = bookings.filter(b => b.status !== 'cancelled')
+  
+  const arrivedBookings = activeBookings.filter(b => {
     const checkIn = new Date(b.check_in)
-    return checkIn >= new Date()
+    checkIn.setHours(0, 0, 0, 0)
+    const checkOut = new Date(b.check_out)
+    checkOut.setHours(0, 0, 0, 0)
+    return checkIn <= today && checkOut >= today
   })
-  const pastBookings = displayBookings.filter(b => {
+  
+  const upcomingBookings = activeBookings.filter(b => {
     const checkIn = new Date(b.check_in)
-    return checkIn < new Date()
+    checkIn.setHours(0, 0, 0, 0)
+    return checkIn > today
+  })
+  
+  const pastBookings = activeBookings.filter(b => {
+    const checkOut = new Date(b.check_out)
+    checkOut.setHours(0, 0, 0, 0)
+    return checkOut < today
   })
 
   return (
@@ -65,12 +83,12 @@ export default function MemberDashboard() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card className="p-6">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-600 mb-1">การจองทั้งหมด</p>
-                  <p className="text-2xl font-bold text-primary">{displayBookings.length}</p>
+                  <p className="text-2xl font-bold text-primary">{activeBookings.length}</p>
                 </div>
                 <div className="rounded-xl bg-teal-50 p-3">
                   <Calendar size={24} className="text-teal-600" />
@@ -81,11 +99,23 @@ export default function MemberDashboard() {
             <Card className="p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600 mb-1">การจองที่กำลังจะมาถึง</p>
-                  <p className="text-2xl font-bold text-teal-600">{upcomingBookings.length}</p>
+                  <p className="text-sm font-medium text-slate-600 mb-1">การจองที่กำลังเข้าพัก</p>
+                  <p className="text-2xl font-bold text-emerald-600">{arrivedBookings.length}</p>
                 </div>
-                <div className="rounded-xl bg-teal-50 p-3">
-                  <Clock size={24} className="text-teal-600" />
+                <div className="rounded-xl bg-emerald-50 p-3">
+                  <LogIn size={24} className="text-emerald-600" />
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-600 mb-1">การจองที่กำลังจะมาถึง</p>
+                  <p className="text-2xl font-bold text-amber-600">{upcomingBookings.length}</p>
+                </div>
+                <div className="rounded-xl bg-amber-50 p-3">
+                  <Clock size={24} className="text-amber-600" />
                 </div>
               </div>
             </Card>
@@ -194,4 +224,3 @@ export default function MemberDashboard() {
     </MemberLayout>
   )
 }
-

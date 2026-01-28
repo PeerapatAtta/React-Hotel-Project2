@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import UsersManagementTable from '../../components/admin/UsersManagementTable'
 import AddUserModal from '../../components/admin/AddUserModal'

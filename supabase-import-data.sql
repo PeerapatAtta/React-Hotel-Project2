@@ -3,6 +3,7 @@
 -- ============================================
 
 -- Import Rooms Data
+
 INSERT INTO rooms (id, name, type, capacity, base_price, images, amenities) VALUES
 ('deluxe-city', 'Deluxe City View', 'Deluxe', 3, 3200, 
  ARRAY[
@@ -94,5 +95,3 @@ ON CONFLICT (id) DO NOTHING;
 --   6400,
 --   'confirmed'
 -- );
-
-

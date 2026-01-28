@@ -51,7 +51,6 @@ export default function RoomDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
-  const [showStickyBar, setShowStickyBar] = useState(false)
 
   useEffect(() => {
     const fetchRoom = async () => {
@@ -85,18 +84,6 @@ export default function RoomDetailPage() {
 
     fetchRoom()
   }, [id])
-
-  // ตรวจสอบ scroll position เพื่อแสดง sticky bar
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY
-      // แสดง sticky bar เมื่อ scroll ลงมากกว่า 200px
-      setShowStickyBar(scrollPosition > 200)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   if (loading || authLoading) {
     return (
@@ -148,7 +135,7 @@ export default function RoomDetailPage() {
   }
 
   return (
-    <div className="space-y-10 pb-24 pt-8 md:pb-28 md:pt-12">
+    <div className="space-y-10 pb-10 pt-8 md:pt-12">
       <Container>
         <div className="space-y-10">
           {/* Back Button */}
@@ -219,17 +206,11 @@ export default function RoomDetailPage() {
           {/* Amenities Section */}
           <Card className="p-6 md:p-8">
             <div className="space-y-8">
-              <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <SectionTitle
-                    title="สิ่งอำนวยความสะดวก"
-                    description="บริการที่รวมอยู่ในห้องพักและพื้นที่ส่วนกลาง"
-                  />
-                </div>
-                <Button onClick={handleBooking} className="w-full md:w-auto">
-                  <Calendar size={18} />
-                  จองห้อง
-                </Button>
+              <div>
+                <SectionTitle
+                  title="สิ่งอำนวยความสะดวก"
+                  description="บริการที่รวมอยู่ในห้องพักและพื้นที่ส่วนกลาง"
+                />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 {(room.amenities || []).map((amenity) => (
@@ -250,32 +231,6 @@ export default function RoomDetailPage() {
           </Card>
         </div>
       </Container>
-
-      {/* Sticky Booking Bar */}
-      {showStickyBar && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg">
-          <Container>
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
-              <div className="flex-1">
-                <h3 className="font-semibold text-primary text-lg">{room.name}</h3>
-                <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
-                  <span className="flex items-center gap-1">
-                    <Users size={16} />
-                    {room.capacity} คน
-                  </span>
-                  <span className="font-semibold text-primary text-base">
-                    ฿{formatPriceNumber(room.base_price || room.basePrice)} / คืน
-                  </span>
-                </div>
-              </div>
-              <Button onClick={handleBooking} className="w-full sm:w-auto min-w-[200px]">
-                <Calendar size={18} />
-                จองห้อง
-              </Button>
-            </div>
-          </Container>
-        </div>
-      )}
 
       {/* Booking Modal */}
       <BookingModal

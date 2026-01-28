@@ -337,65 +337,14 @@ export default function AdminBookingsPage() {
           </div>
         </div>
 
-        {/* Stats Summary - แบ่งตามช่วงเวลา */}
-        <Card className="p-3">
-          <h2 className="text-base font-semibold text-slate-700 mb-1.5">สรุปการจองตามช่วงเวลา</h2>
+ {/* Stats Summary - แบ่งตามสถานะ */}
+ <Card className="p-3">
+          <h2 className="text-base font-semibold text-slate-700 mb-1.5">สถานะการจ่ายเงิน</h2>
           <div className="grid gap-1.5 md:grid-cols-4">
             <div className="bg-white rounded-lg border border-slate-200 p-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-medium text-slate-600">การจองทั้งหมด</p>
-                  <p className="text-xl font-bold text-slate-700 mt-0">{timeStats.total}</p>
-                </div>
-                <div className="rounded-lg bg-teal-50 p-1.5">
-                  <Calendar size={16} className="text-teal-600" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">การจองที่กำลังเข้าพัก</p>
-                  <p className="text-xl font-bold text-emerald-600 mt-0">{timeStats.arrived}</p>
-                </div>
-                <div className="rounded-lg bg-emerald-50 p-1.5">
-                  <LogIn size={16} className="text-emerald-600" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">การจองที่กำลังจะมาถึง</p>
-                  <p className="text-xl font-bold text-amber-600 mt-0">{timeStats.upcoming}</p>
-                </div>
-                <div className="rounded-lg bg-amber-50 p-1.5">
-                  <Clock size={16} className="text-amber-600" />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg border border-slate-200 p-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">การจองที่ผ่านมา</p>
-                  <p className="text-xl font-bold text-slate-600 mt-0">{timeStats.past}</p>
-                </div>
-                <div className="rounded-lg bg-slate-50 p-1.5">
-                  <CheckCircle size={16} className="text-slate-600" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Stats Summary - แบ่งตามสถานะ */}
-        <Card className="p-3">
-          <h2 className="text-base font-semibold text-slate-700 mb-1.5">สรุปการจองตามสถานะ</h2>
-          <div className="grid gap-1.5 md:grid-cols-4">
-            <div className="bg-white rounded-lg border border-slate-200 p-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-medium text-slate-600">การจองทั้งหมด</p>
+                  <p className="text-xs font-medium text-slate-600">ทั้งหมด</p>
                   <p className="text-xl font-bold text-slate-700 mt-0">{statusStats.total}</p>
                 </div>
                 <div className="rounded-lg bg-slate-50 p-1.5">
@@ -438,7 +387,58 @@ export default function AdminBookingsPage() {
             </div>
           </div>
         </Card>
-
+        
+        {/* Stats Summary - แบ่งตามช่วงเวลา */}
+        <Card className="p-3">
+          <h2 className="text-base font-semibold text-slate-700 mb-1.5">สถานะการเข้าพัก</h2>
+          <div className="grid gap-1.5 md:grid-cols-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">ทั้งหมด</p>
+                  <p className="text-xl font-bold text-slate-700 mt-0">{timeStats.total}</p>
+                </div>
+                <div className="rounded-lg bg-teal-50 p-1.5">
+                  <Calendar size={16} className="text-teal-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">กำลังเข้าพัก</p>
+                  <p className="text-xl font-bold text-emerald-600 mt-0">{timeStats.arrived}</p>
+                </div>
+                <div className="rounded-lg bg-emerald-50 p-1.5">
+                  <LogIn size={16} className="text-emerald-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">กำลังจะมาถึง</p>
+                  <p className="text-xl font-bold text-amber-600 mt-0">{timeStats.upcoming}</p>
+                </div>
+                <div className="rounded-lg bg-amber-50 p-1.5">
+                  <Clock size={16} className="text-amber-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">ที่ผ่านมาแล้ว</p>
+                  <p className="text-xl font-bold text-slate-600 mt-0">{timeStats.past}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-1.5">
+                  <CheckCircle size={16} className="text-slate-600" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+       
         {/* Search and Filter */}
         <div className="space-y-3">
           {/* Search Section */}

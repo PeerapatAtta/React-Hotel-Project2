@@ -373,7 +373,7 @@ export const bookingService = {
       const year = date.getFullYear()
       const month = date.getMonth()
       
-      const monthRevenue = bookings
+      const monthRevenueAmount = bookings
         .filter(b => {
           if (!b.created_at) return false
           const bookingDate = new Date(b.created_at)
@@ -385,7 +385,7 @@ export const bookingService = {
       
       monthlyRevenue.push({
         month: monthNames[month],
-        revenue: monthRevenue
+        revenue: monthRevenueAmount
       })
     }
 

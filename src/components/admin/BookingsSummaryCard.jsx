@@ -21,7 +21,7 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
     let newBookingsToday = 0
 
     bookings.forEach((booking) => {
-      const status = booking.status || booking.status
+      const status = booking.status
       
       // นับตามสถานะ
       if (status === 'pending') pending++

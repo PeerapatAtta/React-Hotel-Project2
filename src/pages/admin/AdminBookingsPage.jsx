@@ -3,8 +3,9 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import BookingsManagementTable from '../../components/admin/BookingsManagementTable'
 import AddBookingModal from '../../components/admin/AddBookingModal'
 import Button from '../../components/Button'
+import Card from '../../components/Card'
 import { bookingService } from '../../services/bookingService'
-import { Search, Filter, Download, Calendar, Plus, ArrowUpDown, ArrowUp, ArrowDown, X } from 'lucide-react'
+import { Search, Filter, Download, Calendar, Plus, ArrowUpDown, ArrowUp, ArrowDown, X, LogIn, Clock, CheckCircle, List } from 'lucide-react'
 import Input from '../../components/Input'
 import { formatPrice } from '../../utils/formatters'
 import Swal from 'sweetalert2'
@@ -227,6 +228,51 @@ export default function AdminBookingsPage() {
     return { confirmed, pending, cancelled, totalRevenue }
   }, [filteredBookings])
 
+  // Calculate time statistics (สรุปการจองตามช่วงเวลา)
+  const timeStats = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const activeBookings = filteredBookings.filter(b => b.status !== 'cancelled')
+
+    const arrivedBookings = activeBookings.filter(b => {
+      const checkIn = new Date(b.check_in || b.checkIn)
+      checkIn.setHours(0, 0, 0, 0)
+      const checkOut = new Date(b.check_out || b.checkOut)
+      checkOut.setHours(0, 0, 0, 0)
+      return checkIn <= today && checkOut >= today
+    })
+
+    const upcomingBookings = activeBookings.filter(b => {
+      const checkIn = new Date(b.check_in || b.checkIn)
+      checkIn.setHours(0, 0, 0, 0)
+      return checkIn > today
+    })
+
+    const pastBookings = activeBookings.filter(b => {
+      const checkOut = new Date(b.check_out || b.checkOut)
+      checkOut.setHours(0, 0, 0, 0)
+      return checkOut < today
+    })
+
+    return {
+      total: activeBookings.length,
+      arrived: arrivedBookings.length,
+      upcoming: upcomingBookings.length,
+      past: pastBookings.length
+    }
+  }, [filteredBookings])
+
+  // Calculate status statistics (สรุปการจองตามสถานะ)
+  const statusStats = useMemo(() => {
+    const total = filteredBookings.length
+    const confirmed = filteredBookings.filter(b => b.status === 'confirmed').length
+    const pending = filteredBookings.filter(b => b.status === 'pending').length
+    const cancelled = filteredBookings.filter(b => b.status === 'cancelled').length
+
+    return { total, confirmed, pending, cancelled }
+  }, [filteredBookings])
+
   const handleExport = () => {
     Swal.fire({
       icon: 'info',
@@ -269,7 +315,7 @@ export default function AdminBookingsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -291,33 +337,113 @@ export default function AdminBookingsPage() {
           </div>
         </div>
 
-        {/* Stats Summary */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-600">จ่ายเงินแล้ว</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">{stats.confirmed}</p>
+        {/* Stats Summary - แบ่งตามช่วงเวลา */}
+        <Card className="p-3">
+          <h2 className="text-base font-semibold text-slate-700 mb-1.5">สรุปการจองตามช่วงเวลา</h2>
+          <div className="grid gap-1.5 md:grid-cols-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">การจองทั้งหมด</p>
+                  <p className="text-xl font-bold text-slate-700 mt-0">{timeStats.total}</p>
+                </div>
+                <div className="rounded-lg bg-teal-50 p-1.5">
+                  <Calendar size={16} className="text-teal-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">การจองที่กำลังเข้าพัก</p>
+                  <p className="text-xl font-bold text-emerald-600 mt-0">{timeStats.arrived}</p>
+                </div>
+                <div className="rounded-lg bg-emerald-50 p-1.5">
+                  <LogIn size={16} className="text-emerald-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">การจองที่กำลังจะมาถึง</p>
+                  <p className="text-xl font-bold text-amber-600 mt-0">{timeStats.upcoming}</p>
+                </div>
+                <div className="rounded-lg bg-amber-50 p-1.5">
+                  <Clock size={16} className="text-amber-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">การจองที่ผ่านมา</p>
+                  <p className="text-xl font-bold text-slate-600 mt-0">{timeStats.past}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-1.5">
+                  <CheckCircle size={16} className="text-slate-600" />
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-600">รอจ่ายเงิน</p>
-            <p className="text-2xl font-bold text-yellow-600 mt-1">{stats.pending}</p>
+        </Card>
+
+        {/* Stats Summary - แบ่งตามสถานะ */}
+        <Card className="p-3">
+          <h2 className="text-base font-semibold text-slate-700 mb-1.5">สรุปการจองตามสถานะ</h2>
+          <div className="grid gap-1.5 md:grid-cols-4">
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">การจองทั้งหมด</p>
+                  <p className="text-xl font-bold text-slate-700 mt-0">{statusStats.total}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-1.5">
+                  <List size={16} className="text-slate-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">จ่ายเงินแล้ว</p>
+                  <p className="text-xl font-bold text-emerald-600 mt-0">{statusStats.confirmed}</p>
+                </div>
+                <div className="rounded-lg bg-emerald-50 p-1.5">
+                  <CheckCircle size={16} className="text-emerald-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">รอจ่ายเงิน</p>
+                  <p className="text-xl font-bold text-amber-600 mt-0">{statusStats.pending}</p>
+                </div>
+                <div className="rounded-lg bg-amber-50 p-1.5">
+                  <Clock size={16} className="text-amber-600" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-lg border border-slate-200 p-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-slate-600">ยกเลิก</p>
+                  <p className="text-xl font-bold text-rose-600 mt-0">{statusStats.cancelled}</p>
+                </div>
+                <div className="rounded-lg bg-rose-50 p-1.5">
+                  <X size={16} className="text-rose-600" />
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-600">ยกเลิก</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">{stats.cancelled}</p>
-          </div>
-          <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-600">รายได้รวม</p>
-            <p className="text-2xl font-bold text-primary mt-1">
-              {formatPrice(stats.totalRevenue)}
-            </p>
-          </div>
-        </div>
+        </Card>
 
         {/* Search and Filter */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Search Section */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-slate-700">ค้นหา</h3>
               {hasActiveFilters && (
                 <button
@@ -377,8 +503,8 @@ export default function AdminBookingsPage() {
           </div>
 
           {/* Filter and Sort Section */}
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-700 mb-4">กรองและเรียง</h3>
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">กรองและเรียง</h3>
             <div className="grid gap-4 md:grid-cols-4">
               {/* Status Filter */}
               <div className="relative">

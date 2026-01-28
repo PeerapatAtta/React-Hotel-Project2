@@ -18,8 +18,8 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const menuItems = [
     { path: '/admin', label: 'หน้าสรุปข้อมูล', icon: LayoutDashboard },
-    { path: '/admin/rooms', label: 'จัดการห้อง', icon: Home },
     { path: '/admin/bookings', label: 'การจอง', icon: Calendar },
+    { path: '/admin/rooms', label: 'จัดการห้อง', icon: Home },
     { path: '/admin/users', label: 'ผู้ใช้', icon: Users },
     { path: '/admin/settings', label: 'ตั้งค่า', icon: Settings },
   ]
@@ -71,8 +71,8 @@ export default function Sidebar({ isOpen, onClose }) {
                 to={item.path}
                 onClick={onClose}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${active
-                    ? 'bg-teal-50 text-teal-700 font-semibold'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-teal-50 text-teal-700 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
               >
                 <Icon size={20} />

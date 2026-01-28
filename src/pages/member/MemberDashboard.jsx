@@ -216,49 +216,90 @@ export default function MemberDashboard() {
                   description="รายการการจองของคุณ"
                 />
                 <div className="mt-4 space-y-3">
-                  {displayBookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50 p-4 sm:flex-row sm:items-start sm:justify-between"
-                    >
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <h3 className="font-semibold text-primary">{booking.room_name}</h3>
-                          <span className={`rounded-full px-2 py-1 text-xs font-semibold ${booking.status === 'confirmed'
-                            ? 'bg-green-100 text-green-700'
-                            : booking.status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-red-100 text-red-700'
-                            }`}>
-                            {booking.status === 'confirmed' ? 'ยืนยันแล้ว' :
-                              booking.status === 'pending' ? 'รอยืนยัน' : 'ยกเลิก'}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-3 text-sm text-slate-600">
-                          <span className="flex items-center gap-1">
-                            <Calendar size={14} className="text-slate-400" />
-                            {formatDate(booking.check_in)} - {formatDate(booking.check_out)}
-                          </span>
-                          <span>{booking.nights} คืน</span>
-                          <span>{booking.guests} คน</span>
-                          <span className="font-semibold text-primary">{formatPrice(booking.total_price)}</span>
-                        </div>
-                        {booking.created_at && (
-                          <div className="flex items-center gap-1 text-xs text-slate-500 pt-1">
-                            <Clock size={12} className="text-slate-400" />
-                            <span>จองเมื่อ {formatDateTime(booking.created_at)}</span>
+                  {displayBookings.map((booking) => {
+                    // Parse dates and normalize to start of day
+                    const checkInDate = new Date(booking.check_in)
+                    const checkOutDate = new Date(booking.check_out)
+                    const today = new Date()
+                    const checkIn = new Date(checkInDate.getFullYear(), checkInDate.getMonth(), checkInDate.getDate())
+                    const checkOut = new Date(checkOutDate.getFullYear(), checkOutDate.getMonth(), checkOutDate.getDate())
+                    const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+                    // Calculate status based on dates
+                    const isCurrentlyStaying =
+                      booking.status !== 'cancelled' &&
+                      checkIn.getTime() <= todayNormalized.getTime() &&
+                      checkOut.getTime() > todayNormalized.getTime()
+
+                    const isUpcoming =
+                      booking.status !== 'cancelled' &&
+                      checkIn.getTime() > todayNormalized.getTime() &&
+                      !isCurrentlyStaying
+
+                    const isPast =
+                      booking.status !== 'cancelled' &&
+                      checkOut.getTime() <= todayNormalized.getTime() &&
+                      !isCurrentlyStaying
+
+                    return (
+                      <div
+                        key={booking.id}
+                        className="flex flex-col gap-3 rounded-lg border border-slate-100 bg-slate-50 p-4 sm:flex-row sm:items-start sm:justify-between"
+                      >
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <h3 className="font-semibold text-primary">{booking.room_name}</h3>
+                            <span className={`rounded-full px-2 py-1 text-xs font-semibold ${booking.status === 'confirmed'
+                              ? 'bg-green-100 text-green-700'
+                              : booking.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-700'
+                                : 'bg-red-100 text-red-700'
+                              }`}>
+                              {booking.status === 'confirmed' ? 'ยืนยันแล้ว' :
+                                booking.status === 'pending' ? 'รอยืนยัน' : 'ยกเลิก'}
+                            </span>
+                            {isCurrentlyStaying && (
+                              <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 border border-green-300">
+                                กำลังเข้าพัก
+                              </span>
+                            )}
+                            {isUpcoming && (
+                              <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700 border border-blue-300">
+                                กำลังจะมาถึง
+                              </span>
+                            )}
+                            {isPast && (
+                              <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 border border-slate-300">
+                                ผ่านมาแล้ว
+                              </span>
+                            )}
                           </div>
-                        )}
+                          <div className="flex flex-wrap gap-3 text-sm text-slate-600">
+                            <span className="flex items-center gap-1">
+                              <Calendar size={14} className="text-slate-400" />
+                              {formatDate(booking.check_in)} - {formatDate(booking.check_out)}
+                            </span>
+                            <span>{booking.nights} คืน</span>
+                            <span>{booking.guests} คน</span>
+                            <span className="font-semibold text-primary">{formatPrice(booking.total_price)}</span>
+                          </div>
+                          {booking.created_at && (
+                            <div className="flex items-center gap-1 text-xs text-slate-500 pt-1">
+                              <Clock size={12} className="text-slate-400" />
+                              <span>จองเมื่อ {formatDateTime(booking.created_at)}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-start pt-1">
+                          <Link to={`/rooms/${booking.room_id}`}>
+                            <Button variant="ghost" className="w-full sm:w-auto text-sm">
+                              ดูรายละเอียดห้องพัก
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
-                      <div className="flex items-start pt-1">
-                        <Link to={`/rooms/${booking.room_id}`}>
-                          <Button variant="ghost" className="w-full sm:w-auto text-sm">
-                            ดูรายละเอียดห้องพัก
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </Card>
             ) : (

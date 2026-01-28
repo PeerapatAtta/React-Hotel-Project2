@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background Circle -->
+  <circle cx="16" cy="16" r="15" fill="#0d9488" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Hotel Building Icon -->
+  <g transform="translate(8, 8)">
+    <!-- Building Base -->
+    <rect x="2" y="8" width="12" height="6" fill="#ffffff" rx="1"/>
+    
+    <!-- Building Windows -->
+    <rect x="3.5" y="9.5" width="2" height="2" fill="#0d9488" rx="0.3"/>
+    <rect x="6.5" y="9.5" width="2" height="2" fill="#0d9488" rx="0.3"/>
+    <rect x="9.5" y="9.5" width="2" height="2" fill="#0d9488" rx="0.3"/>
+    <rect x="12.5" y="9.5" width="2" height="2" fill="#0d9488" rx="0.3"/>
+    
+    <!-- Building Top Floor -->
+    <rect x="4" y="4" width="8" height="4" fill="#ffffff" rx="1"/>
+    
+    <!-- Top Floor Windows -->
+    <rect x="5" y="5" width="2" height="2" fill="#0d9488" rx="0.3"/>
+    <rect x="8" y="5" width="2" height="2" fill="#0d9488" rx="0.3"/>
+    <rect x="11" y="5" width="2" height="2" fill="#0d9488" rx="0.3"/>
+    
+    <!-- Door -->
+    <rect x="6.5" y="10.5" width="3" height="3.5" fill="#ffffff" rx="0.5"/>
+    <circle cx="8" cy="12" r="0.5" fill="#0d9488"/>
+  </g>
+</svg>

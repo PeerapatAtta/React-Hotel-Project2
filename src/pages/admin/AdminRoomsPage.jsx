@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import RoomManagementTable from '../../components/admin/RoomManagementTable'
 import AddRoomModal from '../../components/admin/AddRoomModal'
 import EditRoomModal from '../../components/admin/EditRoomModal'
 import Button from '../../components/Button'
 import { roomService } from '../../services/roomService'
+import { bookingService } from '../../services/bookingService'
 import { Plus, Search, Filter } from 'lucide-react'
 import Input from '../../components/Input'
 import LoadingSpinner from '../../components/LoadingSpinner'
 
 export default function AdminRoomsPage() {
   const [rooms, setRooms] = useState([])
+  const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -22,16 +24,26 @@ export default function AdminRoomsPage() {
   const [selectedRoom, setSelectedRoom] = useState(null)
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchData = async () => {
       setLoading(true)
       setError(null)
       try {
-        const { data, error: fetchError } = await roomService.getAllRooms()
-        if (fetchError) {
-          console.error('Error fetching rooms:', fetchError)
-          setError(fetchError.message)
+        const [roomsResult, bookingsResult] = await Promise.all([
+          roomService.getAllRooms(),
+          bookingService.getAllBookings(),
+        ])
+
+        if (roomsResult.error) {
+          console.error('Error fetching rooms:', roomsResult.error)
+          setError(roomsResult.error.message)
         } else {
-          setRooms(data || [])
+          setRooms(roomsResult.data || [])
+        }
+
+        if (bookingsResult.error) {
+          console.error('Error fetching bookings:', bookingsResult.error)
+        } else {
+          setBookings(bookingsResult.data || [])
         }
       } catch (err) {
         console.error('Error:', err)
@@ -41,8 +53,41 @@ export default function AdminRoomsPage() {
       }
     }
 
-    fetchRooms()
+    fetchData()
   }, [])
+
+  // คำนวณห้องว่างจาก bookings
+  const roomStats = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0]
+    const bookedRoomIds = new Set()
+    
+    bookings.forEach(booking => {
+      if (booking.status === 'confirmed' || booking.status === 'pending') {
+        const checkIn = booking.check_in || booking.checkIn
+        const checkOut = booking.check_out || booking.checkOut
+        
+        if (checkIn && checkOut) {
+          // ตรวจสอบว่าการจองทับกับวันนี้หรือไม่
+          if (checkIn <= today && checkOut > today) {
+            const roomId = booking.room_id || booking.roomId
+            if (roomId) {
+              bookedRoomIds.add(roomId)
+            }
+          }
+        }
+      }
+    })
+    
+    const totalRooms = rooms.length
+    const bookedRooms = bookedRoomIds.size
+    const availableRooms = Math.max(0, totalRooms - bookedRooms)
+    
+    return {
+      totalRooms,
+      bookedRooms,
+      availableRooms,
+    }
+  }, [rooms, bookings])
 
   // Filter rooms based on search and type
   const filteredRooms = rooms.filter((room) => {
@@ -211,17 +256,15 @@ export default function AdminRoomsPage() {
         <div className="grid gap-4 md:grid-cols-4">
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
             <p className="text-sm font-medium text-slate-600">ห้องทั้งหมด</p>
-            <p className="text-2xl font-bold text-primary mt-1">{rooms.length}</p>
+            <p className="text-2xl font-bold text-primary mt-1">{roomStats.totalRooms}</p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
             <p className="text-sm font-medium text-slate-600">ห้องว่าง</p>
-            <p className="text-2xl font-bold text-teal-600 mt-1">
-              {rooms.length - filteredRooms.length + filteredRooms.length}
-            </p>
+            <p className="text-2xl font-bold text-teal-600 mt-1">{roomStats.availableRooms}</p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-600">ประเภทห้อง</p>
-            <p className="text-2xl font-bold text-primary mt-1">{roomTypes.length - 1}</p>
+            <p className="text-sm font-medium text-slate-600">ห้องที่ถูกจอง</p>
+            <p className="text-2xl font-bold text-blue-600 mt-1">{roomStats.bookedRooms}</p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
             <p className="text-sm font-medium text-slate-600">ผลลัพธ์</p>

@@ -72,6 +72,9 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
       }
     })
 
+    // คำนวณ total สำหรับช่วงเวลา (เฉพาะที่ไม่ใช่ cancelled)
+    const totalTimePeriod = ongoing + upcoming + past
+
     // ใช้ todayStats ถ้ามี (จาก getBookingStatistics) เพื่อความถูกต้อง
     return {
       total,
@@ -81,6 +84,7 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
       ongoing,
       upcoming,
       past,
+      totalTimePeriod,
       checkInsToday: todayStats.checkIns !== undefined ? todayStats.checkIns : checkInsToday,
       checkOutsToday: todayStats.checkOuts !== undefined ? todayStats.checkOuts : checkOutsToday,
       newBookingsToday: todayStats.newBookings !== undefined ? todayStats.newBookings : newBookingsToday,
@@ -118,7 +122,7 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp size={18} className="text-slate-500" />
             <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-              สถานะการจอง
+              สถานะการจ่ายเงิน
             </h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -131,20 +135,6 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
               <p className="text-2xl font-bold text-slate-700">{stats.total}</p>
             </div>
 
-            {/* รอจ่ายเงิน */}
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-amber-700">รอจ่ายเงิน</p>
-                <Clock size={16} className="text-amber-600" />
-              </div>
-              <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
-              {stats.total > 0 && (
-                <p className="text-xs text-amber-600 mt-1">
-                  {((stats.pending / stats.total) * 100).toFixed(0)}%
-                </p>
-              )}
-            </div>
-
             {/* จ่ายเงินแล้ว */}
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
               <div className="flex items-center justify-between mb-2">
@@ -155,6 +145,20 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
               {stats.total > 0 && (
                 <p className="text-xs text-emerald-600 mt-1">
                   {((stats.confirmed / stats.total) * 100).toFixed(0)}%
+                </p>
+              )}
+            </div>
+
+            {/* รอจ่ายเงิน */}
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-amber-700">รอจ่ายเงิน</p>
+                <Clock size={16} className="text-amber-600" />
+              </div>
+              <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
+              {stats.total > 0 && (
+                <p className="text-xs text-amber-600 mt-1">
+                  {((stats.pending / stats.total) * 100).toFixed(0)}%
                 </p>
               )}
             </div>
@@ -178,8 +182,58 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
         {/* Divider */}
         <div className="border-t border-slate-200 my-6"></div>
 
-        {/* วันนี้ */}
+        {/* ช่วงเวลา */}
         <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock size={18} className="text-slate-500" />
+            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+               สถานะการเข้าพัก
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* การจองทั้งหมด */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-slate-600">ทั้งหมด</p>
+                <Calendar size={16} className="text-slate-500" />
+              </div>
+              <p className="text-2xl font-bold text-slate-700">{stats.totalTimePeriod}</p>
+            </div>
+
+            {/* กำลังเข้าพัก */}
+            <div className="rounded-xl border border-teal-200 bg-teal-50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-teal-700">กำลังเข้าพัก</p>
+                <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
+              </div>
+              <p className="text-2xl font-bold text-teal-600">{stats.ongoing}</p>
+            </div>
+
+            {/* กำลังจะมาถึง */}
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-amber-700">กำลังจะมาถึง</p>
+                <Clock size={16} className="text-amber-600" />
+              </div>
+              <p className="text-2xl font-bold text-amber-600">{stats.upcoming}</p>
+            </div>
+
+            {/* ผ่านมาแล้ว */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-slate-600">ผ่านมาแล้ว</p>
+                <CheckCircle size={16} className="text-slate-500" />
+              </div>
+              <p className="text-2xl font-bold text-slate-600">{stats.past}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-slate-200 my-6"></div>
+
+        {/* วันนี้ */}
+        <div>
           <div className="flex items-center gap-2 mb-4">
             <Calendar size={18} className="text-slate-500" />
             <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
@@ -212,47 +266,6 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
                 <Plus size={16} className="text-indigo-600" />
               </div>
               <p className="text-2xl font-bold text-indigo-600">{stats.newBookingsToday}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-slate-200 my-6"></div>
-
-        {/* ช่วงเวลา */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Clock size={18} className="text-slate-500" />
-            <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-              ช่วงเวลา
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* กำลังเข้าพัก */}
-            <div className="rounded-xl border border-teal-200 bg-teal-50 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-teal-700">กำลังเข้าพัก</p>
-                <div className="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
-              </div>
-              <p className="text-2xl font-bold text-teal-600">{stats.ongoing}</p>
-            </div>
-
-            {/* กำลังจะมาถึง */}
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-amber-700">กำลังจะมาถึง</p>
-                <Clock size={16} className="text-amber-600" />
-              </div>
-              <p className="text-2xl font-bold text-amber-600">{stats.upcoming}</p>
-            </div>
-
-            {/* ผ่านมาแล้ว */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-slate-600">ผ่านมาแล้ว</p>
-                <CheckCircle size={16} className="text-slate-500" />
-              </div>
-              <p className="text-2xl font-bold text-slate-600">{stats.past}</p>
             </div>
           </div>
         </div>

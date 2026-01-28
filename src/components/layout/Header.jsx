@@ -65,7 +65,6 @@ export default function Header() {
             <div className="h-10 w-28 rounded-full bg-slate-100 animate-pulse hidden sm:block" />
             <div className="h-10 w-24 rounded-full bg-slate-100 animate-pulse hidden md:block" />
             <div className="h-10 w-32 rounded-full bg-slate-100 animate-pulse" />
-            <div className="h-10 w-36 rounded-full bg-slate-200 animate-pulse" />
           </div>
         </div>
       </header>
@@ -181,13 +180,6 @@ export default function Header() {
               </Button>
             </Link>
           )}
-          <Link
-            to="/rooms"
-            className="rounded-full border-2 border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all duration-300 hover:border-teal-500 hover:bg-teal-100 hover:text-teal-800 hover:shadow-lg hover:shadow-teal-200/50 hover:scale-105 hover:-translate-y-0.5"
-            style={{ color: '#475569', borderColor: '#e2e8f0', backgroundColor: '#ffffff' }}
-          >
-            ตรวจสอบห้องว่าง
-          </Link>
         </div>
       </div>
     </header>

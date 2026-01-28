@@ -502,7 +502,7 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }) {
 
                     {/* URL Input */}
                     {image.type === 'url' && (
-                      <div>
+                      <div className="space-y-2">
                         <Input
                           type="url"
                           value={image.value}
@@ -511,14 +511,16 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }) {
                           className="w-full"
                         />
                         {image.value && (
-                          <img
-                            src={image.value}
-                            alt="Preview"
-                            className="mt-2 w-full max-w-xs h-32 object-cover rounded-lg"
-                            onError={(e) => {
-                              e.target.style.display = 'none'
-                            }}
-                          />
+                          <div className="w-full min-h-[200px] max-h-[400px] border-2 border-slate-200 rounded-lg bg-slate-50 flex items-center justify-center p-4 overflow-hidden">
+                            <img
+                              src={image.value}
+                              alt="Preview"
+                              className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg"
+                              onError={(e) => {
+                                e.target.style.display = 'none'
+                              }}
+                            />
+                          </div>
                         )}
                       </div>
                     )}

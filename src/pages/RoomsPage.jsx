@@ -61,7 +61,7 @@ function RoomCard({ room }) {
           />
         </div>
         <div className="flex flex-wrap gap-2 pt-1">
-        {(room.amenities || []).slice(0, 3).map((amenity) => (
+          {(room.amenities || []).slice(0, 3).map((amenity) => (
             <div
               key={amenity}
               className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1"
@@ -121,7 +121,7 @@ export default function RoomsPage() {
               checkIn,
               checkOut
             )
-            
+
             if (availabilityError) {
               console.error(`Error checking availability for room ${room.id}:`, availabilityError)
               // ถ้าเกิด error ในการตรวจสอบ ให้แสดงห้องไว้ก่อน (เพื่อไม่ให้ผู้ใช้เห็นห้องว่างน้อยเกินไป)
@@ -143,9 +143,8 @@ export default function RoomsPage() {
     fetchRooms()
   }, [guests, checkIn, checkOut])
 
-  const filteredRooms = useMemo(() => {
-    return rooms
-  }, [rooms])
+  // filteredRooms ไม่จำเป็นเพราะ rooms ถูก filter แล้วจาก useEffect
+  const filteredRooms = rooms
 
   useEffect(() => {
     setSearch({
@@ -299,6 +298,13 @@ export default function RoomsPage() {
       <Container>
         {isLoading ? (
           <LoadingSpinner text="กำลังค้นหาห้องว่าง..." />
+        ) : error ? (
+          <EmptyState
+            title="เกิดข้อผิดพลาด"
+            description={error || 'ไม่สามารถโหลดข้อมูลห้องพักได้ กรุณาลองใหม่อีกครั้ง'}
+            actionLabel="ลองอีกครั้ง"
+            onAction={() => window.location.reload()}
+          />
         ) : filteredRooms.length === 0 ? (
           <EmptyState
             title="ไม่พบห้องว่างในช่วงวันที่ที่เลือก"

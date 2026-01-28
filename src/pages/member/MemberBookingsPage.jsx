@@ -119,7 +119,42 @@ export default function MemberBookingsPage() {
         booking.room_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         booking.guest_name?.toLowerCase().includes(searchQuery.toLowerCase())
 
-      const matchesStatus = filterStatus === 'all' || booking.status === filterStatus
+      // Check booking date status
+      const checkInDate = new Date(booking.check_in)
+      const checkOutDate = new Date(booking.check_out)
+      const today = new Date()
+      const checkIn = new Date(checkInDate.getFullYear(), checkInDate.getMonth(), checkInDate.getDate())
+      const checkOut = new Date(checkOutDate.getFullYear(), checkOutDate.getMonth(), checkOutDate.getDate())
+      const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+      const isCurrentlyStaying =
+        booking.status !== 'cancelled' &&
+        checkIn.getTime() <= todayNormalized.getTime() &&
+        checkOut.getTime() > todayNormalized.getTime()
+
+      const isUpcoming =
+        booking.status !== 'cancelled' &&
+        checkIn.getTime() > todayNormalized.getTime() &&
+        !isCurrentlyStaying
+
+      const isPast =
+        booking.status !== 'cancelled' &&
+        checkOut.getTime() <= todayNormalized.getTime() &&
+        !isCurrentlyStaying
+
+      // Filter by status
+      let matchesStatus = false
+      if (filterStatus === 'all') {
+        matchesStatus = true
+      } else if (filterStatus === 'currently_staying') {
+        matchesStatus = isCurrentlyStaying
+      } else if (filterStatus === 'upcoming') {
+        matchesStatus = isUpcoming
+      } else if (filterStatus === 'past') {
+        matchesStatus = isPast
+      } else {
+        matchesStatus = booking.status === filterStatus
+      }
 
       return matchesSearch && matchesStatus
     })
@@ -200,6 +235,9 @@ export default function MemberBookingsPage() {
                   className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 >
                   <option value="all">ทุกสถานะ</option>
+                  <option value="currently_staying">กำลังเข้าพัก</option>
+                  <option value="upcoming">กำลังจะมาถึง</option>
+                  <option value="past">ผ่านมาแล้ว</option>
                   <option value="confirmed">ยืนยันแล้ว</option>
                   <option value="pending">รอยืนยัน</option>
                   <option value="cancelled">ยกเลิก</option>
@@ -235,17 +273,6 @@ export default function MemberBookingsPage() {
                     booking.status !== 'cancelled' &&
                     checkIn.getTime() <= todayNormalized.getTime() &&
                     checkOut.getTime() > todayNormalized.getTime()
-
-                  // Debug log (remove in production)
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('Booking:', booking.id, {
-                      checkIn: checkIn.toISOString(),
-                      checkOut: checkOut.toISOString(),
-                      today: todayNormalized.toISOString(),
-                      status: booking.status,
-                      isCurrentlyStaying
-                    })
-                  }
 
                   // กำลังจะมาถึง: check-in ยังไม่มาถึง
                   const isUpcoming =

@@ -4,7 +4,7 @@ import Button from '../../components/Button'
 import Input from '../../components/Input'
 import Card from '../../components/Card'
 import Container from '../../components/layout/Container'
-import { 
+import {
   Lock,
   Eye,
   EyeOff,
@@ -20,15 +20,15 @@ import { userService } from '../../services/userService'
 // ฟังก์ชัน format เบอร์โทรศัพท์ให้มี "-"
 function formatPhoneNumber(phone) {
   if (!phone) return ''
-  
+
   // ลบ "-" และช่องว่างออกก่อน
   const cleaned = phone.replace(/[-\s]/g, '')
-  
+
   // ถ้าไม่ใช่ตัวเลขทั้งหมด ให้คืนค่าเดิม
   if (!/^\d+$/.test(cleaned)) {
     return phone
   }
-  
+
   // Format ตามรูปแบบเบอร์โทรศัพท์ไทย
   if (cleaned.startsWith('0')) {
     if (cleaned.length === 10) {
@@ -39,7 +39,7 @@ function formatPhoneNumber(phone) {
       return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 5)}-${cleaned.slice(5)}`
     }
   }
-  
+
   // ถ้าไม่ใช่รูปแบบที่รู้จัก ให้คืนค่าเดิม
   return phone
 }
@@ -52,7 +52,7 @@ function cleanPhoneNumber(phone) {
 
 export default function MemberSettingsPage() {
   const { changePassword, user, loadUserProfile } = useAuth()
-  
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -79,27 +79,27 @@ export default function MemberSettingsPage() {
     if (user) {
       // ตรวจสอบว่า phone ไม่ใช่ email และเป็น string ที่ถูกต้อง
       let phoneValue = user.phone || ''
-      
+
       // ถ้า phone มี @ แสดงว่าเป็น email ให้ล้างออก
       if (phoneValue && phoneValue.includes('@')) {
         phoneValue = ''
       }
-      
+
       // ถ้า phone เท่ากับ email ให้ล้างออก
       if (phoneValue && user.email && phoneValue === user.email) {
         phoneValue = ''
       }
-      
+
       // ถ้า phone เป็น email format (มี .com, .net, etc.) ให้ล้างออก
       if (phoneValue && (phoneValue.includes('.com') || phoneValue.includes('.net') || phoneValue.includes('.org'))) {
         phoneValue = ''
       }
-      
+
       // Format เบอร์โทรศัพท์ให้มี "-"
       if (phoneValue) {
         phoneValue = formatPhoneNumber(phoneValue)
       }
-      
+
       setProfileData({
         name: user.name || '',
         phone: phoneValue,
@@ -139,7 +139,7 @@ export default function MemberSettingsPage() {
         [field]: value
       }))
     }
-    
+
     // Clear error when user types
     if (profileErrors[field]) {
       setProfileErrors(prev => ({
@@ -152,11 +152,11 @@ export default function MemberSettingsPage() {
   const handleUpdateProfile = async () => {
     // Validation
     const errors = {}
-    
+
     if (!profileData.name || profileData.name.trim() === '') {
       errors.name = 'กรุณากรอกชื่อ'
     }
-    
+
     if (profileData.phone && profileData.phone.trim() !== '') {
       // Validate phone format (optional but if provided, should be valid)
       const phoneRegex = /^[0-9-+\s()]*$/
@@ -191,7 +191,7 @@ export default function MemberSettingsPage() {
       } else {
         // Reload user profile to update context
         await loadUserProfile(user.id)
-        
+
         Swal.fire({
           icon: 'success',
           title: 'อัปเดตข้อมูลสำเร็จ',
@@ -217,17 +217,17 @@ export default function MemberSettingsPage() {
   const handleChangePassword = async () => {
     // Validation
     const errors = {}
-    
+
     if (!passwordData.currentPassword) {
       errors.currentPassword = 'กรุณากรอกรหัสผ่านปัจจุบัน'
     }
-    
+
     if (!passwordData.newPassword) {
       errors.newPassword = 'กรุณากรอกรหัสผ่านใหม่'
     } else if (passwordData.newPassword.length < 6) {
       errors.newPassword = 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร'
     }
-    
+
     if (!passwordData.confirmPassword) {
       errors.confirmPassword = 'กรุณายืนยันรหัสผ่านใหม่'
     } else if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -252,7 +252,7 @@ export default function MemberSettingsPage() {
           newPassword: '',
           confirmPassword: '',
         })
-        
+
         Swal.fire({
           icon: 'success',
           title: 'เปลี่ยนรหัสผ่านสำเร็จ',
@@ -386,6 +386,13 @@ export default function MemberSettingsPage() {
               </div>
             </div>
 
+            {/* Notice Message */}
+            <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 p-4">
+              <p className="text-sm font-medium text-amber-800 text-center">
+                ⚠️ ฟีเจอร์นี้ยังไม่เปิดใช้งาน
+              </p>
+            </div>
+
             <div className="grid gap-6 md:grid-cols-2">
               {/* Current Password */}
               <div className="relative md:col-span-2">
@@ -400,6 +407,7 @@ export default function MemberSettingsPage() {
                   onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
                   className="pl-10 pr-10"
                   error={passwordErrors.currentPassword}
+                  disabled={true}
                 />
                 <button
                   type="button"
@@ -424,6 +432,7 @@ export default function MemberSettingsPage() {
                   onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
                   className="pl-10 pr-10"
                   error={passwordErrors.newPassword}
+                  disabled={true}
                 />
                 <button
                   type="button"
@@ -448,6 +457,7 @@ export default function MemberSettingsPage() {
                   onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
                   className="pl-10 pr-10"
                   error={passwordErrors.confirmPassword}
+                  disabled={true}
                 />
                 <button
                   type="button"
@@ -461,8 +471,8 @@ export default function MemberSettingsPage() {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <Button onClick={handleChangePassword} disabled={isLoadingPassword}>
-                <Save size={18} />
+              <Button onClick={handleChangePassword} disabled={true}>
+                <Lock size={18} />
                 {isLoadingPassword ? 'กำลังเปลี่ยนรหัสผ่าน...' : 'เปลี่ยนรหัสผ่าน'}
               </Button>
             </div>

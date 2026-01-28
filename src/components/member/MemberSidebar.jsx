@@ -41,20 +41,19 @@ export default function MemberSidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 flex flex-col`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0 flex flex-col`}
       >
         {/* Logo */}
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="p-6 border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
           onClick={onClose}
         >
           <div className="flex items-center gap-2">
             <Sparkles size={24} className="text-teal-600" />
             <h1 className="text-xl font-bold text-primary hover:text-teal-600 transition-colors">
-              บ้านพัก Prima
+              Prima Hotel
             </h1>
           </div>
         </Link>
@@ -69,11 +68,10 @@ export default function MemberSidebar({ isOpen, onClose }) {
                 key={item.path}
                 to={item.path}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                  active
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${active
                     ? 'bg-teal-50 text-teal-700 font-semibold'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 <Icon size={20} />
                 <span className="text-sm">{item.label}</span>

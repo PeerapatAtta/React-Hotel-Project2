@@ -52,7 +52,7 @@ export default function Header() {
             className="inline-flex items-center gap-2 text-xl font-bold text-primary hover:text-teal-600 transition-colors cursor-pointer"
           >
             <Sparkles size={24} className="text-accent" />
-            บ้านพัก Prima
+            Prima Hotel
           </a>
           <nav className="hidden items-center gap-2 text-sm font-semibold md:flex">
             {/* Skeleton nav items */}
@@ -95,7 +95,7 @@ export default function Header() {
           className="inline-flex items-center gap-2 text-xl font-bold text-primary hover:text-teal-600 transition-colors cursor-pointer"
         >
           <Sparkles size={24} className="text-accent" />
-          บ้านพัก Prima
+          Prima Hotel
         </a>
         <nav className="hidden items-center gap-2 text-sm font-semibold md:flex">
           <a

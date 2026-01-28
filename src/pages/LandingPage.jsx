@@ -173,7 +173,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <h1 className="text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl animate-fade-in" style={{ color: '#ffffff' }}>
-                  โรงแรม Prima — ที่พักใจกลางเมืองสำหรับทุกโอกาส
+                  Prima Hotel — ที่พักใจกลางเมืองสำหรับทุกโอกาส
                 </h1>
                 <p className="text-base leading-relaxed text-white md:text-lg opacity-90" style={{ color: '#ffffff' }}>
                   ออกแบบเพื่อผู้เข้าพักที่ชอบความสะดวกสบาย พร้อมบริการที่เข้าใจความต้องการของคุณ
@@ -242,7 +242,7 @@ export default function LandingPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-teal-900/20 to-transparent z-10" />
                   <img
                     src="https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1200&q=80"
-                    alt="โรงแรม Prima"
+                    alt="Prima Hotel"
                     className="h-64 w-full object-cover md:h-96 transition-transform duration-700 group-hover:scale-110"
                   />
                 </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { X, Calendar, Users, Mail, Phone, Home } from 'lucide-react'
 import Button from '../Button'
 import Input from '../Input'
@@ -10,15 +11,15 @@ import { useAuth } from '../../hooks/useAuth'
 // ฟังก์ชัน format เบอร์โทรศัพท์ให้มี "-"
 function formatPhoneNumber(phone) {
   if (!phone) return ''
-  
+
   // ลบ "-" และช่องว่างออกก่อน
   const cleaned = phone.replace(/[-\s]/g, '')
-  
+
   // ถ้าไม่ใช่ตัวเลขทั้งหมด ให้คืนค่าเดิม
   if (!/^\d+$/.test(cleaned)) {
     return phone
   }
-  
+
   // Format ตามรูปแบบเบอร์โทรศัพท์ไทย
   if (cleaned.startsWith('0')) {
     if (cleaned.length === 10) {
@@ -29,7 +30,7 @@ function formatPhoneNumber(phone) {
       return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 5)}-${cleaned.slice(5)}`
     }
   }
-  
+
   // ถ้าไม่ใช่รูปแบบที่รู้จัก ให้คืนค่าเดิม
   return phone
 }
@@ -42,6 +43,7 @@ function cleanPhoneNumber(phone) {
 
 export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     guest_name: user?.name || '',
     email: user?.email || '',
@@ -110,7 +112,7 @@ export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
     } else {
       setFormData(prev => ({ ...prev, [field]: value }))
     }
-    
+
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }))
     }
@@ -304,11 +306,14 @@ export default function BookingModal({ isOpen, onClose, onSuccess, room }) {
           text: 'การจองของคุณถูกส่งเรียบร้อยแล้ว รอการยืนยันจากทางโรงแรม',
           confirmButtonText: 'ตกลง',
           confirmButtonColor: '#0d9488',
+        }).then(() => {
+          handleClose()
+          if (onSuccess) {
+            onSuccess()
+          }
+          // Redirect ไปหน้า member dashboard
+          navigate('/member')
         })
-        handleClose()
-        if (onSuccess) {
-          onSuccess()
-        }
       }
     } catch (err) {
       console.error('Error:', err)

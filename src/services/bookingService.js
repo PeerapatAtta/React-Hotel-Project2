@@ -272,19 +272,33 @@ export const bookingService = {
    * ตรวจสอบห้องว่างในช่วงวันที่
    */
   async checkRoomAvailability(roomId, checkIn, checkOut) {
-    // ตรวจสอบว่ามีการจองที่ทับซ้อนหรือไม่
-    // ห้องไม่ว่างถ้า: check_in < checkOut และ check_out > checkIn
+    // ใช้ RPC function เพื่อ bypass RLS และตรวจสอบห้องว่างได้แม้ยังไม่ login
     const { data, error } = await supabase
-      .from('bookings')
-      .select('id')
-      .eq('room_id', roomId)
-      .in('status', ['confirmed', 'pending'])
-      .lt('check_in', checkOut)  // การจองเริ่มก่อนที่เราจะออก
-      .gt('check_out', checkIn)  // การจองจบหลังที่เราจะเข้า
+      .rpc('check_room_availability', {
+        p_room_id: roomId,
+        p_check_in: checkIn,
+        p_check_out: checkOut
+      })
+    
+    if (error) {
+      // ถ้า RPC function ไม่มี ให้ใช้วิธีเดิม (fallback)
+      const { data: bookings, error: bookingsError } = await supabase
+        .from('bookings')
+        .select('id')
+        .eq('room_id', roomId)
+        .in('status', ['confirmed', 'pending'])
+        .lt('check_in', checkOut)  // การจองเริ่มก่อนที่เราจะออก
+        .gt('check_out', checkIn)  // การจองจบหลังที่เราจะเข้า
+      
+      return { 
+        available: !bookings || bookings.length === 0,
+        error: bookingsError 
+      }
+    }
     
     return { 
-      available: !data || data.length === 0,
-      error 
+      available: data === true,
+      error: null 
     }
   },
 

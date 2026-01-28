@@ -193,7 +193,7 @@ export default function LandingPage() {
                   <div className="flex items-center gap-1.5">
                     <CheckCircle size={16} className="text-teal-200 flex-shrink-0" />
                     <span className="text-white" style={{ color: '#ffffff' }}>ราคาดีที่สุด</span>
-                  </div>
+                  </div>/
                 </div>
 
                 <div className="flex flex-wrap gap-3 pt-2 relative z-20">

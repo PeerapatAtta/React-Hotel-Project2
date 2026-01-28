@@ -105,31 +105,36 @@ export default function AdminBookingsPage() {
         (new Date(booking.check_in) <= new Date(filterDate) &&
           new Date(booking.check_out) >= new Date(filterDate))
 
-      // Filter by time status
+      // Filter by time status (ไม่นับ cancelled bookings)
       let matchesTimeStatus = true
       if (filterTimeStatus !== 'all') {
-        const checkIn = booking.check_in || booking.checkIn
-        const checkOut = booking.check_out || booking.checkOut
-        
-        if (checkIn && checkOut) {
-          const today = new Date()
-          today.setHours(0, 0, 0, 0)
-          
-          const checkInDate = new Date(checkIn)
-          checkInDate.setHours(0, 0, 0, 0)
-          
-          const checkOutDate = new Date(checkOut)
-          checkOutDate.setHours(0, 0, 0, 0)
-          
-          if (filterTimeStatus === 'past') {
-            matchesTimeStatus = checkOutDate < today
-          } else if (filterTimeStatus === 'ongoing') {
-            matchesTimeStatus = checkInDate <= today && checkOutDate >= today
-          } else if (filterTimeStatus === 'upcoming') {
-            matchesTimeStatus = checkInDate > today
-          }
+        // ถ้าเป็น cancelled ให้ผ่าน filter (แสดงได้) แต่จะไม่ถูกนับใน time status
+        if (booking.status === 'cancelled') {
+          matchesTimeStatus = true // แสดง cancelled bookings ได้
         } else {
-          matchesTimeStatus = false
+          const checkIn = booking.check_in || booking.checkIn
+          const checkOut = booking.check_out || booking.checkOut
+          
+          if (checkIn && checkOut) {
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+            
+            const checkInDate = new Date(checkIn)
+            checkInDate.setHours(0, 0, 0, 0)
+            
+            const checkOutDate = new Date(checkOut)
+            checkOutDate.setHours(0, 0, 0, 0)
+            
+            if (filterTimeStatus === 'past') {
+              matchesTimeStatus = checkOutDate < today
+            } else if (filterTimeStatus === 'ongoing') {
+              matchesTimeStatus = checkInDate <= today && checkOutDate >= today
+            } else if (filterTimeStatus === 'upcoming') {
+              matchesTimeStatus = checkInDate > today
+            }
+          } else {
+            matchesTimeStatus = false
+          }
         }
       }
 
@@ -217,7 +222,7 @@ export default function AdminBookingsPage() {
     const cancelled = filteredBookings.filter(b => b.status === 'cancelled').length
     const totalRevenue = filteredBookings
       .filter(b => b.status === 'confirmed')
-      .reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0)
+      .reduce((sum, b) => sum + parseFloat(b.total_price || b.totalPrice || 0), 0)
 
     return { confirmed, pending, cancelled, totalRevenue }
   }, [filteredBookings])

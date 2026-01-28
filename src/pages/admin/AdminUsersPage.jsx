@@ -187,7 +187,7 @@ export default function AdminUsersPage() {
 
     const result = { total, active, inactive, admins, members, regularUsers }
     return result
-  }, [filteredUsers, users])
+  }, [filteredUsers])
 
   const handleAddUser = () => {
     setIsAddModalOpen(true)

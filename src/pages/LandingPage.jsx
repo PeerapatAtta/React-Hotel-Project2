@@ -193,7 +193,7 @@ export default function LandingPage() {
                   <div className="flex items-center gap-1.5">
                     <CheckCircle size={16} className="text-teal-200 flex-shrink-0" />
                     <span className="text-white" style={{ color: '#ffffff' }}>ราคาดีที่สุด</span>
-                  </div>/
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap gap-3 pt-2 relative z-20">
@@ -351,9 +351,12 @@ export default function LandingPage() {
                     <Card hover className="p-0 bg-white shadow-lg h-full flex flex-col group cursor-pointer">
                       <div className="relative overflow-hidden">
                         <img
-                          src={room.images[0]}
-                          alt={room.name}
+                          src={room.images && room.images.length > 0 ? room.images[0] : 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80'}
+                          alt={room.name || 'ห้องพัก'}
                           className="h-52 w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          onError={(e) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=800&q=80'
+                          }}
                         />
                         <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1">
                           <Star size={12} className="text-yellow-400 fill-yellow-400" />
@@ -362,26 +365,28 @@ export default function LandingPage() {
                       </div>
                       <div className="space-y-4 p-6 flex-1 flex flex-col">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="text-lg font-semibold leading-tight text-primary group-hover:text-teal-600 transition-colors">{room.name}</h3>
+                          <h3 className="text-lg font-semibold leading-tight text-primary group-hover:text-teal-600 transition-colors">{room.name || 'ห้องพัก'}</h3>
                           <div className="flex items-center gap-1.5 text-slate-400">
                             <Bed size={16} className="flex-shrink-0" />
-                            <span className="text-xs font-medium uppercase tracking-wide">{room.type}</span>
+                            <span className="text-xs font-medium uppercase tracking-wide">{room.type || 'Standard'}</span>
                           </div>
                         </div>
                         <div className="space-y-2 flex-1">
-                          <IconLabel icon={Users} text={`รองรับ ${room.capacity} คน`} size={16} />
-                          <IconLabel iconText="฿" text={`เริ่มต้น ${formatPriceNumber(room.base_price || room.basePrice)}/คืน`} size={16} className="font-semibold text-teal-600" />
+                          <IconLabel icon={Users} text={`รองรับ ${room.capacity || 2} คน`} size={16} />
+                          <IconLabel iconText="฿" text={`เริ่มต้น ${formatPriceNumber(room.base_price || room.basePrice || 0)}/คืน`} size={16} className="font-semibold text-teal-600" />
                         </div>
-                        <div className="flex flex-wrap gap-2 pt-2">
-                          {room.amenities.slice(0, 3).map((amenity) => (
-                            <span
-                              key={amenity}
-                              className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700 border border-teal-100"
-                            >
-                              {amenity}
-                            </span>
-                          ))}
-                        </div>
+                        {room.amenities && room.amenities.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-2">
+                            {room.amenities.slice(0, 3).map((amenity, amenityIndex) => (
+                              <span
+                                key={amenityIndex}
+                                className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700 border border-teal-100"
+                              >
+                                {amenity}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <div className="pt-2 mt-auto">
                           <div className="flex items-center gap-2 text-sm font-semibold text-teal-600 group-hover:gap-3 transition-all">
                             <span>ดูรายละเอียด</span>

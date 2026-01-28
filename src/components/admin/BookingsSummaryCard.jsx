@@ -7,6 +7,7 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
   const stats = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
+    const todayStr = today.toISOString().split('T')[0]
 
     let total = bookings.length
     let pending = 0
@@ -38,13 +39,13 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
         const checkOutDate = new Date(checkOut)
         checkOutDate.setHours(0, 0, 0, 0)
 
-        // เช็กอินวันนี้
-        if (checkInDate.getTime() === today.getTime() && status !== 'cancelled') {
+        // เช็กอินวันนี้ (ใช้ todayStats ถ้ามี หรือคำนวณเอง)
+        if (checkIn === todayStr && status !== 'cancelled') {
           checkInsToday++
         }
 
-        // เช็กเอาต์วันนี้
-        if (checkOutDate.getTime() === today.getTime() && status !== 'cancelled') {
+        // เช็กเอาต์วันนี้ (ใช้ todayStats ถ้ามี หรือคำนวณเอง)
+        if (checkOut === todayStr && status !== 'cancelled') {
           checkOutsToday++
         }
 
@@ -65,14 +66,13 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
       // การจองใหม่วันนี้
       const createdAt = booking.created_at || booking.createdAt
       if (createdAt) {
-        const createdDate = new Date(createdAt)
-        createdDate.setHours(0, 0, 0, 0)
-        if (createdDate.getTime() === today.getTime()) {
+        if (createdAt.startsWith(todayStr)) {
           newBookingsToday++
         }
       }
     })
 
+    // ใช้ todayStats ถ้ามี (จาก getBookingStatistics) เพื่อความถูกต้อง
     return {
       total,
       pending,
@@ -81,11 +81,11 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
       ongoing,
       upcoming,
       past,
-      checkInsToday,
-      checkOutsToday,
-      newBookingsToday,
+      checkInsToday: todayStats.checkIns !== undefined ? todayStats.checkIns : checkInsToday,
+      checkOutsToday: todayStats.checkOuts !== undefined ? todayStats.checkOuts : checkOutsToday,
+      newBookingsToday: todayStats.newBookings !== undefined ? todayStats.newBookings : newBookingsToday,
     }
-  }, [bookings])
+  }, [bookings, todayStats])
 
   return (
     <div className="rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">

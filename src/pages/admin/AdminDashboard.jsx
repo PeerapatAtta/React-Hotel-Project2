@@ -1,33 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
-import StatCard from '../../components/admin/StatCard'
 import BookingsSummaryCard from '../../components/admin/BookingsSummaryCard'
-import RevenueChart from '../../components/admin/RevenueChart'
+import RevenueSummaryCard from '../../components/admin/RevenueSummaryCard'
+import RoomsSummaryCard from '../../components/admin/RoomsSummaryCard'
 import { bookingService } from '../../services/bookingService'
-import { Home } from 'lucide-react'
+import { roomService } from '../../services/roomService'
 import LoadingSpinner from '../../components/LoadingSpinner'
-
-// Custom Thai Baht icon component
-const BathIcon = ({ size = 24, className = '' }) => (
-  <div 
-    className={className}
-    style={{ 
-      fontSize: `${size * 0.85}px`,
-      lineHeight: 1,
-      fontWeight: 'bold',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: `${size}px`,
-      height: `${size}px`
-    }}
-  >
-    ฿
-  </div>
-)
 
 export default function AdminDashboard() {
   const [bookings, setBookings] = useState([])
+  const [rooms, setRooms] = useState([])
   const [statistics, setStatistics] = useState({
     totalRevenue: 0,
     totalBookings: 0,
@@ -48,29 +30,72 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       setLoading(true)
       try {
-        const [bookingsResult, statsResult] = await Promise.all([
+        const [bookingsResult, statsResult, roomsResult] = await Promise.all([
           bookingService.getAllBookings(),
           bookingService.getBookingStatistics(),
+          roomService.getAllRooms(),
         ])
+
+        let bookingsData = []
+        let roomsData = []
 
         if (bookingsResult.error) {
           console.error('Error fetching bookings:', bookingsResult.error)
           setBookings([])
         } else if (bookingsResult.data) {
-          setBookings(Array.isArray(bookingsResult.data) ? bookingsResult.data : [])
+          bookingsData = Array.isArray(bookingsResult.data) ? bookingsResult.data : []
+          setBookings(bookingsData)
+        }
+
+        if (roomsResult.error) {
+          console.error('Error fetching rooms:', roomsResult.error)
+          setRooms([])
+        } else if (roomsResult.data) {
+          roomsData = Array.isArray(roomsResult.data) ? roomsResult.data : []
+          setRooms(roomsData)
         }
 
         if (statsResult.error) {
           console.error('Error fetching statistics:', statsResult.error)
         } else if (statsResult.data) {
+          // คำนวณ availableRooms และ occupancyRate จากข้อมูลจริง
+          const totalRooms = roomsData.length
+          const today = new Date().toISOString().split('T')[0]
+          
+          // หาห้องที่ถูกจองในวันนี้ (confirmed หรือ pending และอยู่ในช่วงวันที่)
+          const bookedRoomIds = new Set()
+          bookingsData.forEach(booking => {
+            if (booking.status === 'confirmed' || booking.status === 'pending') {
+              const checkIn = booking.check_in || booking.checkIn
+              const checkOut = booking.check_out || booking.checkOut
+              
+              if (checkIn && checkOut) {
+                // ตรวจสอบว่าการจองทับกับวันนี้หรือไม่
+                if (checkIn <= today && checkOut > today) {
+                  const roomId = booking.room_id || booking.roomId
+                  if (roomId) {
+                    bookedRoomIds.add(roomId)
+                  }
+                }
+              }
+            }
+          })
+          
+          const bookedRooms = bookedRoomIds.size
+          const availableRooms = Math.max(0, totalRooms - bookedRooms)
+          const occupancyRate = totalRooms > 0 ? Math.round((bookedRooms / totalRooms) * 100) : 0
+
           setStatistics({
             ...statsResult.data,
             monthlyRevenue: statsResult.data.monthlyRevenue || [],
+            availableRooms,
+            occupancyRate,
           })
         }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
         setBookings([])
+        setRooms([])
       } finally {
         setLoading(false)
       }
@@ -97,37 +122,28 @@ export default function AdminDashboard() {
           <p className="text-slate-600 mt-1">ภาพรวมการจัดการโรงแรม</p>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <StatCard
-            title="รายได้รวม"
-            value={`฿${Math.round(statistics.totalRevenue || 0).toLocaleString()}`}
-            icon={BathIcon}
-            trend="+12.5% จากเดือนที่แล้ว"
-            trendUp={true}
-          />
-          <StatCard
-            title="ห้องว่าง"
-            value={statistics.availableRooms}
-            icon={Home}
-            trend={`${statistics.occupancyRate}% ถูกจอง`}
-            trendUp={false}
-          />
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-600 mb-1">รายได้วันนี้</p>
-            <p className="text-2xl font-bold text-primary">
-              ฿{Math.round(statistics.todayStats.revenue || 0).toLocaleString()}
-            </p>
-          </div>
-        </div>
-
-        {/* Charts */}
-        <RevenueChart data={statistics.monthlyRevenue || []} />
-
         {/* Bookings Summary Card */}
         <BookingsSummaryCard bookings={bookings} todayStats={statistics.todayStats} />
+
+        {/* Summary Cards Grid */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Revenue Summary Card */}
+          <RevenueSummaryCard
+            totalRevenue={statistics.totalRevenue}
+            todayRevenue={statistics.todayStats.revenue}
+            monthlyRevenue={statistics.monthlyRevenue}
+            totalBookings={statistics.totalBookings}
+          />
+
+          {/* Rooms Summary Card */}
+          <RoomsSummaryCard
+            rooms={rooms}
+            availableRooms={statistics.availableRooms}
+            occupancyRate={statistics.occupancyRate}
+            activeBookings={statistics.activeBookings}
+          />
+        </div>
       </div>
     </AdminLayout>
   )
 }
-

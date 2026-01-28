@@ -361,7 +361,10 @@ export const bookingService = {
         const checkOut = b.check_out || b.checkOut
         return checkOut === today && b.status !== 'cancelled'
       }).length,
-      newBookings: bookings.filter(b => b.created_at?.startsWith(today)).length,
+      // การจองใหม่วันนี้: นับเฉพาะ confirmed และ pending (ไม่นับ cancelled)
+      newBookings: bookings.filter(b => {
+        return b.created_at?.startsWith(today) && b.status !== 'cancelled'
+      }).length,
       revenue: bookings
         .filter(b => b.created_at?.startsWith(today) && b.status === 'confirmed')
         .reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0),

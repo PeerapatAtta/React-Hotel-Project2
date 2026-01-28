@@ -63,9 +63,9 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
         }
       }
 
-      // การจองใหม่วันนี้
+      // การจองใหม่วันนี้ (ไม่นับ cancelled)
       const createdAt = booking.created_at || booking.createdAt
-      if (createdAt) {
+      if (createdAt && status !== 'cancelled') {
         if (createdAt.startsWith(todayStr)) {
           newBookingsToday++
         }
@@ -187,7 +187,7 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
           <div className="flex items-center gap-2 mb-4">
             <Clock size={18} className="text-slate-500" />
             <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-               สถานะการเข้าพัก
+              สถานะการเข้าพัก
             </h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

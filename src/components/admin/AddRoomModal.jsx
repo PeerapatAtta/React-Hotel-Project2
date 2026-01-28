@@ -7,18 +7,11 @@ import { supabase } from '../../lib/supabaseClient'
 import Swal from 'sweetalert2'
 
 const AMENITY_OPTIONS = [
-  'Wi-Fi ความเร็วสูง',
-  'เครื่องปรับอากาศ',
-  'โทรทัศน์',
-  'ตู้เย็น',
-  'ห้องน้ำในตัว',
-  'ระเบียง',
-  'ตู้เซฟ',
-  'ไมโครเวฟ',
-  'กาต้มน้ำ',
-  'เครื่องเป่าผม',
-  'ชุดเครื่องนอนคุณภาพ',
-  'ห้องนั่งเล่น',
+  'เตียงใหญ่',
+  'เตียงเดี่ยว',
+  'ฟรี Wi-Fi',
+  'มินิบาร์',
+  'ห้องน้ำส่วนตัว',
   'อื่นๆ'
 ]
 
@@ -570,7 +563,7 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }) {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               ความสะดวก * {errors.amenities && <span className="text-red-600">({errors.amenities})</span>}
             </label>
-            <p className="mb-2 text-sm text-slate-500">เลือกความสะดวกที่ต้องการ (เช่น Wi-Fi ความเร็วสูง)</p>
+            <p className="mb-2 text-sm text-slate-500">เลือกความสะดวกที่ต้องการ (เช่น เตียงใหญ่, ฟรี Wi-Fi)</p>
             <div className="space-y-2">
               {formData.amenities.map((amenity, index) => (
                 <div key={index} className="flex gap-2">

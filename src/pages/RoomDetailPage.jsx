@@ -31,8 +31,8 @@ function RoomImage({ src, alt, className }) {
           </div>
         </div>
       ) : (
-        <img 
-          src={imageUrl} 
+        <img
+          src={imageUrl}
           alt={alt}
           className={`object-cover transition-transform duration-300 hover:scale-105 ${className}`}
           onError={() => setImageError(true)}
@@ -62,11 +62,11 @@ export default function RoomDetailPage() {
 
       setLoading(true)
       setError(null)
-      
+
       try {
         const decodedId = decodeURIComponent(id)
         const { data, error: fetchError } = await roomService.getRoomById(decodedId)
-        
+
         if (fetchError) {
           console.error('Error fetching room:', fetchError)
           setError(fetchError.message)
@@ -171,17 +171,17 @@ export default function RoomDetailPage() {
                     title={room.name}
                   />
                   <div className="flex flex-wrap items-center gap-5 pt-1">
-                    <IconLabel 
-                      icon={Bed} 
+                    <IconLabel
+                      icon={Bed}
                       text={room.type}
                       size={18}
                     />
-                    <IconLabel 
-                      icon={Users} 
+                    <IconLabel
+                      icon={Users}
                       text={`รองรับสูงสุด ${room.capacity} คน`}
                       size={18}
                     />
-                    <IconLabel 
+                    <IconLabel
                       iconText="฿"
                       text={`${formatPriceNumber(room.base_price || room.basePrice)} / คืน`}
                       size={18}
@@ -203,11 +203,11 @@ export default function RoomDetailPage() {
           {/* Image Gallery */}
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {(room.images || []).map((src, index) => (
-              <div 
-                key={`${src}-${index}`} 
+              <div
+                key={`${src}-${index}`}
                 className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm"
               >
-                <RoomImage 
+                <RoomImage
                   src={src}
                   alt={`${room.name} - ภาพ ${index + 1}`}
                   className="h-64 w-full md:h-72"
@@ -235,7 +235,7 @@ export default function RoomDetailPage() {
                 {(room.amenities || []).map((amenity) => (
                   <div
                     key={amenity}
-                    className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-5 transition-colors hover:bg-slate-100"
+                    className="flex items-center rounded-xl border border-slate-100 bg-slate-50 p-5 transition-colors hover:bg-slate-100"
                   >
                     <div className="flex items-center gap-3">
                       <div className="rounded-lg bg-white p-2">
@@ -243,7 +243,6 @@ export default function RoomDetailPage() {
                       </div>
                       <p className="text-sm font-semibold text-slate-700">{amenity}</p>
                     </div>
-                    <Badge className="bg-white text-xs text-slate-500">พร้อมใช้งาน</Badge>
                   </div>
                 ))}
               </div>

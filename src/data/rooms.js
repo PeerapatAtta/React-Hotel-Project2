@@ -62,7 +62,7 @@ export const rooms = [
       'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1000&q=80',
       'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1000&q=80',
     ],
-    amenities: ['ห้องน้ำสปา', 'Wi-Fi ความเร็วสูง', 'บริการรองเท้า', 'ชุดเครื่องครัว', 'บริการต้อนรับส่วนตัว'],
+    amenities: ['ห้องน้ำ', 'Wi-Fi ความเร็วสูง', 'บริการรองเท้า', 'ชุดเครื่องครัว', 'บริการต้อนรับส่วนตัว'],
   },
   {
     id: 'standard-room',

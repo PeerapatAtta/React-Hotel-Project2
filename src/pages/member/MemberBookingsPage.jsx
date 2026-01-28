@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Filter, Calendar, CheckCircle, Clock, X } from 'lucide-react'
+import { Search, Filter, Calendar, CheckCircle, Clock, X, List, LogIn } from 'lucide-react'
 import MemberLayout from '../../components/member/MemberLayout'
 import Card from '../../components/Card'
 import Container from '../../components/layout/Container'
@@ -125,18 +125,51 @@ export default function MemberBookingsPage() {
     })
   }, [memberBookings, searchQuery, filterStatus])
 
-  // Calculate statistics
-  const stats = useMemo(() => {
-    const confirmed = filteredBookings.filter(b => b.status === 'confirmed').length
-    const pending = filteredBookings.filter(b => b.status === 'pending').length
-    const cancelled = filteredBookings.filter(b => b.status === 'cancelled').length
-    const upcoming = filteredBookings.filter(b => {
+  // Calculate statistics - แบ่งตามช่วงเวลา
+  const timeStats = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    // กรองเฉพาะการจองที่ไม่ใช่ cancelled
+    const activeBookings = memberBookings.filter(b => b.status !== 'cancelled')
+    
+    const arrivedBookings = activeBookings.filter(b => {
       const checkIn = new Date(b.check_in)
-      return checkIn >= new Date() && b.status !== 'cancelled'
-    }).length
+      checkIn.setHours(0, 0, 0, 0)
+      const checkOut = new Date(b.check_out)
+      checkOut.setHours(0, 0, 0, 0)
+      return checkIn <= today && checkOut >= today
+    })
+    
+    const upcomingBookings = activeBookings.filter(b => {
+      const checkIn = new Date(b.check_in)
+      checkIn.setHours(0, 0, 0, 0)
+      return checkIn > today
+    })
+    
+    const pastBookings = activeBookings.filter(b => {
+      const checkOut = new Date(b.check_out)
+      checkOut.setHours(0, 0, 0, 0)
+      return checkOut < today
+    })
 
-    return { confirmed, pending, cancelled, upcoming }
-  }, [filteredBookings])
+    return {
+      total: activeBookings.length,
+      arrived: arrivedBookings.length,
+      upcoming: upcomingBookings.length,
+      past: pastBookings.length
+    }
+  }, [memberBookings])
+
+  // Calculate statistics - แบ่งตามสถานะ
+  const statusStats = useMemo(() => {
+    const total = memberBookings.length
+    const confirmed = memberBookings.filter(b => b.status === 'confirmed').length
+    const pending = memberBookings.filter(b => b.status === 'pending').length
+    const cancelled = memberBookings.filter(b => b.status === 'cancelled').length
+
+    return { total, confirmed, pending, cancelled }
+  }, [memberBookings])
 
   const getStatusBadge = (status) => {
     const styles = {
@@ -188,56 +221,110 @@ export default function MemberBookingsPage() {
             <p className="text-slate-600 mt-1">ดูและจัดการการจองทั้งหมดของคุณ</p>
           </div>
 
-          {/* Stats Summary */}
-          <div className="grid gap-4 md:grid-cols-4">
-            <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">ยืนยันแล้ว</p>
-                  <p className="text-2xl font-bold text-green-600 mt-1">{stats.confirmed}</p>
-                </div>
-                <div className="rounded-xl bg-green-50 p-3">
-                  <CheckCircle size={20} className="text-green-600" />
-                </div>
-              </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">รอยืนยัน</p>
-                  <p className="text-2xl font-bold text-yellow-600 mt-1">{stats.pending}</p>
-                </div>
-                <div className="rounded-xl bg-yellow-50 p-3">
-                  <Clock size={20} className="text-yellow-600" />
+          {/* Stats Summary - แบ่งตามช่วงเวลา */}
+          <Card className="p-6 mt-6 mb-6">
+            <h2 className="text-lg font-semibold text-slate-700 mb-4">สรุปการจองตามช่วงเวลา</h2>
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">การจองทั้งหมด</p>
+                    <p className="text-2xl font-bold text-slate-700 mt-1">{timeStats.total}</p>
+                  </div>
+                  <div className="rounded-xl bg-teal-50 p-3">
+                    <Calendar size={20} className="text-teal-600" />
+                  </div>
                 </div>
               </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">ยกเลิก</p>
-                  <p className="text-2xl font-bold text-red-600 mt-1">{stats.cancelled}</p>
-                </div>
-                <div className="rounded-xl bg-red-50 p-3">
-                  <X size={20} className="text-red-600" />
-                </div>
-              </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-600">กำลังจะมาถึง</p>
-                  <p className="text-2xl font-bold text-teal-600 mt-1">{stats.upcoming}</p>
-                </div>
-                <div className="rounded-xl bg-teal-50 p-3">
-                  <Calendar size={20} className="text-teal-600" />
+              <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">การจองที่กำลังเข้าพัก</p>
+                    <p className="text-2xl font-bold text-emerald-600 mt-1">{timeStats.arrived}</p>
+                  </div>
+                  <div className="rounded-xl bg-emerald-50 p-3">
+                    <LogIn size={20} className="text-emerald-600" />
+                  </div>
                 </div>
               </div>
-            </Card>
-          </div>
+              <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">การจองที่กำลังจะมาถึง</p>
+                    <p className="text-2xl font-bold text-amber-600 mt-1">{timeStats.upcoming}</p>
+                  </div>
+                  <div className="rounded-xl bg-amber-50 p-3">
+                    <Clock size={20} className="text-amber-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">การจองที่ผ่านมา</p>
+                    <p className="text-2xl font-bold text-slate-600 mt-1">{timeStats.past}</p>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 p-3">
+                    <CheckCircle size={20} className="text-slate-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Stats Summary - แบ่งตามสถานะ */}
+          <Card className="p-6 mt-6 mb-6">
+            <h2 className="text-lg font-semibold text-slate-700 mb-4">สรุปการจองตามสถานะ</h2>
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">การจองทั้งหมด</p>
+                    <p className="text-2xl font-bold text-slate-700 mt-1">{statusStats.total}</p>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 p-3">
+                    <List size={20} className="text-slate-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">ยืนยันแล้ว</p>
+                    <p className="text-2xl font-bold text-emerald-600 mt-1">{statusStats.confirmed}</p>
+                  </div>
+                  <div className="rounded-xl bg-emerald-50 p-3">
+                    <CheckCircle size={20} className="text-emerald-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">รอยืนยัน</p>
+                    <p className="text-2xl font-bold text-amber-600 mt-1">{statusStats.pending}</p>
+                  </div>
+                  <div className="rounded-xl bg-amber-50 p-3">
+                    <Clock size={20} className="text-amber-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg border border-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">ยกเลิก</p>
+                    <p className="text-2xl font-bold text-rose-600 mt-1">{statusStats.cancelled}</p>
+                  </div>
+                  <div className="rounded-xl bg-rose-50 p-3">
+                    <X size={20} className="text-rose-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
 
           {/* Search and Filter */}
-          <Card className="p-6">
+          <Card className="p-6 mt-6 mb-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="relative">
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -277,7 +364,7 @@ export default function MemberBookingsPage() {
             </div>
 
             {filteredBookings.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-4 mt-6">
                 {filteredBookings.map((booking) => {
                   const checkIn = new Date(booking.check_in)
                   const checkOut = new Date(booking.check_out)

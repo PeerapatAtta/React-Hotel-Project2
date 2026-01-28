@@ -76,16 +76,16 @@ export default function AdminBookingsPage() {
             matchesSearch = roomName.toLowerCase().includes(queryLower)
             break
           case 'creator_name':
-            // ค้นหาตามชื่อผู้สร้าง (จาก profiles)
-            const creatorName = (booking.profiles?.name || '').toLowerCase()
-            const creatorEmail = (booking.profiles?.email || '').toLowerCase()
+            // ค้นหาตามชื่อผู้สร้าง
+            const creatorName = ((booking.creatorName || booking.creator_name || booking.profiles?.name) || '').toLowerCase()
+            const creatorEmail = ((booking.creatorEmail || booking.creator_email || booking.profiles?.email) || '').toLowerCase()
             matchesSearch = creatorName.includes(queryLower) || creatorEmail.includes(queryLower)
             break
           case 'all':
           default:
             // ค้นหาทั้งหมด
-            const creatorNameAll = (booking.profiles?.name || '').toLowerCase()
-            const creatorEmailAll = (booking.profiles?.email || '').toLowerCase()
+            const creatorNameAll = ((booking.creatorName || booking.creator_name || booking.profiles?.name) || '').toLowerCase()
+            const creatorEmailAll = ((booking.creatorEmail || booking.creator_email || booking.profiles?.email) || '').toLowerCase()
             matchesSearch =
               booking.id?.toLowerCase().includes(queryLower) ||
               guestName.toLowerCase().includes(queryLower) ||

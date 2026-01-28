@@ -10,7 +10,7 @@ export const bookingService = {
       .from('bookings')
       .select('*')
       .order('created_at', { ascending: false })
-    
+
     if (bookingsError) {
       console.error('Error fetching bookings:', bookingsError)
       return { data: null, error: bookingsError }
@@ -39,7 +39,7 @@ export const bookingService = {
     const bookingsWithDetails = bookings.map(booking => {
       const room = rooms?.find(r => r.id === booking.room_id)
       const profile = profiles?.find(p => p.id === booking.user_id)
-      
+
       return {
         ...booking,
         roomName: room?.name || booking.room_name,
@@ -48,6 +48,10 @@ export const bookingService = {
         guestName: booking.guest_name,
         creatorName: profile?.name,
         creatorEmail: profile?.email,
+        profiles: profile ? {
+          name: profile.name,
+          email: profile.email
+        } : null,
       }
     })
 
@@ -66,7 +70,7 @@ export const bookingService = {
       `)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-    
+
     return { data, error }
   },
 
@@ -80,7 +84,7 @@ export const bookingService = {
       .select('*')
       .eq('id', id)
       .single()
-    
+
     if (bookingError) {
       console.error('Error fetching booking:', bookingError)
       return { data: null, error: bookingError }
@@ -131,12 +135,12 @@ export const bookingService = {
     let bookingId = 'BK001'
     let attempts = 0
     const maxAttempts = 10
-    
+
     while (attempts < maxAttempts) {
       // ใช้ RPC function เพื่อดึง max booking ID (bypass RLS)
       const { data: maxIdResult, error: maxIdError } = await supabase
         .rpc('get_max_booking_id')
-      
+
       if (maxIdError) {
         // ถ้า RPC function ไม่มี ให้ใช้วิธีเดิม (fallback)
         const { data: currentBookings } = await supabase
@@ -144,7 +148,7 @@ export const bookingService = {
           .select('id')
           .order('created_at', { ascending: false })
           .limit(100)
-        
+
         if (currentBookings && currentBookings.length > 0) {
           const maxId = currentBookings.reduce((max, b) => {
             const match = b.id.match(/^BK(\d+)$/)
@@ -159,18 +163,18 @@ export const bookingService = {
       } else {
         bookingId = maxIdResult || 'BK001'
       }
-      
+
       // ตรวจสอบว่า ID นี้มีอยู่แล้วหรือไม่ (ใช้ RPC function ที่ bypass RLS)
       const { data: checkExistsResult, error: checkExistsError } = await supabase
         .rpc('check_booking_id_exists', { booking_id: bookingId })
-      
+
       const idExists = checkExistsError ? false : (checkExistsResult === true)
-      
+
       if (!idExists) {
         // ID นี้ยังไม่มี ใช้ได้
         break
       }
-      
+
       // ID มีอยู่แล้ว ลองครั้งถัดไป (เพิ่ม ID)
       const match = bookingId.match(/^BK(\d+)$/)
       if (match) {
@@ -179,10 +183,10 @@ export const bookingService = {
       } else {
         bookingId = 'BK001'
       }
-      
+
       attempts++
     }
-    
+
     if (attempts >= maxAttempts) {
       return {
         data: null,
@@ -206,19 +210,19 @@ export const bookingService = {
       total_price: booking.total_price,
       status: booking.status || 'pending',
     }
-    
+
     const { data, error } = await supabase
       .from('bookings')
       .insert(insertPayload)
       .select()
       .single()
-    
+
     // ถ้าเกิด duplicate key error ให้ retry (แต่ควรจะไม่เกิดเพราะเราเช็คแล้ว)
     if (error && error.code === '23505') {
       // Log error for debugging (optional - can remove if not needed)
       console.error('Duplicate key error despite check:', { bookingId, error })
     }
-    
+
     return { data, error }
   },
 
@@ -228,14 +232,14 @@ export const bookingService = {
   async updateBookingStatus(id, status) {
     const { data, error } = await supabase
       .from('bookings')
-      .update({ 
-        status, 
-        updated_at: new Date().toISOString() 
+      .update({
+        status,
+        updated_at: new Date().toISOString()
       })
       .eq('id', id)
       .select()
       .single()
-    
+
     return { data, error }
   },
 
@@ -252,7 +256,7 @@ export const bookingService = {
       .eq('id', id)
       .select()
       .single()
-    
+
     return { data, error }
   },
 
@@ -264,7 +268,7 @@ export const bookingService = {
       .from('bookings')
       .delete()
       .eq('id', id)
-    
+
     return { error }
   },
 
@@ -279,7 +283,7 @@ export const bookingService = {
         p_check_in: checkIn,
         p_check_out: checkOut
       })
-    
+
     if (error) {
       // ถ้า RPC function ไม่มี ให้ใช้วิธีเดิม (fallback)
       const { data: bookings, error: bookingsError } = await supabase
@@ -289,16 +293,16 @@ export const bookingService = {
         .in('status', ['confirmed', 'pending'])
         .lt('check_in', checkOut)  // การจองเริ่มก่อนที่เราจะออก
         .gt('check_out', checkIn)  // การจองจบหลังที่เราจะเข้า
-      
-      return { 
+
+      return {
         available: !bookings || bookings.length === 0,
-        error: bookingsError 
+        error: bookingsError
       }
     }
-    
-    return { 
+
+    return {
       available: data === true,
-      error: null 
+      error: null
     }
   },
 
@@ -366,23 +370,23 @@ export const bookingService = {
     // คำนวณ monthlyRevenue (ย้อนหลัง 6 เดือน)
     const monthlyRevenue = []
     const monthNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
-    
+
     for (let i = 5; i >= 0; i--) {
       const date = new Date()
       date.setMonth(date.getMonth() - i)
       const year = date.getFullYear()
       const month = date.getMonth()
-      
+
       const monthRevenueAmount = bookings
         .filter(b => {
           if (!b.created_at) return false
           const bookingDate = new Date(b.created_at)
-          return bookingDate.getFullYear() === year && 
-                 bookingDate.getMonth() === month &&
-                 b.status === 'confirmed'
+          return bookingDate.getFullYear() === year &&
+            bookingDate.getMonth() === month &&
+            b.status === 'confirmed'
         })
         .reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0)
-      
+
       monthlyRevenue.push({
         month: monthNames[month],
         revenue: monthRevenueAmount

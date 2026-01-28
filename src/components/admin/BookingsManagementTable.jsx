@@ -369,6 +369,8 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
               const checkOut = booking.checkOut || booking.check_out
               const totalPrice = booking.totalPrice || booking.total_price
               const createdAt = booking.createdAt || booking.created_at
+              const creatorName = booking.creatorName || booking.creator_name || booking.profiles?.name
+              const creatorEmail = booking.creatorEmail || booking.creator_email || booking.profiles?.email
 
               return (
                 <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
@@ -444,10 +446,10 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   <td className="px-6 py-4">
                     <div>
                       <p className="text-sm font-medium text-slate-700">
-                        {booking.profiles?.name || booking.profiles?.email || '-'}
+                        {creatorName || creatorEmail || '-'}
                       </p>
-                      {booking.profiles?.email && booking.profiles?.name && (
-                        <p className="text-xs text-slate-500 mt-1">{booking.profiles.email}</p>
+                      {creatorEmail && creatorName && (
+                        <p className="text-xs text-slate-500 mt-1">{creatorEmail}</p>
                       )}
                     </div>
                   </td>

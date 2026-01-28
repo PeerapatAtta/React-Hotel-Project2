@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, Home } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, Home, Shield, User, Copy } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import Button from '../components/Button'
 import Input from '../components/Input'
@@ -15,6 +15,15 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  const handleFillCredentials = (email, password) => {
+    setFormData({ email, password })
+    setErrors({})
+  }
+
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text)
+  }
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -58,10 +67,10 @@ export default function LoginPage() {
       if (result.success) {
         // Determine redirect path based on user role from login result
         const userRole = result.user?.role
-        const redirectPath = searchParams.get('returnUrl') || 
-          (userRole === 'admin' ? '/admin' : 
-           userRole === 'member' ? '/member' : '/')
-        
+        const redirectPath = searchParams.get('returnUrl') ||
+          (userRole === 'admin' ? '/admin' :
+            userRole === 'member' ? '/member' : '/')
+
         console.log('[LoginPage] Login successful, navigating to:', redirectPath, 'user role:', userRole) // Redirect ไปที่ dashboard ตาม role หรือ returnUrl ถ้ามี
         navigate(redirectPath)
       } else {
@@ -167,6 +176,103 @@ export default function LoginPage() {
                 <Home size={16} />
                 <span>กลับหน้าแรก</span>
               </Link>
+            </div>
+          </div>
+        </Card>
+
+        {/* Test Credentials Card */}
+        <Card className="max-w-md mx-auto mt-6 p-6 shadow-xl border-2 border-amber-200 bg-amber-50/50">
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold text-slate-800 text-center">
+              ข้อมูลสำหรับทดสอบเว็บไซต์เท่านั้น
+            </h3>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Card 1: ผู้จัดการโรงแรม */}
+            <div className="bg-white rounded-lg border border-purple-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2 mb-3">
+                <Shield size={20} className="text-purple-600" />
+                <h4 className="font-semibold text-slate-700">ผู้จัดการโรงแรม</h4>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-slate-600">อีเมล:</span>
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs text-slate-800">admin@gmail.com</span>
+                    <button
+                      onClick={() => handleCopy('admin@gmail.com')}
+                      className="text-slate-400 hover:text-teal-600 transition-colors"
+                      title="คัดลอก"
+                    >
+                      <Copy size={14} />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-slate-600">รหัสผ่าน:</span>
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs text-slate-800">Admin1234th</span>
+                    <button
+                      onClick={() => handleCopy('Admin1234th')}
+                      className="text-slate-400 hover:text-teal-600 transition-colors"
+                      title="คัดลอก"
+                    >
+                      <Copy size={14} />
+                    </button>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => handleFillCredentials('admin@gmail.com', 'Admin1234th')}
+                  className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-sm py-2"
+                  size="sm"
+                >
+                  ใช้ข้อมูลนี้
+                </Button>
+              </div>
+            </div>
+
+            {/* Card 2: สมาชิก */}
+            <div className="bg-white rounded-lg border border-blue-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2 mb-3">
+                <User size={20} className="text-blue-600" />
+                <h4 className="font-semibold text-slate-700">สมาชิก</h4>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-slate-600">อีเมล:</span>
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs text-slate-800">member@gmail.com</span>
+                    <button
+                      onClick={() => handleCopy('member@gmail.com')}
+                      className="text-slate-400 hover:text-teal-600 transition-colors"
+                      title="คัดลอก"
+                    >
+                      <Copy size={14} />
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-slate-600">รหัสผ่าน:</span>
+                  <div className="flex items-center gap-1">
+                    <span className="font-mono text-xs text-slate-800">member1234</span>
+                    <button
+                      onClick={() => handleCopy('member1234')}
+                      className="text-slate-400 hover:text-teal-600 transition-colors"
+                      title="คัดลอก"
+                    >
+                      <Copy size={14} />
+                    </button>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => handleFillCredentials('member@gmail.com', 'member1234')}
+                  className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-sm py-2"
+                  size="sm"
+                >
+                  ใช้ข้อมูลนี้
+                </Button>
+              </div>
             </div>
           </div>
         </Card>

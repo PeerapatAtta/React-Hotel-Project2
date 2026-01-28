@@ -347,8 +347,16 @@ export const bookingService = {
 
     const today = new Date().toISOString().split('T')[0]
     const todayStats = {
-      checkIns: bookings.filter(b => b.check_in === today && b.status === 'confirmed').length,
-      checkOuts: bookings.filter(b => b.check_out === today && b.status === 'confirmed').length,
+      // เช็กอินวันนี้: นับเฉพาะ confirmed และ pending (ไม่นับ cancelled)
+      checkIns: bookings.filter(b => {
+        const checkIn = b.check_in || b.checkIn
+        return checkIn === today && b.status !== 'cancelled'
+      }).length,
+      // เช็กเอาต์วันนี้: นับเฉพาะ confirmed และ pending (ไม่นับ cancelled)
+      checkOuts: bookings.filter(b => {
+        const checkOut = b.check_out || b.checkOut
+        return checkOut === today && b.status !== 'cancelled'
+      }).length,
       newBookings: bookings.filter(b => b.created_at?.startsWith(today)).length,
       revenue: bookings
         .filter(b => b.created_at?.startsWith(today) && b.status === 'confirmed')

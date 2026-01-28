@@ -3,11 +3,11 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import Button from '../../components/Button'
 import Input from '../../components/Input'
 import Card from '../../components/Card'
-import { 
-  Building2, 
-  Mail, 
-  Phone, 
-  Globe, 
+import {
+  Building2,
+  Mail,
+  Phone,
+  Globe,
   Save,
   Lock,
   Eye,
@@ -21,7 +21,7 @@ import { useAuth } from '../../hooks/useAuth'
 
 export default function AdminSettingsPage() {
   const { changePassword } = useAuth()
-  
+
   const [settings, setSettings] = useState({
     // ข้อมูลโรงแรม
     hotelName: hotelConfig.hotelName,
@@ -52,7 +52,7 @@ export default function AdminSettingsPage() {
       setIsLoadingData(true)
       try {
         const { data, error } = await getHotelSettings()
-        
+
         if (error) {
           console.error('Error loading settings:', error)
           // ถ้าไม่มีข้อมูลใน database ให้ใช้ค่า default จาก config (settings state ถูกตั้งค่าไว้แล้วจาก hotelConfig)
@@ -85,11 +85,11 @@ export default function AdminSettingsPage() {
 
   const handleSave = async () => {
     setIsLoading(true)
-    
+
     try {
       // ใช้ upsert ซึ่งจะทำงานได้ทั้งกรณีที่มีและไม่มีข้อมูล
       const { data, error } = await updateHotelSettings(settings)
-      
+
       if (error) {
         console.error('Error saving settings:', error)
         Swal.fire({
@@ -105,7 +105,7 @@ export default function AdminSettingsPage() {
 
       // Clear cache เพื่อให้ดึงข้อมูลใหม่
       clearHotelSettingsCache()
-      
+
       Swal.fire({
         icon: 'success',
         title: 'บันทึกสำเร็จ',
@@ -145,17 +145,17 @@ export default function AdminSettingsPage() {
   const handleChangePassword = async () => {
     // Validation
     const errors = {}
-    
+
     if (!passwordData.currentPassword) {
       errors.currentPassword = 'กรุณากรอกรหัสผ่านปัจจุบัน'
     }
-    
+
     if (!passwordData.newPassword) {
       errors.newPassword = 'กรุณากรอกรหัสผ่านใหม่'
     } else if (passwordData.newPassword.length < 6) {
       errors.newPassword = 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร'
     }
-    
+
     if (!passwordData.confirmPassword) {
       errors.confirmPassword = 'กรุณายืนยันรหัสผ่านใหม่'
     } else if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -180,7 +180,7 @@ export default function AdminSettingsPage() {
           newPassword: '',
           confirmPassword: '',
         })
-        
+
         Swal.fire({
           icon: 'success',
           title: 'เปลี่ยนรหัสผ่านสำเร็จ',
@@ -243,7 +243,7 @@ export default function AdminSettingsPage() {
               <p className="text-sm text-slate-500">จัดการข้อมูลพื้นฐานของโรงแรม</p>
             </div>
           </div>
-          
+
           <div className="grid gap-6 md:grid-cols-2">
             <div className="relative">
               <div className="absolute left-3 top-9 text-slate-400 z-10">
@@ -307,9 +307,9 @@ export default function AdminSettingsPage() {
               />
             </div>
           </div>
-          
+
           <div className="mt-6 flex justify-end">
-            <Button 
+            <Button
               onClick={handleSave}
               disabled={isLoading}
             >
@@ -330,7 +330,14 @@ export default function AdminSettingsPage() {
               <p className="text-sm text-slate-500">เปลี่ยนรหัสผ่านของคุณ</p>
             </div>
           </div>
-          
+
+          {/* Notice Message */}
+          <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 p-4">
+            <p className="text-sm font-medium text-amber-800 text-center">
+              ⚠️ ฟีเจอร์นี้ยังไม่เปิดใช้งาน
+            </p>
+          </div>
+
           <div className="grid gap-6 md:grid-cols-2">
             {/* รหัสผ่านปัจจุบัน */}
             <div className="relative md:col-span-2">
@@ -404,11 +411,11 @@ export default function AdminSettingsPage() {
               </button>
             </div>
           </div>
-          
+
           <div className="mt-6 flex justify-end">
-            <Button 
+            <Button
               onClick={handleChangePassword}
-              disabled={isLoadingPassword}
+              disabled={true}
             >
               <Lock size={18} />
               {isLoadingPassword ? 'กำลังเปลี่ยนรหัสผ่าน...' : 'เปลี่ยนรหัสผ่าน'}

@@ -15,14 +15,14 @@ export function formatPriceNumber(value) {
   if (value === null || value === undefined) {
     return '0'
   }
-  
+
   // Convert string to number if needed
   const numValue = typeof value === 'string' ? parseFloat(value) : value
-  
+
   if (typeof numValue !== 'number' || Number.isNaN(numValue)) {
     return String(value || '0')
   }
-  
+
   // Return formatted number without currency symbol (for use with icon)
   return new Intl.NumberFormat('th-TH', {
     maximumFractionDigits: 0,
@@ -41,6 +41,23 @@ export function formatDate(value) {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+  })
+}
+
+export function formatDateTime(value) {
+  if (!value) {
+    return ''
+  }
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) {
+    return value
+  }
+  return parsed.toLocaleString('th-TH', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   })
 }
 

@@ -42,8 +42,8 @@ export async function updateHotelSettings(settings) {
       .maybeSingle()
 
     // ใช้ upsert โดยระบุ id ถ้ามีข้อมูลอยู่แล้ว หรือไม่ระบุ id ถ้ายังไม่มี
+    // ไม่ส่ง hotel_name เพราะไม่สามารถแก้ไขได้
     const upsertData = {
-      hotel_name: settings.hotelName,
       hotel_address: settings.hotelAddress,
       hotel_phone: settings.hotelPhone,
       hotel_email: settings.hotelEmail,

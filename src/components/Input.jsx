@@ -17,11 +17,12 @@ export default function Input({
       )}
       <input
         type={type}
-        className={`w-full rounded-xl border px-4 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ${
-          error
-            ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-2 focus:ring-red-200'
-            : 'border-slate-200 bg-white focus:border-accent focus:ring-2 focus:ring-accent/20'
-        } focus:outline-none ${className}`}
+        className={`w-full rounded-xl border px-4 py-2.5 text-sm text-slate-700 shadow-sm transition-all duration-200 ${props.disabled
+            ? 'border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed'
+            : error
+              ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-2 focus:ring-red-200'
+              : 'border-slate-200 bg-white focus:border-accent focus:ring-2 focus:ring-accent/20'
+          } focus:outline-none ${className}`}
         {...props}
       />
       {error && (

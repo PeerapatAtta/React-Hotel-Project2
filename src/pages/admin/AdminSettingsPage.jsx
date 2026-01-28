@@ -87,8 +87,10 @@ export default function AdminSettingsPage() {
     setIsLoading(true)
 
     try {
+      // ไม่ส่ง hotelName ไปเพราะไม่สามารถแก้ไขได้
+      const { hotelName, ...settingsToSave } = settings
       // ใช้ upsert ซึ่งจะทำงานได้ทั้งกรณีที่มีและไม่มีข้อมูล
-      const { data, error } = await updateHotelSettings(settings)
+      const { data, error } = await updateHotelSettings(settingsToSave)
 
       if (error) {
         console.error('Error saving settings:', error)
@@ -234,31 +236,20 @@ export default function AdminSettingsPage() {
 
         {/* ข้อมูลโรงแรม */}
         <Card className="p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="rounded-lg bg-teal-50 p-2">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="rounded-lg bg-teal-50 p-2.5">
               <Building2 size={24} className="text-teal-600" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-primary">ข้อมูลโรงแรม</h2>
-              <p className="text-sm text-slate-500">จัดการข้อมูลพื้นฐานของโรงแรม</p>
+              <p className="text-sm text-slate-500 mt-0.5">จัดการข้อมูลพื้นฐานของโรงแรม</p>
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
-            <div className="relative">
-              <div className="absolute left-3 top-9 text-slate-400 z-10">
-                <Building2 size={18} />
-              </div>
-              <Input
-                label="ชื่อโรงแรม"
-                value={settings.hotelName}
-                onChange={(e) => handleChange('hotelName', e.target.value)}
-                placeholder="ชื่อโรงแรม"
-                className="pl-10"
-              />
-            </div>
-            <div className="relative">
-              <div className="absolute left-3 top-9 text-slate-400 z-10">
+            {/* ที่อยู่ */}
+            <div className="relative group">
+              <div className="absolute left-3 top-9 text-slate-400 z-10 transition-colors group-focus-within:text-teal-600">
                 <MapPin size={18} />
               </div>
               <Input
@@ -266,11 +257,13 @@ export default function AdminSettingsPage() {
                 value={settings.hotelAddress}
                 onChange={(e) => handleChange('hotelAddress', e.target.value)}
                 placeholder="ที่อยู่โรงแรม"
-                className="pl-10"
+                className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
-            <div className="relative">
-              <div className="absolute left-3 top-9 text-slate-400 z-10">
+
+            {/* เบอร์โทรศัพท์ */}
+            <div className="relative group">
+              <div className="absolute left-3 top-9 text-slate-400 z-10 transition-colors group-focus-within:text-teal-600">
                 <Phone size={18} />
               </div>
               <Input
@@ -278,11 +271,13 @@ export default function AdminSettingsPage() {
                 value={settings.hotelPhone}
                 onChange={(e) => handleChange('hotelPhone', e.target.value)}
                 placeholder="02-123-4567"
-                className="pl-10"
+                className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
-            <div className="relative">
-              <div className="absolute left-3 top-9 text-slate-400 z-10">
+
+            {/* อีเมล */}
+            <div className="relative group">
+              <div className="absolute left-3 top-9 text-slate-400 z-10 transition-colors group-focus-within:text-teal-600">
                 <Mail size={18} />
               </div>
               <Input
@@ -291,11 +286,13 @@ export default function AdminSettingsPage() {
                 value={settings.hotelEmail}
                 onChange={(e) => handleChange('hotelEmail', e.target.value)}
                 placeholder="hello@prima.stay"
-                className="pl-10"
+                className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
-            <div className="relative md:col-span-2">
-              <div className="absolute left-3 top-9 text-slate-400 z-10">
+
+            {/* เว็บไซต์ */}
+            <div className="relative group">
+              <div className="absolute left-3 top-9 text-slate-400 z-10 transition-colors group-focus-within:text-teal-600">
                 <Globe size={18} />
               </div>
               <Input
@@ -303,15 +300,16 @@ export default function AdminSettingsPage() {
                 value={settings.hotelWebsite}
                 onChange={(e) => handleChange('hotelWebsite', e.target.value)}
                 placeholder="https://prima.stay"
-                className="pl-10"
+                className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end">
             <Button
               onClick={handleSave}
               disabled={isLoading}
+              className="min-w-[160px] shadow-sm hover:shadow-md transition-shadow duration-200"
             >
               <Save size={18} />
               {isLoading ? 'กำลังบันทึก...' : 'บันทึกการตั้งค่า'}
@@ -321,13 +319,13 @@ export default function AdminSettingsPage() {
 
         {/* บัญชีผู้ใช้ */}
         <Card className="p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="rounded-lg bg-teal-50 p-2">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="rounded-lg bg-teal-50 p-2.5">
               <Lock size={24} className="text-teal-600" />
             </div>
             <div>
               <h2 className="text-xl font-semibold text-primary">บัญชีผู้ใช้</h2>
-              <p className="text-sm text-slate-500">เปลี่ยนรหัสผ่านของคุณ</p>
+              <p className="text-sm text-slate-500 mt-0.5">เปลี่ยนรหัสผ่านของคุณ</p>
             </div>
           </div>
 
@@ -340,7 +338,7 @@ export default function AdminSettingsPage() {
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* รหัสผ่านปัจจุบัน */}
-            <div className="relative md:col-span-2">
+            <div className="relative md:col-span-2 group">
               <div className="absolute left-3 top-9 text-slate-400 z-10">
                 <Lock size={18} />
               </div>
@@ -350,21 +348,23 @@ export default function AdminSettingsPage() {
                 value={passwordData.currentPassword}
                 onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
                 placeholder="กรอกรหัสผ่านปัจจุบัน"
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 transition-all duration-200"
                 error={passwordErrors.currentPassword}
+                disabled={true}
               />
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                className="absolute right-3 top-9 text-slate-300 cursor-not-allowed z-10"
                 tabIndex={-1}
+                disabled={true}
               >
                 {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
 
             {/* รหัสผ่านใหม่ */}
-            <div className="relative">
+            <div className="relative group">
               <div className="absolute left-3 top-9 text-slate-400 z-10">
                 <Lock size={18} />
               </div>
@@ -374,21 +374,23 @@ export default function AdminSettingsPage() {
                 value={passwordData.newPassword}
                 onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
                 placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 transition-all duration-200"
                 error={passwordErrors.newPassword}
+                disabled={true}
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                className="absolute right-3 top-9 text-slate-300 cursor-not-allowed z-10"
                 tabIndex={-1}
+                disabled={true}
               >
                 {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
 
             {/* ยืนยันรหัสผ่านใหม่ */}
-            <div className="relative">
+            <div className="relative group">
               <div className="absolute left-3 top-9 text-slate-400 z-10">
                 <Lock size={18} />
               </div>
@@ -398,24 +400,27 @@ export default function AdminSettingsPage() {
                 value={passwordData.confirmPassword}
                 onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
                 placeholder="ยืนยันรหัสผ่านใหม่"
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 transition-all duration-200"
                 error={passwordErrors.confirmPassword}
+                disabled={true}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 transition-colors z-10"
+                className="absolute right-3 top-9 text-slate-300 cursor-not-allowed z-10"
                 tabIndex={-1}
+                disabled={true}
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end">
+          <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end">
             <Button
               onClick={handleChangePassword}
               disabled={true}
+              className="min-w-[160px] shadow-sm hover:shadow-md transition-shadow duration-200"
             >
               <Lock size={18} />
               {isLoadingPassword ? 'กำลังเปลี่ยนรหัสผ่าน...' : 'เปลี่ยนรหัสผ่าน'}

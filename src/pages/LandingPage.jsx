@@ -82,6 +82,7 @@ export default function LandingPage() {
   const [search, setSearch] = useState(defaultSearch)
   const [errors, setErrors] = useState({})
   const [recommendedRooms, setRecommendedRooms] = useState([])
+  const [maxCapacity, setMaxCapacity] = useState(10) // Default value
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -96,6 +97,12 @@ export default function LandingPage() {
 
         if (data && Array.isArray(data) && data.length > 0) {
           setRecommendedRooms(data.slice(0, 4))
+
+          // คำนวณจำนวนสูงสุดที่รองรับได้จากทุกห้อง
+          const maxCap = Math.max(...data.map(room => room.capacity || 0))
+          if (maxCap > 0) {
+            setMaxCapacity(maxCap)
+          }
         } else {
           setRecommendedRooms([])
         }
@@ -125,6 +132,8 @@ export default function LandingPage() {
 
     if (!search.guests || Number(search.guests) < 1) {
       newErrors.guests = 'กรุณาระบุจำนวนผู้เข้าพักอย่างน้อย 1 คน'
+    } else if (Number(search.guests) > maxCapacity) {
+      newErrors.guests = `จำนวนผู้เข้าพักสูงสุดคือ ${maxCapacity} คน`
     }
 
     setErrors(newErrors)
@@ -257,7 +266,7 @@ export default function LandingPage() {
             <section className="mx-auto max-w-5xl rounded-3xl bg-white p-6 shadow-2xl shadow-teal-900/20 md:p-8 lg:p-10 transition-all duration-300 hover:shadow-teal-900/30">
               <div className="mb-6 text-center">
                 <h2 className="text-xl font-bold text-primary md:text-2xl" style={{ color: '#1f2933' }}>ค้นหาห้องพักที่เหมาะกับคุณ</h2>
-                <p className="mt-1 text-sm text-slate-500" style={{ color: '#64748b' }}>เลือกวันที่และจำนวนผู้เข้าพักเพื่อเริ่มต้น</p>
+                <p className="mt-1 text-sm text-slate-500" style={{ color: '#64748b' }}>เลือกวันและจำนวนผู้เข้าพักเพื่อเริ่มต้น</p>
               </div>
               <form className="grid gap-4 md:grid-cols-4" onSubmit={handleSubmit}>
                 <div className="relative">
@@ -296,11 +305,11 @@ export default function LandingPage() {
                     label="จำนวนผู้เข้าพัก"
                     type="number"
                     min="1"
-                    max="10"
+                    max={maxCapacity}
                     value={search.guests}
                     error={errors.guests}
                     onChange={(event) => handleChange('guests', event.target.value)}
-                    helperText="สูงสุด 10 คน"
+                    helperText={`สูงสุด ${maxCapacity} คน`}
                     className="pl-10"
                   />
                 </div>

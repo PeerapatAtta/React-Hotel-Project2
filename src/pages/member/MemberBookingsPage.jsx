@@ -219,10 +219,45 @@ export default function MemberBookingsPage() {
             {filteredBookings.length > 0 ? (
               <div className="space-y-4 mt-6">
                 {filteredBookings.map((booking) => {
-                  const checkIn = new Date(booking.check_in)
-                  const checkOut = new Date(booking.check_out)
-                  const isUpcoming = checkIn >= new Date()
-                  const isPast = checkOut < new Date()
+                  // Parse dates and normalize to start of day
+                  const checkInDate = new Date(booking.check_in)
+                  const checkOutDate = new Date(booking.check_out)
+                  const today = new Date()
+
+                  // Normalize all dates to start of day (00:00:00)
+                  const checkIn = new Date(checkInDate.getFullYear(), checkInDate.getMonth(), checkInDate.getDate())
+                  const checkOut = new Date(checkOutDate.getFullYear(), checkOutDate.getMonth(), checkOutDate.getDate())
+                  const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+                  // Calculate status based on dates
+                  // กำลังเข้าพัก: วันนี้อยู่ระหว่าง check-in (รวม) และ check-out (ไม่รวม)
+                  const isCurrentlyStaying =
+                    booking.status !== 'cancelled' &&
+                    checkIn.getTime() <= todayNormalized.getTime() &&
+                    checkOut.getTime() > todayNormalized.getTime()
+
+                  // Debug log (remove in production)
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log('Booking:', booking.id, {
+                      checkIn: checkIn.toISOString(),
+                      checkOut: checkOut.toISOString(),
+                      today: todayNormalized.toISOString(),
+                      status: booking.status,
+                      isCurrentlyStaying
+                    })
+                  }
+
+                  // กำลังจะมาถึง: check-in ยังไม่มาถึง
+                  const isUpcoming =
+                    checkIn.getTime() > todayNormalized.getTime() &&
+                    booking.status !== 'cancelled' &&
+                    !isCurrentlyStaying
+
+                  // ผ่านมาแล้ว: check-out ผ่านไปแล้ว
+                  const isPast =
+                    checkOut.getTime() <= todayNormalized.getTime() &&
+                    booking.status !== 'cancelled' &&
+                    !isCurrentlyStaying
 
                   return (
                     <Card key={booking.id} className="p-6">
@@ -233,13 +268,18 @@ export default function MemberBookingsPage() {
                               {booking.room_name}
                             </h3>
                             {getStatusBadge(booking.status)}
-                            {isUpcoming && booking.status !== 'cancelled' && (
-                              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                            {isCurrentlyStaying && (
+                              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 border border-green-300">
+                                กำลังเข้าพัก
+                              </span>
+                            )}
+                            {isUpcoming && (
+                              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 border border-blue-300">
                                 กำลังจะมาถึง
                               </span>
                             )}
-                            {isPast && booking.status !== 'cancelled' && (
-                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                            {isPast && (
+                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 border border-slate-300">
                                 ผ่านมาแล้ว
                               </span>
                             )}

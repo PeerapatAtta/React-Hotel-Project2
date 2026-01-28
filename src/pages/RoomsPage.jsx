@@ -87,6 +87,7 @@ export default function RoomsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [rooms, setRooms] = useState([])
   const [error, setError] = useState(null)
+  const [maxCapacity, setMaxCapacity] = useState(10) // Default value
   const checkIn = params.get('checkIn') || today.toISOString().split('T')[0]
   const checkOut = params.get('checkOut') || tomorrow.toISOString().split('T')[0]
   const guests = params.get('guests') || '2'
@@ -97,6 +98,24 @@ export default function RoomsPage() {
     guests: guests,
   })
   const [errors, setErrors] = useState({})
+
+  // ดึงข้อมูลห้องทั้งหมดเพื่อคำนวณ max capacity
+  useEffect(() => {
+    const fetchMaxCapacity = async () => {
+      try {
+        const { data, error: fetchError } = await roomService.getAllRooms()
+        if (!fetchError && data && Array.isArray(data) && data.length > 0) {
+          const maxCap = Math.max(...data.map(room => room.capacity || 0))
+          if (maxCap > 0) {
+            setMaxCapacity(maxCap)
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching max capacity:', err)
+      }
+    }
+    fetchMaxCapacity()
+  }, [])
 
   // ดึงข้อมูลห้องจาก Supabase และตรวจสอบห้องว่างตามวันที่
   useEffect(() => {
@@ -171,10 +190,8 @@ export default function RoomsPage() {
 
     if (!search.guests || Number(search.guests) < 1) {
       newErrors.guests = 'กรุณาระบุจำนวนผู้เข้าพักอย่างน้อย 1 คน'
-    }
-
-    if (Number(search.guests) > 10) {
-      newErrors.guests = 'จำนวนผู้เข้าพักสูงสุด 10 คน'
+    } else if (Number(search.guests) > maxCapacity) {
+      newErrors.guests = `จำนวนผู้เข้าพักสูงสุดคือ ${maxCapacity} คน`
     }
 
     setErrors(newErrors)
@@ -270,11 +287,11 @@ export default function RoomsPage() {
                   name="guests"
                   type="number"
                   min="1"
-                  max="10"
+                  max={maxCapacity}
                   value={search.guests}
                   error={errors.guests}
                   onChange={(event) => handleChange('guests', event.target.value)}
-                  helperText="สูงสุด 10 คน"
+                  helperText={`สูงสุด ${maxCapacity} คน`}
                   className="pl-10"
                 />
               </div>

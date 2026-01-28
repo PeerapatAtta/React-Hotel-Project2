@@ -65,11 +65,11 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
 
   const handleConfirm = async (bookingId) => {
     const result = await Swal.fire({
-      title: 'ยืนยันการจอง?',
-      text: `คุณต้องการยืนยันการจอง "${bookingId}" ใช่หรือไม่?`,
+      title: 'ยืนยันการจ่ายเงิน?',
+      text: `คุณต้องการยืนยันการจ่ายเงินสำหรับการจอง "${bookingId}" ใช่หรือไม่?`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonText: 'ใช่, ยืนยัน',
+      confirmButtonText: 'ใช่, ยืนยันการจ่ายเงิน',
       cancelButtonText: 'ยกเลิก',
       confirmButtonColor: '#10b981',
       cancelButtonColor: '#64748b',
@@ -85,15 +85,15 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
           Swal.fire({
             icon: 'error',
             title: 'เกิดข้อผิดพลาด',
-            text: error.message || 'ไม่สามารถยืนยันการจองได้ กรุณาลองใหม่อีกครั้ง',
+            text: error.message || 'ไม่สามารถยืนยันการจ่ายเงินได้ กรุณาลองใหม่อีกครั้ง',
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#0d9488',
           })
         } else {
           Swal.fire({
             icon: 'success',
-            title: 'ยืนยันสำเร็จ',
-            text: `ยืนยันการจอง "${bookingId}" เรียบร้อยแล้ว`,
+            title: 'ยืนยันการจ่ายเงินสำเร็จ',
+            text: `ยืนยันการจ่ายเงินสำหรับการจอง "${bookingId}" เรียบร้อยแล้ว`,
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#0d9488',
           })
@@ -108,7 +108,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
-          text: 'ไม่สามารถยืนยันการจองได้ กรุณาลองใหม่อีกครั้ง',
+          text: 'ไม่สามารถยืนยันการจ่ายเงินได้ กรุณาลองใหม่อีกครั้ง',
           confirmButtonText: 'ตกลง',
           confirmButtonColor: '#0d9488',
         })
@@ -468,7 +468,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                             onClick={() => handleConfirm(booking.id)}
                             disabled={confirmingId === booking.id}
                             className="p-2! min-w-[36px] text-green-600 hover:text-green-700 hover:bg-green-50 disabled:opacity-50"
-                            title="ยืนยันการจอง"
+                            title="ยืนยันการจ่ายเงิน"
                           >
                             <Check size={22} />
                           </Button>

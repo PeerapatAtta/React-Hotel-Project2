@@ -132,23 +132,23 @@ export default function RoomsPage() {
           console.error('Error fetching rooms:', fetchError)
           setError(fetchError.message)
         } else {
-          // ตรวจสอบห้องว่างตามวันที่ที่เลือก
-          const availableRooms = []
-          for (const room of (data || [])) {
-            const { available, error: availabilityError } = await bookingService.checkRoomAvailability(
-              room.id,
-              checkIn,
-              checkOut
-            )
+          // ตรวจสอบห้องว่างตามวันที่ที่เลือก - เรียก API พร้อมกันเพื่อความเร็ว
+          const roomsData = data || []
+          const availabilityChecks = roomsData.map(room =>
+            bookingService.checkRoomAvailability(room.id, checkIn, checkOut)
+              .then(result => ({ room, ...result }))
+              .catch(error => {
+                console.error(`Error checking availability for room ${room.id}:`, error)
+                // ถ้าเกิด error ให้แสดงห้องไว้ก่อน
+                return { room, available: true, error }
+              })
+          )
 
-            if (availabilityError) {
-              console.error(`Error checking availability for room ${room.id}:`, availabilityError)
-              // ถ้าเกิด error ในการตรวจสอบ ให้แสดงห้องไว้ก่อน (เพื่อไม่ให้ผู้ใช้เห็นห้องว่างน้อยเกินไป)
-              availableRooms.push(room)
-            } else if (available) {
-              availableRooms.push(room)
-            }
-          }
+          const results = await Promise.all(availabilityChecks)
+          const availableRooms = results
+            .filter(result => result.available)
+            .map(result => result.room)
+
           setRooms(availableRooms)
         }
       } catch (err) {

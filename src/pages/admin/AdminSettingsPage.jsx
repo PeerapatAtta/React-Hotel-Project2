@@ -55,11 +55,8 @@ export default function AdminSettingsPage() {
         
         if (error) {
           console.error('Error loading settings:', error)
-          // ถ้าไม่มีข้อมูลใน database ให้ใช้ค่า default จาก config
-          return
-        }
-
-        if (data) {
+          // ถ้าไม่มีข้อมูลใน database ให้ใช้ค่า default จาก config (settings state ถูกตั้งค่าไว้แล้วจาก hotelConfig)
+        } else if (data) {
           setSettings({
             hotelName: data.hotel_name || hotelConfig.hotelName,
             hotelAddress: data.hotel_address || hotelConfig.hotelAddress,
@@ -70,6 +67,7 @@ export default function AdminSettingsPage() {
         }
       } catch (err) {
         console.error('Exception loading settings:', err)
+        // ถ้าเกิด exception ให้ใช้ค่า default จาก config (settings state ถูกตั้งค่าไว้แล้วจาก hotelConfig)
       } finally {
         setIsLoadingData(false)
       }

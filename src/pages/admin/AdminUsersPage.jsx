@@ -183,9 +183,8 @@ export default function AdminUsersPage() {
     const inactive = filteredUsers.filter(u => u.status === 'inactive').length
     const admins = filteredUsers.filter(u => u.role === 'admin').length
     const members = filteredUsers.filter(u => u.role === 'member').length
-    const regularUsers = filteredUsers.filter(u => u.role === 'user').length
 
-    const result = { total, active, inactive, admins, members, regularUsers }
+    const result = { total, active, inactive, admins, members }
     return result
   }, [filteredUsers])
 
@@ -384,7 +383,7 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Stats Summary */}
-        <div className="grid gap-4 md:grid-cols-6">
+        <div className="grid gap-4 md:grid-cols-5">
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <Users size={20} className="text-slate-400" />
@@ -420,13 +419,6 @@ export default function AdminUsersPage() {
             </div>
             <p className="text-2xl font-bold text-blue-600">{stats.members}</p>
           </div>
-          <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <UserIcon size={20} className="text-slate-400" />
-              <p className="text-sm font-medium text-slate-600">ผู้ใช้ทั่วไป</p>
-            </div>
-            <p className="text-2xl font-bold text-primary">{stats.regularUsers}</p>
-          </div>
         </div>
 
         {/* Search and Filter */}
@@ -458,7 +450,6 @@ export default function AdminUsersPage() {
                   <option value="all">ทุกบทบาท</option>
                   <option value="admin">ผู้ดูแลระบบ</option>
                   <option value="member">สมาชิก</option>
-                  <option value="user">ผู้ใช้ทั่วไป</option>
                 </select>
               </div>
             </div>

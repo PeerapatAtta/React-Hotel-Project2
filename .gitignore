@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 
+# Markdown docs (keep README)
+*.md
+!README.md
+
 # Environment variables
 # .env.example should be committed (template file)
 # .env.local and .env*.local should NOT be committed (contains real secrets)

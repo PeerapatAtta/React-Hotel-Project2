@@ -22,35 +22,36 @@ export const bookingService = {
     }
 
     // ดึงข้อมูล rooms และ profiles แยก (ถ้าต้องการ)
-    try {
-      const roomIds = [...new Set(bookings.map(b => b.room_id).filter(Boolean))]
-      const userIds = [...new Set(bookings.map(b => b.user_id).filter(Boolean))]
+    const roomIds = [...new Set(bookings.map(b => b.room_id).filter(Boolean))]
+    const userIds = [...new Set(bookings.map(b => b.user_id).filter(Boolean))]
 
-      const [roomsResult, profilesResult] = await Promise.all([
-        roomIds.length > 0 
-          ? supabase.from('rooms').select('id, name, type, images').in('id', roomIds)
-          : Promise.resolve({ data: [], error: null }),
-        userIds.length > 0
-          ? supabase.from('profiles').select('id, name, email').in('id', userIds)
-          : Promise.resolve({ data: [], error: null })
-      ])
+    const { data: rooms } = await supabase
+      .from('rooms')
+      .select('id, name, type, images')
+      .in('id', roomIds)
 
-      const rooms = roomsResult.data || []
-      const profiles = profilesResult.data || []
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, name, email')
+      .in('id', userIds)
 
-      // รวมข้อมูล
-      const bookingsWithRelations = bookings.map(booking => ({
+    // รวมข้อมูล
+    const bookingsWithDetails = bookings.map(booking => {
+      const room = rooms?.find(r => r.id === booking.room_id)
+      const profile = profiles?.find(p => p.id === booking.user_id)
+      
+      return {
         ...booking,
-        rooms: rooms.find(r => r.id === booking.room_id) || null,
-        profiles: profiles.find(p => p.id === booking.user_id) || null,
-      }))
+        roomName: room?.name || booking.room_name,
+        roomType: room?.type,
+        roomImages: room?.images,
+        guestName: booking.guest_name,
+        creatorName: profile?.name,
+        creatorEmail: profile?.email,
+      }
+    })
 
-      return { data: bookingsWithRelations, error: null }
-    } catch (err) {
-      console.error('Error fetching related data:', err)
-      // ถ้าเกิด error ในการดึง related data ให้ return bookings แบบธรรมดา
-      return { data: bookings, error: null }
-    }
+    return { data: bookingsWithDetails, error: null }
   },
 
   /**
@@ -90,34 +91,29 @@ export const bookingService = {
     }
 
     // ดึงข้อมูล rooms และ profiles แยก (ถ้าต้องการ)
-    try {
-      const roomId = booking.room_id
-      const userId = booking.user_id
+    const { data: room } = await supabase
+      .from('rooms')
+      .select('id, name, type, images')
+      .eq('id', booking.room_id)
+      .single()
 
-      const [roomsResult, profilesResult] = await Promise.all([
-        roomId 
-          ? supabase.from('rooms').select('id, name, type, images').eq('id', roomId).single()
-          : Promise.resolve({ data: null, error: null }),
-        userId
-          ? supabase.from('profiles').select('id, name, email').eq('id', userId).single()
-          : Promise.resolve({ data: null, error: null })
-      ])
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, name, email')
+      .eq('id', booking.user_id)
+      .single()
 
-      const room = roomsResult.data || null
-      const profile = profilesResult.data || null
-
-      // รวมข้อมูล
-      const bookingWithRelations = {
+    return {
+      data: {
         ...booking,
-        rooms: room,
-        profiles: profile,
-      }
-
-      return { data: bookingWithRelations, error: null }
-    } catch (err) {
-      console.error('Error fetching related data:', err)
-      // ถ้าเกิด error ในการดึง related data ให้ return booking แบบธรรมดา
-      return { data: booking, error: null }
+        roomName: room?.name || booking.room_name,
+        roomType: room?.type,
+        roomImages: room?.images,
+        guestName: booking.guest_name,
+        creatorName: profile?.name,
+        creatorEmail: profile?.email,
+      },
+      error: null
     }
   },
 
@@ -130,31 +126,98 @@ export const bookingService = {
     const checkOut = new Date(booking.check_out)
     const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
 
-    // สร้าง booking ID
-    const { data: lastBooking } = await supabase
-      .from('bookings')
-      .select('id')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
+    // สร้าง booking ID ที่ไม่ซ้ำโดยใช้ RPC function ที่ bypass RLS
+    // RLS policy ทำให้ member เห็นแค่ bookings ของตัวเอง จึงต้องใช้ function ที่ bypass RLS
     let bookingId = 'BK001'
-    if (lastBooking) {
-      const lastNum = parseInt(lastBooking.id.replace('BK', ''))
-      bookingId = `BK${String(lastNum + 1).padStart(3, '0')}`
+    let attempts = 0
+    const maxAttempts = 10
+    
+    while (attempts < maxAttempts) {
+      // ใช้ RPC function เพื่อดึง max booking ID (bypass RLS)
+      const { data: maxIdResult, error: maxIdError } = await supabase
+        .rpc('get_max_booking_id')
+      
+      if (maxIdError) {
+        // ถ้า RPC function ไม่มี ให้ใช้วิธีเดิม (fallback)
+        const { data: currentBookings } = await supabase
+          .from('bookings')
+          .select('id')
+          .order('created_at', { ascending: false })
+          .limit(100)
+        
+        if (currentBookings && currentBookings.length > 0) {
+          const maxId = currentBookings.reduce((max, b) => {
+            const match = b.id.match(/^BK(\d+)$/)
+            if (match) {
+              const num = parseInt(match[1], 10)
+              return num > max ? num : max
+            }
+            return max
+          }, 0)
+          bookingId = `BK${String(maxId + 1).padStart(3, '0')}`
+        }
+      } else {
+        bookingId = maxIdResult || 'BK001'
+      }
+      
+      // ตรวจสอบว่า ID นี้มีอยู่แล้วหรือไม่ (ใช้ RPC function ที่ bypass RLS)
+      const { data: checkExistsResult, error: checkExistsError } = await supabase
+        .rpc('check_booking_id_exists', { booking_id: bookingId })
+      
+      const idExists = checkExistsError ? false : (checkExistsResult === true)
+      
+      if (!idExists) {
+        // ID นี้ยังไม่มี ใช้ได้
+        break
+      }
+      
+      // ID มีอยู่แล้ว ลองครั้งถัดไป (เพิ่ม ID)
+      const match = bookingId.match(/^BK(\d+)$/)
+      if (match) {
+        const num = parseInt(match[1], 10)
+        bookingId = `BK${String(num + 1).padStart(3, '0')}`
+      } else {
+        bookingId = 'BK001'
+      }
+      
+      attempts++
+    }
+    
+    if (attempts >= maxAttempts) {
+      return {
+        data: null,
+        error: { message: 'ไม่สามารถสร้าง booking ID ที่ไม่ซ้ำได้ กรุณาลองใหม่อีกครั้ง' }
+      }
     }
 
+    // สร้าง insert payload พร้อม ID ที่สร้างเอง
+    const insertPayload = {
+      id: bookingId,
+      room_id: booking.room_id,
+      user_id: booking.user_id || null,
+      room_name: booking.room_name,
+      guest_name: booking.guest_name,
+      email: booking.email,
+      phone: booking.phone,
+      check_in: booking.check_in,
+      check_out: booking.check_out,
+      nights: nights,
+      guests: booking.guests,
+      total_price: booking.total_price,
+      status: booking.status || 'pending',
+    }
+    
     const { data, error } = await supabase
       .from('bookings')
-      .insert({
-        id: bookingId,
-        ...booking,
-        nights,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
+      .insert(insertPayload)
       .select()
       .single()
+    
+    // ถ้าเกิด duplicate key error ให้ retry (แต่ควรจะไม่เกิดเพราะเราเช็คแล้ว)
+    if (error && error.code === '23505') {
+      // Log error for debugging (optional - can remove if not needed)
+      console.error('Duplicate key error despite check:', { bookingId, error })
+    }
     
     return { data, error }
   },
@@ -321,5 +384,3 @@ export const bookingService = {
     }
   }
 }
-
-

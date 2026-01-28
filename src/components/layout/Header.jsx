@@ -36,10 +36,24 @@ export default function Header() {
     return (
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 md:px-8 lg:px-10">
-          <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold text-primary hover:text-teal-600 transition-colors">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault()
+              if (window.location.pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+              } else {
+                navigate('/')
+                setTimeout(() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }, 100)
+              }
+            }}
+            className="inline-flex items-center gap-2 text-xl font-bold text-primary hover:text-teal-600 transition-colors cursor-pointer"
+          >
             <Sparkles size={24} className="text-accent" />
             บ้านพัก Prima
-          </Link>
+          </a>
           <nav className="hidden items-center gap-2 text-sm font-semibold md:flex">
             {/* Skeleton nav items */}
             <div className="h-8 w-16 rounded-lg bg-slate-100 animate-pulse" />
@@ -58,21 +72,40 @@ export default function Header() {
     )
   }
 
+  const handleHomeClick = (e) => {
+    e.preventDefault()
+    if (window.location.pathname === '/') {
+      // ถ้าอยู่ที่หน้า home อยู่แล้ว ให้ scroll ไปที่ด้านบนสุด
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      // ถ้าอยู่หน้าอื่น ให้ navigate ไปที่ home และ scroll ไปที่ด้านบนสุด
+      navigate('/')
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }, 100)
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 md:px-8 lg:px-10">
-        <Link to="/" className="inline-flex items-center gap-2 text-xl font-bold text-primary hover:text-teal-600 transition-colors">
+        <a
+          href="/"
+          onClick={handleHomeClick}
+          className="inline-flex items-center gap-2 text-xl font-bold text-primary hover:text-teal-600 transition-colors cursor-pointer"
+        >
           <Sparkles size={24} className="text-accent" />
           บ้านพัก Prima
-        </Link>
+        </a>
         <nav className="hidden items-center gap-2 text-sm font-semibold md:flex">
-          <Link
-            to="/"
-            className="relative text-slate-700 hover:text-teal-600 px-3 py-1.5 rounded-lg transition-all duration-300 hover:bg-teal-50 hover:scale-105 hover:font-semibold after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-teal-600 after:transition-all after:duration-300 hover:after:w-3/4"
+          <a
+            href="/"
+            onClick={handleHomeClick}
+            className="relative text-slate-700 hover:text-teal-600 px-3 py-1.5 rounded-lg transition-all duration-300 hover:bg-teal-50 hover:scale-105 hover:font-semibold after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-teal-600 after:transition-all after:duration-300 hover:after:w-3/4 cursor-pointer"
             style={{ color: '#334155' }}
           >
             หน้าแรก
-          </Link>
+          </a>
           <Link
             to="/rooms"
             className="relative text-slate-700 hover:text-teal-600 px-3 py-1.5 rounded-lg transition-all duration-300 hover:bg-teal-50 hover:scale-105 hover:font-semibold after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0.5 after:bg-teal-600 after:transition-all after:duration-300 hover:after:w-3/4"

@@ -341,9 +341,8 @@ export default function AddBookingModal({ isOpen, onClose, onSuccess }) {
               <select
                 value={formData.room_id}
                 onChange={(e) => handleChange('room_id', e.target.value)}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${
-                  errors.room_id ? 'border-red-300' : 'border-slate-200 bg-white'
-                }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 ${errors.room_id ? 'border-red-300' : 'border-slate-200 bg-white'
+                  }`}
               >
                 <option value="">-- เลือกห้อง --</option>
                 {rooms.map((room) => (
@@ -485,8 +484,8 @@ export default function AddBookingModal({ isOpen, onClose, onSuccess }) {
               onChange={(e) => handleChange('status', e.target.value)}
               className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
             >
-              <option value="pending">รอยืนยัน</option>
-              <option value="confirmed">ยืนยันแล้ว</option>
+              <option value="pending">รอจ่ายเงิน</option>
+              <option value="confirmed">จ่ายเงินแล้ว</option>
             </select>
           </div>
 

@@ -22,7 +22,7 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
 
     bookings.forEach((booking) => {
       const status = booking.status
-      
+
       // นับตามสถานะ
       if (status === 'pending') pending++
       if (status === 'confirmed') confirmed++
@@ -35,7 +35,7 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
       if (checkIn && checkOut) {
         const checkInDate = new Date(checkIn)
         checkInDate.setHours(0, 0, 0, 0)
-        
+
         const checkOutDate = new Date(checkOut)
         checkOutDate.setHours(0, 0, 0, 0)
 
@@ -131,10 +131,10 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
               <p className="text-2xl font-bold text-slate-700">{stats.total}</p>
             </div>
 
-            {/* รอยืนยัน */}
+            {/* รอจ่ายเงิน */}
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-amber-700">รอยืนยัน</p>
+                <p className="text-xs font-medium text-amber-700">รอจ่ายเงิน</p>
                 <Clock size={16} className="text-amber-600" />
               </div>
               <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
@@ -145,10 +145,10 @@ export default function BookingsSummaryCard({ bookings = [], todayStats = {} }) 
               )}
             </div>
 
-            {/* ยืนยันแล้ว */}
+            {/* จ่ายเงินแล้ว */}
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-emerald-700">ยืนยันแล้ว</p>
+                <p className="text-xs font-medium text-emerald-700">จ่ายเงินแล้ว</p>
                 <CheckCircle size={16} className="text-emerald-600" />
               </div>
               <p className="text-2xl font-bold text-emerald-600">{stats.confirmed}</p>

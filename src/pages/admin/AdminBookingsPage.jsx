@@ -114,17 +114,17 @@ export default function AdminBookingsPage() {
         } else {
           const checkIn = booking.check_in || booking.checkIn
           const checkOut = booking.check_out || booking.checkOut
-          
+
           if (checkIn && checkOut) {
             const today = new Date()
             today.setHours(0, 0, 0, 0)
-            
+
             const checkInDate = new Date(checkIn)
             checkInDate.setHours(0, 0, 0, 0)
-            
+
             const checkOutDate = new Date(checkOut)
             checkOutDate.setHours(0, 0, 0, 0)
-            
+
             if (filterTimeStatus === 'past') {
               matchesTimeStatus = checkOutDate < today
             } else if (filterTimeStatus === 'ongoing') {
@@ -145,16 +145,16 @@ export default function AdminBookingsPage() {
     // Helper function เพื่อคำนวณสถานะเวลา
     const getTimeStatusValue = (checkIn, checkOut) => {
       if (!checkIn || !checkOut) return 0
-      
+
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      
+
       const checkInDate = new Date(checkIn)
       checkInDate.setHours(0, 0, 0, 0)
-      
+
       const checkOutDate = new Date(checkOut)
       checkOutDate.setHours(0, 0, 0, 0)
-      
+
       // past = 0, ongoing = 1, upcoming = 2
       if (checkOutDate < today) return 0 // ผ่านมาแล้ว
       if (checkInDate <= today && checkOutDate >= today) return 1 // กำลังเข้าพัก
@@ -294,11 +294,11 @@ export default function AdminBookingsPage() {
         {/* Stats Summary */}
         <div className="grid gap-4 md:grid-cols-4">
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-600">ยืนยันแล้ว</p>
+            <p className="text-sm font-medium text-slate-600">จ่ายเงินแล้ว</p>
             <p className="text-2xl font-bold text-green-600 mt-1">{stats.confirmed}</p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-            <p className="text-sm font-medium text-slate-600">รอยืนยัน</p>
+            <p className="text-sm font-medium text-slate-600">รอจ่ายเงิน</p>
             <p className="text-2xl font-bold text-yellow-600 mt-1">{stats.pending}</p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -391,8 +391,8 @@ export default function AdminBookingsPage() {
                   className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 pl-10 text-sm font-medium text-slate-700 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                 >
                   <option value="all">ทุกสถานะ</option>
-                  <option value="confirmed">ยืนยันแล้ว</option>
-                  <option value="pending">รอยืนยัน</option>
+                  <option value="confirmed">จ่ายเงินแล้ว</option>
+                  <option value="pending">รอจ่ายเงิน</option>
                   <option value="cancelled">ยกเลิก</option>
                 </select>
               </div>

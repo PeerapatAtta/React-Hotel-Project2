@@ -25,8 +25,8 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
 
   const getStatusText = (status) => {
     const texts = {
-      confirmed: 'ยืนยันแล้ว',
-      pending: 'รอยืนยัน',
+      confirmed: 'จ่ายเงินแล้ว',
+      pending: 'รอจ่ายเงิน',
       cancelled: 'ยกเลิก',
     }
     return texts[status] || status
@@ -35,31 +35,31 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
   // ตรวจสอบสถานะช่วงเวลา
   const getTimeStatus = (checkIn, checkOut) => {
     if (!checkIn || !checkOut) return null
-    
+
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
+
     const checkInDate = new Date(checkIn)
     checkInDate.setHours(0, 0, 0, 0)
-    
+
     const checkOutDate = new Date(checkOut)
     checkOutDate.setHours(0, 0, 0, 0)
-    
+
     // ถ้า check-out ผ่านมาแล้ว = ผ่านมาแล้ว
     if (checkOutDate < today) {
       return { status: 'past', text: 'ผ่านมาแล้ว', className: 'bg-slate-200 text-slate-900 border-2 border-slate-400 font-semibold' }
     }
-    
+
     // ถ้าวันนี้อยู่ระหว่าง check-in และ check-out = กำลังเข้าพัก
     if (checkInDate <= today && checkOutDate >= today) {
       return { status: 'ongoing', text: 'กำลังเข้าพัก', className: 'bg-teal-200 text-teal-900 border-2 border-teal-400 font-semibold' }
     }
-    
+
     // ถ้า check-in ยังไม่มาถึง = กำลังจะมาถึง
     if (checkInDate > today) {
       return { status: 'upcoming', text: 'กำลังจะมาถึง', className: 'bg-amber-200 text-amber-900 border-2 border-amber-400 font-semibold' }
     }
-    
+
     return null
   }
 
@@ -97,7 +97,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#0d9488',
           })
-          
+
           // รีเฟรชข้อมูลการจอง
           if (onRefresh) {
             onRefresh()
@@ -152,7 +152,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#0d9488',
           })
-          
+
           // รีเฟรชข้อมูลการจอง
           if (onRefresh) {
             onRefresh()
@@ -213,7 +213,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#0d9488',
           })
-          
+
           // รีเฟรชข้อมูลการจอง
           if (onRefresh) {
             onRefresh()
@@ -248,7 +248,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
         <table className="w-full">
           <thead className="bg-slate-50">
             <tr>
-              <th 
+              <th
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'id' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('id')}
               >
@@ -261,7 +261,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   )}
                 </div>
               </th>
-              <th 
+              <th
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'room_name' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('room_name')}
               >
@@ -274,7 +274,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   )}
                 </div>
               </th>
-              <th 
+              <th
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'guest_name' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('guest_name')}
               >
@@ -287,7 +287,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   )}
                 </div>
               </th>
-              <th 
+              <th
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'check_in' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('check_in')}
               >
@@ -303,7 +303,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600">
                 จำนวนคืน/คน
               </th>
-              <th 
+              <th
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'total_price' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('total_price')}
               >
@@ -316,7 +316,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   )}
                 </div>
               </th>
-              <th 
+              <th
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'status' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('status')}
               >
@@ -329,7 +329,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   )}
                 </div>
               </th>
-              <th 
+              <th
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'time_status' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('time_status')}
               >
@@ -342,7 +342,7 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                   )}
                 </div>
               </th>
-              <th 
+              <th
                 className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors ${sortField === 'creator_name' ? 'bg-slate-100' : ''}`}
                 onClick={() => onSort && onSort('creator_name')}
               >
@@ -411,67 +411,79 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                       {formatPrice(totalPrice)}
                     </span>
                   </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge className={getStatusBadge(booking.status)}>
-                    {getStatusText(booking.status)}
-                  </Badge>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {(() => {
-                    const timeStatus = getTimeStatus(checkIn, checkOut)
-                    if (!timeStatus) return <span className="text-sm text-slate-400">-</span>
-                    // ใช้ inline style เพื่อ override default Badge styles
-                    const styleMap = {
-                      past: { bg: '#e2e8f0', text: '#0f172a', border: '#94a3b8' },
-                      ongoing: { bg: '#99f6e4', text: '#134e4a', border: '#2dd4bf' },
-                      upcoming: { bg: '#fde68a', text: '#78350f', border: '#fbbf24' }
-                    }
-                    const colors = styleMap[timeStatus.status]
-                    return (
-                      <span
-                        className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border-2"
-                        style={{
-                          backgroundColor: colors.bg,
-                          color: colors.text,
-                          borderColor: colors.border
-                        }}
-                      >
-                        {timeStatus.text}
-                      </span>
-                    )
-                  })()}
-                </td>
-                <td className="px-6 py-4">
-                  <div>
-                    <p className="text-sm font-medium text-slate-700">
-                      {booking.profiles?.name || booking.profiles?.email || '-'}
-                    </p>
-                    {booking.profiles?.email && booking.profiles?.name && (
-                      <p className="text-xs text-slate-500 mt-1">{booking.profiles.email}</p>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleView(booking.id)}
-                      className="p-2! min-w-[36px]"
-                      title="ดูรายละเอียด"
-                    >
-                      <Eye size={22} />
-                    </Button>
-                    {booking.status === 'pending' && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          onClick={() => handleConfirm(booking.id)}
-                          disabled={confirmingId === booking.id}
-                          className="p-2! min-w-[36px] text-green-600 hover:text-green-700 hover:bg-green-50 disabled:opacity-50"
-                          title="ยืนยันการจอง"
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Badge className={getStatusBadge(booking.status)}>
+                      {getStatusText(booking.status)}
+                    </Badge>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {(() => {
+                      const timeStatus = getTimeStatus(checkIn, checkOut)
+                      if (!timeStatus) return <span className="text-sm text-slate-400">-</span>
+                      // ใช้ inline style เพื่อ override default Badge styles
+                      const styleMap = {
+                        past: { bg: '#e2e8f0', text: '#0f172a', border: '#94a3b8' },
+                        ongoing: { bg: '#99f6e4', text: '#134e4a', border: '#2dd4bf' },
+                        upcoming: { bg: '#fde68a', text: '#78350f', border: '#fbbf24' }
+                      }
+                      const colors = styleMap[timeStatus.status]
+                      return (
+                        <span
+                          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold border-2"
+                          style={{
+                            backgroundColor: colors.bg,
+                            color: colors.text,
+                            borderColor: colors.border
+                          }}
                         >
-                          <Check size={22} />
-                        </Button>
+                          {timeStatus.text}
+                        </span>
+                      )
+                    })()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">
+                        {booking.profiles?.name || booking.profiles?.email || '-'}
+                      </p>
+                      {booking.profiles?.email && booking.profiles?.name && (
+                        <p className="text-xs text-slate-500 mt-1">{booking.profiles.email}</p>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleView(booking.id)}
+                        className="p-2! min-w-[36px]"
+                        title="ดูรายละเอียด"
+                      >
+                        <Eye size={22} />
+                      </Button>
+                      {booking.status === 'pending' && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleConfirm(booking.id)}
+                            disabled={confirmingId === booking.id}
+                            className="p-2! min-w-[36px] text-green-600 hover:text-green-700 hover:bg-green-50 disabled:opacity-50"
+                            title="ยืนยันการจอง"
+                          >
+                            <Check size={22} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleCancel(booking.id)}
+                            disabled={cancellingId === booking.id}
+                            className="p-2! min-w-[36px] text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+                            title="ยกเลิกการจอง"
+                          >
+                            <X size={22} />
+                          </Button>
+                        </>
+                      )}
+                      {booking.status === 'confirmed' && (
                         <Button
                           variant="ghost"
                           onClick={() => handleCancel(booking.id)}
@@ -481,31 +493,19 @@ export default function BookingsManagementTable({ bookings, onRefresh, sortField
                         >
                           <X size={22} />
                         </Button>
-                      </>
-                    )}
-                    {booking.status === 'confirmed' && (
+                      )}
                       <Button
                         variant="ghost"
-                        onClick={() => handleCancel(booking.id)}
-                        disabled={cancellingId === booking.id}
-                        className="p-2! min-w-[36px] text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
-                        title="ยกเลิกการจอง"
+                        onClick={() => handleDelete(booking.id)}
+                        disabled={deletingId === booking.id}
+                        className="p-2! min-w-[36px] text-red-700 hover:text-red-800 hover:bg-red-50 disabled:opacity-50"
+                        title="ลบการจอง"
                       >
-                        <X size={22} />
+                        <Trash2 size={22} />
                       </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleDelete(booking.id)}
-                      disabled={deletingId === booking.id}
-                      className="p-2! min-w-[36px] text-red-700 hover:text-red-800 hover:bg-red-50 disabled:opacity-50"
-                      title="ลบการจอง"
-                    >
-                      <Trash2 size={22} />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
+                    </div>
+                  </td>
+                </tr>
               )
             })}
           </tbody>

@@ -168,8 +168,8 @@ export default function MemberBookingsPage() {
       cancelled: 'bg-rose-100 text-rose-800 border border-rose-300',
     }
     const labels = {
-      confirmed: 'ยืนยันแล้ว',
-      pending: 'รอยืนยัน',
+      confirmed: 'จ่ายเงินแล้ว',
+      pending: 'รอจ่ายเงิน',
       cancelled: 'ยกเลิก',
     }
     return (
@@ -238,8 +238,8 @@ export default function MemberBookingsPage() {
                   <option value="currently_staying">กำลังเข้าพัก</option>
                   <option value="upcoming">กำลังจะมาถึง</option>
                   <option value="past">ผ่านมาแล้ว</option>
-                  <option value="confirmed">ยืนยันแล้ว</option>
-                  <option value="pending">รอยืนยัน</option>
+                  <option value="confirmed">จ่ายเงินแล้ว</option>
+                  <option value="pending">รอจ่ายเงิน</option>
                   <option value="cancelled">ยกเลิก</option>
                 </select>
               </div>

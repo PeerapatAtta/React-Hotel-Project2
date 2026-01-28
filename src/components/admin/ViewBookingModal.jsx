@@ -65,8 +65,8 @@ export default function ViewBookingModal({ isOpen, onClose, bookingId }) {
 
   const getStatusText = (status) => {
     const texts = {
-      confirmed: 'ยืนยันแล้ว',
-      pending: 'รอยืนยัน',
+      confirmed: 'จ่ายเงินแล้ว',
+      pending: 'รอจ่ายเงิน',
       cancelled: 'ยกเลิก',
     }
     return texts[status] || status

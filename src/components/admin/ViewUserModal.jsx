@@ -25,7 +25,7 @@ export default function ViewUserModal({ isOpen, onClose, userId }) {
     try {
       // ดึงข้อมูลผู้ใช้
       const { data: userData, error: userError } = await userService.getUserById(userId)
-      
+
       if (userError) {
         console.error('Error fetching user:', userError)
         Swal.fire({
@@ -55,7 +55,7 @@ export default function ViewUserModal({ isOpen, onClose, userId }) {
 
       // ดึงข้อมูลการจองของผู้ใช้
       const { data: bookingsData, error: bookingsError } = await bookingService.getBookingsByUserId(userId)
-      
+
       if (bookingsError) {
         console.error('Error fetching bookings:', bookingsError)
         // ไม่แสดง error เพราะการจองอาจจะไม่มี
@@ -264,14 +264,14 @@ export default function ViewUserModal({ isOpen, onClose, userId }) {
                               <span className="font-semibold text-slate-800">{booking.id}</span>
                               <Badge className={
                                 booking.status === 'confirmed' ? 'bg-emerald-200 text-emerald-900' :
-                                booking.status === 'pending' ? 'bg-amber-200 text-amber-900' :
-                                booking.status === 'cancelled' ? 'bg-rose-200 text-rose-900' :
-                                'bg-slate-200 text-slate-800'
+                                  booking.status === 'pending' ? 'bg-amber-200 text-amber-900' :
+                                    booking.status === 'cancelled' ? 'bg-rose-200 text-rose-900' :
+                                      'bg-slate-200 text-slate-800'
                               }>
-                                {booking.status === 'confirmed' ? 'ยืนยันแล้ว' :
-                                 booking.status === 'pending' ? 'รอยืนยัน' :
-                                 booking.status === 'cancelled' ? 'ยกเลิก' :
-                                 booking.status}
+                                {booking.status === 'confirmed' ? 'จ่ายเงินแล้ว' :
+                                  booking.status === 'pending' ? 'รอจ่ายเงิน' :
+                                    booking.status === 'cancelled' ? 'ยกเลิก' :
+                                      booking.status}
                               </Badge>
                             </div>
                             <p className="text-sm text-slate-600 mb-1">

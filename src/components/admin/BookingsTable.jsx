@@ -5,7 +5,7 @@ import { formatPrice } from '../../utils/formatters'
 
 export default function BookingsTable({ bookings, showAll = false }) {
   const displayBookings = showAll ? bookings : bookings.slice(0, 5)
-  
+
   const getStatusBadge = (status) => {
     const variants = {
       confirmed: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
@@ -17,8 +17,8 @@ export default function BookingsTable({ bookings, showAll = false }) {
 
   const getStatusText = (status) => {
     const texts = {
-      confirmed: 'ยืนยันแล้ว',
-      pending: 'รอยืนยัน',
+      confirmed: 'จ่ายเงินแล้ว',
+      pending: 'รอจ่ายเงิน',
       cancelled: 'ยกเลิก',
     }
     return texts[status] || status

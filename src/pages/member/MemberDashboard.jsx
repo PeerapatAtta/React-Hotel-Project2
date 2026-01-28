@@ -171,7 +171,7 @@ export default function MemberDashboard() {
                 <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-slate-600">ยืนยันแล้ว</p>
+                      <p className="text-xs font-medium text-slate-600">จ่ายเงินแล้ว</p>
                       <p className="text-xl font-bold text-emerald-600 mt-0.5">{statusStats.confirmed}</p>
                     </div>
                     <div className="rounded-lg bg-emerald-50 p-1.5">
@@ -182,7 +182,7 @@ export default function MemberDashboard() {
                 <div className="bg-white rounded-lg border border-slate-200 p-2.5">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-medium text-slate-600">รอยืนยัน</p>
+                      <p className="text-xs font-medium text-slate-600">รอจ่ายเงิน</p>
                       <p className="text-xl font-bold text-amber-600 mt-0.5">{statusStats.pending}</p>
                     </div>
                     <div className="rounded-lg bg-amber-50 p-1.5">
@@ -249,27 +249,27 @@ export default function MemberDashboard() {
                         <div className="flex-1 space-y-2">
                           <div className="flex items-center gap-3 flex-wrap">
                             <h3 className="font-semibold text-primary">{booking.room_name}</h3>
-                            <span className={`rounded-full px-2 py-1 text-xs font-semibold ${booking.status === 'confirmed'
-                              ? 'bg-green-100 text-green-700'
+                            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${booking.status === 'confirmed'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                               : booking.status === 'pending'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-red-100 text-red-700'
+                                ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                : 'bg-rose-100 text-rose-800 border border-rose-300'
                               }`}>
-                              {booking.status === 'confirmed' ? 'ยืนยันแล้ว' :
-                                booking.status === 'pending' ? 'รอยืนยัน' : 'ยกเลิก'}
+                              {booking.status === 'confirmed' ? 'จ่ายเงินแล้ว' :
+                                booking.status === 'pending' ? 'รอจ่ายเงิน' : 'ยกเลิก'}
                             </span>
                             {isCurrentlyStaying && (
-                              <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700 border border-green-300">
+                              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700 border border-green-300">
                                 กำลังเข้าพัก
                               </span>
                             )}
                             {isUpcoming && (
-                              <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700 border border-blue-300">
+                              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 border border-blue-300">
                                 กำลังจะมาถึง
                               </span>
                             )}
                             {isPast && (
-                              <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700 border border-slate-300">
+                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 border border-slate-300">
                                 ผ่านมาแล้ว
                               </span>
                             )}

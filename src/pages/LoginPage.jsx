@@ -192,59 +192,7 @@ export default function LoginPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {/* Card 1: ผู้จัดการโรงแรม */}
-              <div className="bg-white rounded-lg border border-purple-200 p-4 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex items-center gap-2 mb-3">
-                  <Shield size={20} className="text-purple-600" />
-                  <h4 className="font-semibold text-slate-700">ผู้จัดการโรงแรม</h4>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-slate-600">อีเมล:</span>
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-xs text-slate-800">admin@gmail.com</span>
-                      <button
-                        onClick={() => handleCopy('admin@gmail.com')}
-                        className="text-slate-400 hover:text-teal-600 transition-colors"
-                        title="คัดลอก"
-                      >
-                        <Copy size={14} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-slate-600">รหัสผ่าน:</span>
-                    <div className="flex items-center gap-1">
-                      <span className="font-mono text-xs text-slate-800">
-                        {showTestPassword.admin ? 'Admin1234th' : '••••••••••'}
-                      </span>
-                      <button
-                        onClick={() => setShowTestPassword(prev => ({ ...prev, admin: !prev.admin }))}
-                        className="text-slate-400 hover:text-teal-600 transition-colors"
-                        title={showTestPassword.admin ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
-                      >
-                        {showTestPassword.admin ? <EyeOff size={14} /> : <Eye size={14} />}
-                      </button>
-                      <button
-                        onClick={() => handleCopy('Admin1234th')}
-                        className="text-slate-400 hover:text-teal-600 transition-colors"
-                        title="คัดลอก"
-                      >
-                        <Copy size={14} />
-                      </button>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => handleFillCredentials('admin@gmail.com', 'Admin1234th')}
-                    className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-sm py-2"
-                    size="sm"
-                  >
-                    ใช้ข้อมูลนี้
-                  </Button>
-                </div>
-              </div>
-
-              {/* Card 2: สมาชิก */}
+              {/* Card 1: สมาชิก */}
               <div className="bg-white rounded-lg border border-blue-200 p-4 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-2 mb-3">
                   <User size={20} className="text-blue-600" />
@@ -289,6 +237,58 @@ export default function LoginPage() {
                   <Button
                     onClick={() => handleFillCredentials('member@gmail.com', 'member1234')}
                     className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-sm py-2"
+                    size="sm"
+                  >
+                    ใช้ข้อมูลนี้
+                  </Button>
+                </div>
+              </div>
+
+              {/* Card 2: ผู้จัดการโรงแรม */}
+              <div className="bg-white rounded-lg border border-purple-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 mb-3">
+                  <Shield size={20} className="text-purple-600" />
+                  <h4 className="font-semibold text-slate-700">ผู้จัดการโรงแรม</h4>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-slate-600">อีเมล:</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-xs text-slate-800">admin@gmail.com</span>
+                      <button
+                        onClick={() => handleCopy('admin@gmail.com')}
+                        className="text-slate-400 hover:text-teal-600 transition-colors"
+                        title="คัดลอก"
+                      >
+                        <Copy size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-slate-600">รหัสผ่าน:</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-xs text-slate-800">
+                        {showTestPassword.admin ? 'Admin1234th' : '••••••••••'}
+                      </span>
+                      <button
+                        onClick={() => setShowTestPassword(prev => ({ ...prev, admin: !prev.admin }))}
+                        className="text-slate-400 hover:text-teal-600 transition-colors"
+                        title={showTestPassword.admin ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+                      >
+                        {showTestPassword.admin ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                      <button
+                        onClick={() => handleCopy('Admin1234th')}
+                        className="text-slate-400 hover:text-teal-600 transition-colors"
+                        title="คัดลอก"
+                      >
+                        <Copy size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => handleFillCredentials('admin@gmail.com', 'Admin1234th')}
+                    className="w-full mt-3 bg-purple-600 hover:bg-purple-700 text-sm py-2"
                     size="sm"
                   >
                     ใช้ข้อมูลนี้
